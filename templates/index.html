@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cobosis | Gestiona y Promociona tu Negocio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-blue-600">Cobosis</a>
+        <div class="space-x-4">
+            <a href="#" class="text-gray-600 hover:text-blue-600">Iniciar Sesión</a>
+            <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Registrarse</a>
+        </div>
+    </nav>
+
+    <!-- HERO BANNER -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20 px-6 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6">Impulsa y Gestiona tu Negocio en un Solo Lugar</h1>
+            <p class="text-lg md:text-xl mb-8 text-blue-100">
+                Desde la promoción con tarjetas interactivas y diseño asistido por IA, hasta la gestión inteligente de pedidos. 
+                Convierte el caos en claridad y haz crecer tu negocio con Cobosis.
+            </p>
+            <div class="flex justify-center gap-4">
+                <a href="#servicios" class="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-100 transition">Descubre nuestros servicios</a>
+                <a href="#" class="border-2 border-white text-white font-bold py-3 px-8 rounded-lg hover:bg-white hover:text-blue-600 transition">Empezar Gratis</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNERS INFORMATIVOS GENERALES -->
+    <section class="py-16 px-6 max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+            <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+                <i class="fas fa-bolt text-4xl text-yellow-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Ahorra Tiempo Valioso</h3>
+                <p class="text-gray-600">Automatiza la extracción de datos de pedidos por redes sociales y conviértelos en tablas ordenadas en segundos.</p>
+            </div>
+            <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+                <i class="fas fa-globe text-4xl text-green-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Visibilidad Global</h3>
+                <p class="text-gray-600">Comparte tu negocio o evento con enlaces directos y tarjetas atractivas que siempre estarán disponibles.</p>
+            </div>
+            <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+                <i class="fas fa-chart-line text-4xl text-blue-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">Decisiones Inteligentes</h3>
+                <p class="text-gray-600">Exporta tus datos a Excel, analiza tendencias y prioriza búsquedas para tomar las mejores decisiones.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIONES DE SERVICIOS -->
+    <section id="servicios" class="py-16 px-6 bg-gray-100">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">Nuestras Soluciones para tu Crecimiento</h2>
+            
+            <!-- Iteramos sobre los servicios que vienen de la vista -->
+            {% for servicio in servicios %}
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-10 border-t-4 {% if servicio.slug == 'promociones' %}border-purple-500{% else %}border-teal-500{% endif %}">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="md:w-1/2">
+                        <div class="flex items-center gap-4 mb-4">
+                            <i class="{{ servicio.icono }} text-4xl {% if servicio.slug == 'promociones' %}text-purple-500{% else %}text-teal-500{% endif %}"></i>
+                            <h3 class="text-2xl font-bold">{{ servicio.nombre }}</h3>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-6">{{ servicio.descripcion_larga }}</p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="{{ servicio.get_absolute_url }}" class="bg-gray-800 text-white text-center font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition">
+                                Ver Detalles y Planes
+                            </a>
+                            <a href="#" class="bg-blue-600 text-white text-center font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition">
+                                Suscribirse
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="md:w-1/2 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                        <h4 class="font-bold text-lg mb-4 text-gray-800">Planes Disponibles</h4>
+                        <ul class="space-y-3">
+                            {% for plan in servicio.planes.all %}
+                                <li class="flex justify-between items-start">
+                                    <div>
+                                        <span class="font-semibold text-gray-900">{{ plan.nombre }}</span>
+                                        {% if plan.destacado %}
+                                            <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded">Popular</span>
+                                        {% endif %}
+                                        <p class="text-xs text-gray-500 mt-1">{{ plan.descripcion|truncatewords:15 }}</p>
+                                    </div>
+                                    <div class="text-right ml-4 flex-shrink-0">
+                                        <span class="font-bold text-blue-600">${{ plan.precio }}</span>
+                                        <span class="block text-xs text-gray-500">{{ plan.vigencia_dias }} días</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-800 text-white py-8 px-6 text-center">
+        <p>&copy; 2023 Cobosis. Todos los derechos reservados.</p>
+        <p class="text-sm text-gray-400 mt-2">Plataforma SaaS para promoción y gestión de negocios.</p>
+    </footer>
+
+</body>
+</html>
