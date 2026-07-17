@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cobosis | {{ servicio.nombre }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-blue-600"><i class="fas fa-arrow-left mr-2 text-sm"></i>Cobosis</a>
+        <div class="space-x-4">
+            <a href="#" class="text-gray-600 hover:text-blue-600">Iniciar Sesión</a>
+            <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Registrarse</a>
+        </div>
+    </nav>
+
+    <!-- ENCABEZADO DEL SERVICIO -->
+    <header class="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-16 px-6 text-center">
+        <div class="max-w-4xl mx-auto">
+            <i class="{{ servicio.icono }} text-5xl mb-4 text-blue-400"></i>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4">{{ servicio.nombre }}</h1>
+            <p class="text-lg md:text-xl text-gray-300 leading-relaxed">
+                {{ servicio.descripcion_corta }}
+            </p>
+        </div>
+    </header>
+
+    <!-- INFORMACIÓN GENERAL DEL SERVICIO -->
+    <section class="py-12 px-6 max-w-4xl mx-auto">
+        <div class="prose lg:prose-lg mx-auto text-center">
+            <h2 class="text-2xl font-bold mb-4">¿Cómo funciona?</h2>
+            <p class="text-gray-600 leading-relaxed whitespace-pre-line">
+                {{ servicio.descripcion_larga }}
+            </p>
+        </div>
+        
+        <!-- Características clave (Copywriting persuasivo) -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12 text-center">
+            <div class="p-4">
+                <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
+                <h4 class="font-bold">Fácil de usar</h4>
+                <p class="text-sm text-gray-500">Sin curva de aprendizaje. Diseñado para que empieces en minutos.</p>
+            </div>
+            <div class="p-4">
+                <i class="fas fa-rocket text-2xl text-blue-500 mb-2"></i>
+                <h4 class="font-bold">Resultados Inmediatos</h4>
+                <p class="text-sm text-gray-500">Optimiza tu tiempo y incrementa tu alcance desde el primer día.</p>
+            </div>
+            <div class="p-4">
+                <i class="fas fa-shield-alt text-2xl text-purple-500 mb-2"></i>
+                <h4 class="font-bold">Información Segura</h4>
+                <p class="text-sm text-gray-500">Tus datos y los de tus clientes protegidos en todo momento.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN DE PLANES (PRICING CARDS) -->
+    <section class="py-16 px-6 bg-gray-100">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-4">Elige el Plan Ideal para Ti</h2>
+            <p class="text-center text-gray-500 mb-12">Sin costos ocultos. Cancela cuando quieras. Precios en USD.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for plan in planes %}
+                <div class="relative bg-white rounded-2xl shadow-md border border-gray-100 p-8 flex flex-col transition transform hover:scale-105 hover:shadow-xl {% if plan.destacado %}border-2 border-blue-600 ring-4 ring-blue-100 z-10 lg:scale-105{% endif %}">
+                    
+                    {% if plan.destacado %}
+                    <div class="absolute top-0 right-0 -mt-3 mr-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                        MÁS POPULAR
+                    </div>
+                    {% endif %}
+
+                    <h3 class="text-xl font-bold text-gray-900">{{ plan.nombre }}</h3>
+                    <div class="my-4">
+                        <span class="text-4xl font-extrabold text-blue-600">${{ plan.precio }}</span>
+                        <span class="text-gray-500">/ {{ plan.vigencia_dias }} días</span>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 mb-6 flex-grow">
+                        <p class="whitespace-pre-line">{{ plan.descripcion }}</p>
+                    </div>
+
+                    <!-- Llamada a la Acción -->
+                    {% if plan.precio == 0 %}
+                        <a href="#" class="mt-auto block text-center bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition">
+                            <i class="fas fa-gift mr-2"></i>Comenzar Gratis
+                        </a>
+                    {% else %}
+                        <a href="#" class="mt-auto block text-center {% if plan.destacado %}bg-blue-600 hover:bg-blue-700{% else %}bg-gray-800 hover:bg-gray-900{% endif %} text-white font-bold py-3 px-6 rounded-lg transition">
+                            Suscribirme
+                        </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN FINAL DE CONVERSIÓN -->
+    <section class="py-12 px-6 bg-white border-t">
+        <div class="max-w-3xl mx-auto text-center">
+            <h2 class="text-2xl font-bold mb-4">¿Tienes dudas sobre qué plan elegir?</h2>
+            <p class="text-gray-600 mb-6">Nuestro equipo está listo para ayudarte a encontrar la mejor solución para tu negocio.</p>
+            <a href="mailto:soporte@cobosis.com" class="inline-flex items-center bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition">
+                <i class="fas fa-headset mr-2"></i> Hablar con un asesor
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-800 text-white py-8 px-6 text-center">
+        <p>&copy; 2023 Cobosis. Todos los derechos reservados.</p>
+        <p class="text-sm text-gray-400 mt-2">Plataforma SaaS para promoción y gestión de negocios.</p>
+    </footer>
+
+</body>
+</html>
