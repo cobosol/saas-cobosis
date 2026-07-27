@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- ENCABEZADO -->
+    <header class="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-16 px-6 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Catálogo de servicios</h1>
+        </div>
+    </header>
+
+    <section class="py-5">
+        <div class="container px-5 my-5">
+            {%for s in servicios %}
+            <div class="row">
+                <div class="max-w-4xl mx-auto">
+                    <i class="{{ s.icono }} text-5xl mb-4 text-blue-400"></i>
+                    <h1 class="text-4xl md:text-5xl font-extrabold mb-4">{{ s.nombre }}</h1>
+                    <p class="text-lg md:text-xl text-gray-300 leading-relaxed">
+                        {{ s.descripcion_corta }}
+                    </p>
+                </div>
+                <div class="col-lg-8">
+                    <p><span style="font-weight: bold;">Modelo negocio: </span> {{p.modelo_negocio}}</p>
+                    <a class="text-decoration-none" href="{% url 'detalle_servicio' s.slug %}">Explorar detalles<i class="bi-arrow-right"></i>
+                </div>
+            </div>
+            {% endfor %}            
+        </div>
+    </section>
+</main>
+{% endblock %}

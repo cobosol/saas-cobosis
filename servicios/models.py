@@ -31,9 +31,20 @@ class Plan(models.Model):
     descripcion = models.TextField(help_text="Ej: Incluye enlace directo, diseño de tarjeta...")
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     vigencia_dias = models.PositiveIntegerField(default=30, help_text="Duración de la suscripción en días")
+    
     destacado = models.BooleanField(default=False, help_text="Marcar si es el plan más popular")
     activo = models.BooleanField(default=True)
     orden = models.PositiveIntegerField(default=0)
+    
+    # Campos para Gestiona
+    max_variables = models.PositiveIntegerField(default=3, help_text="Cantidad máxima de variables a extraer (Ej: 3, 5, 10)")
+    max_extracciones = models.PositiveIntegerField(default=10, help_text="Límite de extracciones totales. Usar 0 para ilimitado.")
+    dias_retencion = models.PositiveIntegerField(default=30, help_text="Días que se guardan los datos. Ej: 30, 365")
+    variables_ajustables = models.BooleanField(default=False, help_text="Marcar si el usuario puede definir sus propias variables")
+
+    # Campos para Promociones (Tu idea de prioridad)
+    nivel_prioridad = models.PositiveSmallIntegerField(default=0, help_text="Prioridad en el listado (0 es normal, >0 es preferencial)")
+    tipo_formulario = models.CharField(max_length=20, choices=[('evento','Evento'),('negocio','Negocio'),('ninguno','Genérico')], default='ninguno')
 
     class Meta:
         ordering = ['orden']

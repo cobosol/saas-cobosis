@@ -1,0 +1,80 @@
+from django.shortcuts import render
+
+# Create your views here.
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils import timezone
+from .models import Promocion
+from servicios.models import Plan
+from clientes.models import Suscripcion, PerfilCliente
+
+def promociones(request):
+    pass
+
+@login_required
+def crear_promocion(request):
+    # Obtenemos todos los planes activos del servicio Promociones
+    planes = Plan.objects.filter(servicio__slug='promociones', activo=True).order_by('precio')
+    
+    if request.method == 'POST':
+        plan_id = request.POST.get('plan_id')
+        plan = get_object_or_404(Plan, id=plan_id, activo=True)
+        
+        # Recopilar datos dinámicamente según el tipo de formulario del plan
+        datos = {}
+        if plan.tipo_formulario == 'evento':
+            datos['titulo'] = request.POST.get('titulo_evento')
+            datos['fecha'] = request.POST.get('fecha_evento')
+            datos['hora'] = request.POST.get('hora_evento')
+            datos['lugar'] = request.POST.get('lugar_evento')
+            datos['informacion'] = request.POST.get('info_evento')
+        elif plan.tipo_formulario == 'negocio':
+            datos['nombre_negocio'] = request.POST.get('nombre_negocio')
+            datos['rubro'] = request.POST.get('rubro_negocio')
+            datos['telefono'] = request.POST.get('telefono_negocio')
+            datos['descripcion'] = request.POST.get('descripcion_negocio')
+        else:
+            datos['titulo'] = request.POST.get('titulo_generico')
+            datos['descripcion'] = request.POST.get('descripcion_generica')
+
+        # 1. Crear la Solicitud de Promoción con los datos
+        solicitud = Promocion.objects.create(
+            cliente=request.user,
+            estado='pendiente'
+        )
+        
+        # 2. Crear la Suscripción en estado "solicitada" para tu gestión
+        Suscripcion.objects.get_or_create(
+            usuario=request.user,
+            plan=plan,
+            estado='solicitada',
+            defaults={'fecha_vencimiento': timezone.now()} # Temporal, se actualiza al aprobar
+        )
+        
+        messages.success(request, f'¡Solicitud enviada con éxito para el plan "{plan.nombre}"! Nos pondremos en contacto contigo para el diseño y la activación.')
+        return redirect('panel_cliente')
+
+    context = {
+        'planes': planes
+    }
+    return render(request, 'promociones/crear_promocion.html', context)
+
+# En views.py
+def ver_promocion(request, slug):
+    promocion = get_object_or_404(Promocion, slug=slug, activa=True)
+    
+    if not promocion.esta_vigente:
+        return render(request, 'promociones/promocion_expirada.html')
+
+    relacionadas = Promocion.objects.filter(
+        categoria=promocion.categoria, 
+        activa=True
+    ).exclude(id=promocion.id).order_by('-es_destacada', '-fecha_inicio')[:10]
+
+    context = {
+        'promocion': promocion,
+        'relacionadas': relacionadas
+    }
+    return render(request, 'promociones/ver_promocion.html', context)
+

@@ -24,6 +24,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('saas.urls')),
     path('servicios/', include('servicios.urls')),
+    path('gestiona/', include('gestiona.urls')),
+    path('promociones/', include('promociones.urls')),
+    path('registration/', include('clientes.urls')),
+    path('registration/', include('django.contrib.auth.urls')),
 
     path("ckeditor5/", include('django_ckeditor_5.urls')),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root':settings.MEDIA_ROOT}),

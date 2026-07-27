@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.inicio, name="inicio"),
+    path('promociones/', views.inicio_promociones, name="inicio_promo")
 ]
 
 if settings.DEBUG:

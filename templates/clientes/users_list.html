@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<title>Zaas - Lista de usuarios</title>
+
+{% block content %}
+
+<style>
+  .cantidad-input {
+      width: 80px;       /* Ancho reducido */
+      padding: 5px;      /* Espaciado interno */
+      font-size: 10px;   /* Tamaño de fuente */
+      text-align: center; /* Centrar el número */
+  }
+</style>
+
+<div class="container-fluid bg-secondary mb-2">
+  <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 60px">
+      <h4 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Lista de usuarios</h4>
+      <!--<h6 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Los productos disponibles en CUP y MLC los puede adquirir en nuestros <a href="{% url 'stores'%}">puntos de venta.</a></h6> -->
+  </div>
+</div>
+<!-- Page Header End -->
+<div id="Filtros" class="row px-xl-12">
+    <div id="Por categorías" class="col">
+      <form method="post" action=".">
+        {% csrf_token %}
+        <p><h6 class="font-weight-semi-bold text-primary" style="font-family:sans-serif ;">Seleccione la categoría</h6></p>
+        <div class="input-group-append">
+            <span class="input-group-text bg-transparent text-primary">
+              <!-- {{form.selected_category}} 
+              <input type="submit" name="submit" value="Ver" class="btn btn-block btn-primary my-1 py-1"/>-->
+            </span>
+        </div>
+      </form>
+    </div>
+</div>
+
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Paginación -->
+        <table class="table table-bordered text-center mb-0">
+          <thead class="bg-primary text-light">
+            <tr>
+              <th width="5%">Usuario</th>
+              <th width="35%">Nombre y apellidos</th>
+              <th width="10%">Fecha de ingreso</th>
+              <th width="10%">Último acceso</th>
+              <th width="20%">Correo</th>
+              <th width="10%">Teléfono</th>
+              <th width="10%">Monedero</th>
+            </tr>
+          </thead>
+          <tbody>
+          <!-- Recorremos los objetos o registros que tenemos en nuestra tabla 'jugos' y los listamos -->
+          {% for perfil in perfiles %}
+            <tr>
+              <td><a href="/accounts/profile/editar/{{perfil.id}}"> {{ perfil.user.username }} </a></td>
+              <td>{{ perfil.user.first_name }} {{perfil.user.last_name}}</td>
+              <td>{{ perfil.user.date_joined.date }}</td>
+              <td>{% if perfil.user.last_login %} {{ perfil.user.last_login.date }} {% else %} {% endif %}</td>
+              <td>{{ perfil.user.email }}</td>
+              <td>{{ perfil.user.phone }}</td>
+              <td>{{ perfil.user.wallet.balance }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+      </table>
+
+      </div>
+    </div>
+  </div>
+
+ 
+<script>
+
+// Restaura la posición al cargar la página
+window.addEventListener('load', function() {
+    const savedPosition = sessionStorage.getItem('scrollPosition');
+    if (savedPosition) {
+        window.scrollTo(0, savedPosition);
+        sessionStorage.removeItem('scrollPosition');
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,779 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Panel | Cobosis{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ========== ESTILOS DEL DASHBOARD ========== */
+    .dashboard-wrapper {
+        display: flex;
+        min-height: calc(100vh - 64px);
+        background-color: #f9fafb;
+    }
+    
+    /* ===== SIDEBAR (Azul claro #4D96FF) ===== */
+    .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 64px;
+        left: 0;
+        bottom: 0;
+        z-index: 40;
+        transition: transform 0.3s ease;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .sidebar-logo {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4D96FF, #6C63FF);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        color: white;
+    }
+    
+    .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0.75rem;
+        overflow-y: auto;
+    }
+    
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-link:hover {
+        background: rgba(77, 150, 255, 0.15);
+        color: white;
+    }
+    
+    .sidebar-link.active {
+        background: rgba(77, 150, 255, 0.25);
+        color: white;
+        font-weight: 600;
+        border-left: 3px solid #4D96FF;
+    }
+    
+    .sidebar-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 1rem;
+    }
+    
+    .sidebar-link .badge-count {
+        margin-left: auto;
+        background: #FF6B6B;
+        color: white;
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+    }
+    
+    .sidebar-footer {
+        padding: 1rem 0.75rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .sidebar-user {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 0.75rem;
+        transition: background 0.2s;
+    }
+    
+    .sidebar-user:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .sidebar-user .user-avatar {
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(135deg, #FFD93D, #FF6B6B);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #1a1a2e;
+    }
+    
+    .sidebar-user .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .sidebar-user .user-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .sidebar-user .user-role {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .sidebar-user .logout-link {
+        color: rgba(255, 255, 255, 0.4);
+        transition: color 0.2s;
+        padding: 0.25rem;
+    }
+    
+    .sidebar-user .logout-link:hover {
+        color: #FF6B6B;
+    }
+    
+    /* ===== CONTENIDO PRINCIPAL ===== */
+    .main-content {
+        flex: 1;
+        margin-left: 260px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    /* ===== TOPBAR ===== */
+    .topbar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 64px;
+        z-index: 30;
+    }
+    
+    .topbar h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    
+    .topbar .public-link {
+        font-size: 0.85rem;
+        color: #4D96FF;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    
+    .topbar .public-link:hover {
+        color: #6C63FF;
+    }
+    
+    /* ===== CONTENIDO ===== */
+    .dashboard-content {
+        flex: 1;
+        padding: 2rem;
+    }
+    
+    /* ===== TARJETAS DE SERVICIOS ===== */
+    .service-card {
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .service-card:hover {
+        box-shadow: 0 8px 25px rgba(77, 150, 255, 0.12);
+        transform: translateY(-2px);
+        border-color: #4D96FF;
+    }
+    
+    .service-card .service-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .service-card .service-icon.purple {
+        background: rgba(108, 99, 255, 0.1);
+        color: #6C63FF;
+    }
+    
+    .service-card .service-icon.teal {
+        background: rgba(78, 205, 196, 0.1);
+        color: #4ECDC4;
+    }
+    
+    /* Badges de estado con colores de la paleta */
+    .status-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-badge.active {
+        background: rgba(107, 203, 119, 0.15);
+        color: #065f46;
+        border: 1px solid #6BCB77;
+    }
+    
+    .status-badge.pending {
+        background: rgba(255, 217, 61, 0.15);
+        color: #92400e;
+        border: 1px solid #FFD93D;
+    }
+    
+    .status-badge.expired {
+        background: rgba(255, 107, 107, 0.15);
+        color: #991b1b;
+        border: 1px solid #FF6B6B;
+    }
+    
+    /* Tarjeta "Adquirir nuevo" con acento amarillo */
+    .add-service-card {
+        background: #fafafa;
+        border: 2px dashed #d1d5db;
+        border-radius: 1rem;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 100%;
+        text-decoration: none;
+    }
+    
+    .add-service-card:hover {
+        border-color: #FFD93D;
+        background: rgba(255, 217, 61, 0.05);
+    }
+    
+    .add-service-card i {
+        font-size: 2.5rem;
+        color: #9ca3af;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s;
+    }
+    
+    .add-service-card:hover i {
+        color: #FFD93D;
+        transform: scale(1.1);
+    }
+    
+    /* ===== SECCIÓN DE EXTRACCIÓN RÁPIDA ===== */
+    .quick-extract {
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        padding: 1.5rem;
+    }
+    
+    .quick-extract textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        resize: vertical;
+        transition: all 0.2s;
+        background: #f9fafb;
+    }
+    
+    .quick-extract textarea:focus {
+        outline: none;
+        border-color: #4D96FF;
+        box-shadow: 0 0 0 4px rgba(77, 150, 255, 0.08);
+        background: white;
+    }
+    
+    .preview-box {
+        min-height: 120px;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.85rem;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* ===== ALERTA SIN SERVICIOS ===== */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #FFD93D;
+        margin-bottom: 1rem;
+    }
+    
+    /* ===== BOTONES CON COLORES DE LA PALETA ===== */
+    
+    /* Botón teal - Gestiona */
+    .btn-teal {
+        background: linear-gradient(135deg, #4ECDC4, #3DBDB5);
+        color: white;
+        font-weight: 600;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-teal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(78, 205, 196, 0.35);
+        color: white;
+    }
+    
+    /* Botón púrpura - Promociones */
+    .btn-purple {
+        background: linear-gradient(135deg, #6C63FF, #5A52D5);
+        color: white;
+        font-weight: 600;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-purple:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(108, 99, 255, 0.35);
+        color: white;
+    }
+    
+    /* Botón amarillo - Acción principal */
+    .btn-warning-custom {
+        background: linear-gradient(135deg, #FFD93D, #FFC107);
+        color: #1a1a2e;
+        font-weight: 700;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-warning-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 217, 61, 0.4);
+        color: #1a1a2e;
+    }
+    
+    /* Botón coral - Acción importante */
+    .btn-coral {
+        background: linear-gradient(135deg, #FF6B6B, #E55555);
+        color: white;
+        font-weight: 600;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-coral:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.35);
+        color: white;
+    }
+    
+    /* Botón primario (azul) */
+    .btn-primary {
+        background: linear-gradient(135deg, #4D96FF, #6C63FF);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(77, 150, 255, 0.3);
+        color: white;
+    }
+    
+    /* Botón verde */
+    .btn-green {
+        background: linear-gradient(135deg, #6BCB77, #5ab868);
+        color: white;
+        font-weight: 600;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-green:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(107, 203, 119, 0.35);
+        color: white;
+    }
+    
+    .btn-disabled {
+        background: #e5e7eb;
+        color: #9ca3af;
+        font-weight: 600;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: not-allowed;
+        font-size: 0.9rem;
+    }
+    
+    /* ===== DESTACAR PRÓXIMO VENCIMIENTO ===== */
+    .text-danger-custom {
+        color: #FF6B6B !important;
+    }
+    
+    .text-warning-custom {
+        color: #FFD93D !important;
+    }
+    
+    /* Mobile menu toggle */
+    .sidebar-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: #374151;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+        
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        
+        .main-content {
+            margin-left: 0;
+        }
+        
+        .sidebar-toggle {
+            display: block;
+        }
+        
+        .dashboard-content {
+            padding: 1rem;
+        }
+        
+        .topbar {
+            padding: 0.75rem 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Navegación -->
+        <nav class="sidebar-nav">
+            <a href="{% url 'panel_cliente' %}" class="sidebar-link active">
+                <i class="bi bi-speedometer2"></i> Panel informativo
+            </a>
+            
+            <a href="{% url 'gestiona_panel' %}" class="sidebar-link">
+                <i class="bi bi-table"></i> Mis extracciones
+                {% if suscripciones %}
+                <span class="badge-count">{{ suscripciones|length }}</span>
+                {% endif %}
+            </a>
+            
+            {% if 'promociones' in servicios_activos|slugify %}
+            <a href="{% url 'mis_promociones' %}" class="sidebar-link">
+                <i class="bi bi-megaphone"></i> Mis Promociones
+            </a>
+            {% endif %}
+            
+            <hr style="border-color: rgba(255,255,255,0.08); margin: 0.5rem 0;">
+            
+            <a href="{% url 'profile' %}" class="sidebar-link">
+                <i class="bi bi-person-gear"></i> Mi Perfil
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="bi bi-question-circle"></i> Ayuda
+            </a>
+        </nav>
+        
+        <!-- Usuario -->
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="user-avatar">
+                    {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                    <div class="user-role">Miembro</div>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-link" title="Cerrar sesión">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Overlay para móvil -->
+    <div id="sidebar-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark opacity-50" 
+         style="z-index: 35;" onclick="toggleSidebar()"></div>
+    
+    <!-- ===== CONTENIDO PRINCIPAL ===== -->
+    <div class="main-content">
+        
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir menú">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h1>Bienvenido, {{ request.user.first_name|default:request.user.username }}</h1>
+            </div>
+            <a href="{% url 'inicio' %}" class="public-link">
+                <i class="bi bi-globe me-1"></i> Ver sitio público
+            </a>
+        </header>
+        
+        <!-- Dashboard Content -->
+        <main class="dashboard-content">
+            
+            <!-- ===== SIN SERVICIOS ===== -->
+            {% if not suscripciones %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h2 class="text-xl fw-bold text-gray-800 mb-2">Aún no tienes servicios activos</h2>
+                <p class="text-gray-500 mb-4">Descubre nuestras herramientas para impulsar tu negocio.</p>
+                <a href="{% url 'inicio' %}#servicios" class="btn-warning-custom">
+                    <i class="bi bi-rocket-takeoff me-2"></i> Ver Planes
+                </a>
+            </div>
+            {% else %}
+            <!-- ===== TUS SERVICIOS ACTIVOS ===== -->
+            <h2 class="text-lg fw-bold text-gray-800 mb-4">
+                <i class="bi bi-star-fill me-2" style="color: #FFD93D;"></i>Tus Servicios Activos
+            </h2>
+            
+            <div class="row g-4 mb-5">
+                {% for sub in suscripciones %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <!-- Cabecera -->
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="service-icon {% if sub.plan.servicio.slug == 'gestiona' %}teal{% else %}purple{% endif %}">
+                                    <i class="{{ sub.plan.servicio.icono }}"></i>
+                                </div>
+                                <h3 class="fw-bold text-gray-800 mb-0" style="font-size: 1rem;">
+                                    {{ sub.plan.servicio.nombre }}
+                                </h3>
+                            </div>
+                            
+                            <!-- Estado -->
+                            {% if sub.estado == 'activa' %}
+                            <span class="status-badge active">
+                                <i class="bi bi-check-circle-fill me-1"></i>Activa
+                            </span>
+                            {% elif sub.estado == 'solicitada' %}
+                            <span class="status-badge pending">
+                                <i class="bi bi-hourglass-split me-1"></i>Pendiente
+                            </span>
+                            {% else %}
+                            <span class="status-badge expired">
+                                <i class="bi bi-x-circle-fill me-1"></i>Inactiva
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Detalles -->
+                        <div class="text-sm text-gray-500 mb-4 flex-grow-1">
+                            <p class="mb-1">
+                                <span class="fw-medium text-gray-700">Plan:</span> {{ sub.plan.nombre }}
+                            </p>
+                            {% if sub.estado == 'activa' %}
+                            <p class="mb-1">
+                                <span class="fw-medium text-gray-700">Vence en:</span> 
+                                <span class="{% if sub.dias_restantes < 7 %}text-danger-custom fw-semibold{% endif %}">
+                                    {% if sub.dias_restantes < 3 %}
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    {% endif %}
+                                    {{ sub.dias_restantes }} días
+                                </span>
+                            </p>
+                            {% elif sub.estado == 'solicitada' %}
+                            <p class="text-warning-custom small mt-2">
+                                <i class="bi bi-hourglass-split me-1"></i>
+                                Estamos procesando tu solicitud.
+                            </p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botón de acción -->
+                        {% if sub.estado == 'activa' %}
+                            {% if sub.plan.servicio.slug == 'gestiona' %}
+                            <a href="{% url 'gestiona_panel' %}" class="btn-teal w-100 justify-content-center mt-auto">
+                                <i class="bi bi-table me-2"></i> Ir a Gestiona
+                            </a>
+                            {% elif sub.plan.servicio.slug == 'promociones' %}
+                            <a href="{% url 'mis_promociones' %}" class="btn-purple w-100 justify-content-center mt-auto">
+                                <i class="bi bi-megaphone me-2"></i> Ir a Promociones
+                            </a>
+                            {% endif %}
+                        {% else %}
+                        <button disabled class="btn-disabled w-100 mt-auto">
+                            <i class="bi bi-lock me-2"></i> En espera
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Tarjeta: Adquirir nuevo servicio -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="{% url 'inicio' %}#servicios" class="add-service-card">
+                        <i class="bi bi-plus-circle"></i>
+                        <h3 class="fw-bold text-gray-600 mb-1">Adquirir nuevo servicio</h3>
+                        <p class="small text-gray-400">Explora nuestras soluciones</p>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- ===== EXTRACCIÓN RÁPIDA (Gestiona) ===== -->
+            {% if 'gestiona' in servicios_activos|slugify %}
+            <div class="quick-extract">
+                <h2 class="text-lg fw-bold text-gray-800 mb-4">
+                    <i class="bi bi-lightning-charge me-2" style="color: #FFD93D;"></i>
+                    Extracción Rápida (Gestiona)
+                </h2>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="fw-semibold text-gray-700 mb-2 d-block" style="font-size: 0.85rem;">
+                            Pega tu texto aquí:
+                        </label>
+                        <textarea placeholder="Ej: Hola, soy Juan. Quiero pedir 2 camisas rojas talla M para mañana."></textarea>
+                        <button class="btn-warning-custom mt-3">
+                            <i class="bi bi-magic me-2"></i> Procesar Texto
+                        </button>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="fw-semibold text-gray-700 mb-2 d-block" style="font-size: 0.85rem;">
+                            Vista previa de la tabla:
+                        </label>
+                        <div class="preview-box">
+                            Los datos extraídos aparecerán aquí...
+                        </div>
+                        <button class="btn-green mt-3">
+                            <i class="bi bi-file-earmark-excel me-2"></i> Exportar a Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('d-none');
+    }
+</script>
+{% endblock %}
