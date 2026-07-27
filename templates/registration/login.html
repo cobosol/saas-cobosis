@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión | Zaas{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ========== ESTILOS DEL LOGIN ========== */
+    .login-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        padding: 2rem 0;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .login-header {
+        background: linear-gradient(135deg, #6C63FF 0%, #4ECDC4 100%);
+        padding: 1rem;
+        text-align: center;
+        color: white;
+    }
+    
+    .login-header .icon-circle {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .login-header .icon-circle i {
+        font-size: 2rem;
+        color: #1a1a2e;
+    }
+    
+    .login-header h2 {
+        font-weight: 700;
+        margin-bottom: 0.15rem;
+        font-size: 1.5rem;
+    }
+    
+    .login-header p {
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+    
+    .login-body {
+        padding: 1.5rem;
+    }
+    
+    /* Estilos para los campos */
+    .login-body label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.375rem;
+        font-size: 0.875rem;
+    }
+    
+    .login-body input[type="text"],
+    .login-body input[type="password"],
+    .login-body input[type="email"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background-color: #f9fafb;
+        color: #1f2937;
+    }
+    
+    .login-body input:focus {
+        outline: none;
+        border-color: #6C63FF;
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+    }
+    
+    .login-body input::placeholder {
+        color: #9ca3af;
+    }
+    
+    /* Mensaje de éxito (registro completado) */
+    .alert-success {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        color: #065f46;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-success i {
+        font-size: 1.5rem;
+        color: #10b981;
+    }
+    
+    /* Mensaje de error */
+    .alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        color: #991b1b;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-error i {
+        font-size: 1.5rem;
+        color: #ef4444;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0.5rem 0;
+        margin: 0.25rem 0 0 0;
+        color: #dc2626;
+        font-size: 0.85rem;
+    }
+    
+    /* Botón de login */
+    .btn-login {
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(135deg, #6C63FF 0%, #5A52D5 100%);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-login:active {
+        transform: translateY(0);
+    }
+    
+    /* Links adicionales */
+    .extra-links {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+    
+    .extra-links a {
+        color: #6C63FF;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .extra-links a:hover {
+        color: #E55555;
+        text-decoration: underline;
+    }
+    
+    .extra-links .divider-dot {
+        margin: 0 0.5rem;
+        color: #d1d5db;
+    }
+    
+    /* Recordar sesión */
+    .remember-me {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+    
+    .remember-me label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #6b7280;
+        cursor: pointer;
+        font-weight: 400;
+    }
+    
+    .remember-me input[type="checkbox"] {
+        width: 1.125rem;
+        height: 1.125rem;
+        accent-color: #374151;
+    }
+    
+    .forgot-password {
+        font-size: 0.85rem;
+        color: #374151;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .forgot-password:hover {
+        text-decoration: underline;
+        color: #E55555;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .login-body {
+            padding: 1.5rem;
+        }
+        
+        .login-header {
+            padding: 1.5rem;
+        }
+        
+        .login-header .icon-circle {
+            width: 55px;
+            height: 55px;
+        }
+        
+        .login-header .icon-circle i {
+            font-size: 1.5rem;
+        }
+        
+        .remember-me {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ========== HERO HEADER ========== -->
+<header class="relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
+    <div class="max-w-4xl mx-auto text-center py-10 md:py-16 px-6">
+        <div class="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm mb-6 border border-white/20">
+            <i class="bi bi-box-arrow-in-right mr-2"></i>
+            Accede a tu cuenta
+        </div>
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-2 leading-tight">
+            Bienvenido de <span style="color: #FFD93D;">vuelta</span>
+        </h1>
+    </div>
+    
+    <!-- Onda decorativa -->
+    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="w-full h-[60px]">
+            <path d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z" fill="#f9fafb"></path>
+        </svg>
+    </div>
+</header>
+
+<!-- ========== FORMULARIO DE LOGIN ========== -->
+<section class="bg-gray-50" style="background-color: #f9fafb;">
+    <div class="login-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                    
+                    <div class="login-card">
+                        
+                        <!-- Cabecera de la tarjeta -->
+                        <div class="login-header">
+                            <div class="icon-circle">
+                                <i class="bi bi-person-check"></i>
+                            </div>
+                            <h2>Iniciar Sesión</h2>
+                            <p>Ingresa tus credenciales</p>
+                        </div>
+                        
+                        <!-- Cuerpo del formulario -->
+                        <div class="login-body">
+                            
+                            <!-- Mensaje de registro exitoso -->
+                            {% if 'register' in request.GET %}
+                            <div class="alert-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>
+                                    <strong>¡Registro exitoso!</strong><br>
+                                    Usuario registrado correctamente, ya puedes iniciar sesión.
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Mensaje de error general -->
+                            {% if form.non_field_errors %}
+                            <div class="alert-error">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <span>
+                                    <strong>Error de acceso</strong><br>
+                                    Usuario o contraseña incorrectos, prueba de nuevo.
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <form method="post" novalidate>
+                                {% csrf_token %}
+                                
+                                <!-- Campo: Nombre de usuario -->
+                                <div class="mb-4">
+                                    <label for="id_username">
+                                        Nombre de usuario <span style="color: #dc2626;">*</span>
+                                    </label>
+                                    <div style="position: relative;">
+                                        <i class="bi bi-person" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; z-index: 1;"></i>
+                                        <input type="text" name="username" id="id_username" 
+                                               autofocus maxlength="254" required
+                                               class="form-control" 
+                                               placeholder="Tu nombre de usuario"
+                                               style="padding-left: 2.75rem;">
+                                    </div>
+                                    {% if form.username.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.username.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Campo: Contraseña -->
+                                <div class="mb-4">
+                                    <label for="id_password">
+                                        Contraseña <span style="color: #dc2626;">*</span>
+                                    </label>
+                                    <div style="position: relative;">
+                                        <i class="bi bi-lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; z-index: 1;"></i>
+                                        <input type="password" name="password" id="id_password" 
+                                               required
+                                               class="form-control" 
+                                               placeholder="Tu contraseña"
+                                               style="padding-left: 2.75rem;">
+                                        <button type="button" 
+                                                onclick="togglePassword()"
+                                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; z-index: 1;"
+                                                aria-label="Mostrar contraseña">
+                                            <i class="bi bi-eye" id="toggleIcon"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.password.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.password.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Recordar sesión + Olvidé contraseña -->
+                                <div class="remember-me">
+                                    <label>
+                                        <input type="checkbox" name="remember">
+                                        Recordar sesión
+                                    </label>
+                                    <a href="{% url 'password_reset' %}" class="forgot-password">
+                                        <i class="bi bi-question-circle mr-1"></i>¿Olvidaste tu contraseña?
+                                    </a>
+                                </div>
+                                
+                                <!-- Campo oculto next -->
+                                <input type="hidden" name="next" value="{{ next }}">
+                                
+                                <!-- Botón de login -->
+                                <button type="submit" class="btn-login">
+                                    <i class="bi bi-box-arrow-in-right mr-2"></i> Acceder
+                                </button>
+                            </form>
+                            
+                            <!-- Links extra -->
+                            <div class="extra-links">
+                                <p class="mb-2">
+                                    ¿No tienes cuenta? 
+                                    <a href="{% url 'registro' %}">
+                                        <i class="bi bi-person-plus mr-1"></i>Regístrate aquí
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Confianza debajo -->
+                    <div class="text-center mt-4">
+                        <div class="row g-3">
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="bi bi-shield-lock d-block mb-1" style="color: #6BCB77; font-size: 1.5rem;"></i>
+                                    <small class="text-muted">Seguro</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="bi bi-lightning-charge d-block mb-1" style="color: #FFD93D; font-size: 1.5rem;"></i>
+                                    <small class="text-muted">Rápido</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="bi bi-headset d-block mb-1" style="color: #FF6B6B; font-size: 1.5rem;"></i>
+                                    <small class="text-muted">Soporte 24/7</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Mostrar/ocultar contraseña
+    function togglePassword() {
+        const passwordInput = document.getElementById('id_password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    }
+    
+    // Enfocar automáticamente el campo de usuario si está vacío
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('id_username');
+        if (usernameInput && !usernameInput.value) {
+            usernameInput.focus();
+        }
+    });
+</script>
+{% endblock %}

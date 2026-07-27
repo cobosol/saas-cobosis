@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirma tu Cuenta | Zaas{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .confirm-wrapper {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background-color: #f9fafb;
+    }
+    
+    .confirm-box {
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        padding: 3rem 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+    }
+    
+    .confirm-box .icon-success {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #6BCB77, #4ECDC4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .confirm-box .icon-success i {
+        font-size: 2.5rem;
+        color: white;
+    }
+    
+    .confirm-box h2 {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.75rem;
+    }
+    
+    .confirm-box p {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .confirm-box .email-badge {
+        display: inline-block;
+        background: #f3f4f6;
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        color: #6C63FF;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #6C63FF, #5A52D5);
+        color: white;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(108, 99, 255, 0.3);
+        color: white;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ========== HERO HEADER ========== -->
+<header class="relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
+    <div class="max-w-4xl mx-auto text-center py-10 md:py-16 px-6">
+        <div class="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm mb-6 border border-white/20">
+            <i class="bi bi-rocket-takeoff mr-2"></i>
+            Comienza en menos de 2 minutos
+        </div>
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-2 leading-tight">
+            Crea tu <span style="color: #FFD93D;">cuenta gratuita</span>
+        </h1>
+    </div>
+    
+    <!-- Onda decorativa -->
+    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="w-full h-[60px]">
+            <path d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z" fill="#f9fafb"></path>
+        </svg>
+    </div>
+</header>
+<section class="confirm-wrapper">
+    <div class="confirm-box">
+        <div class="icon-success">
+            <i class="bi bi-envelope-check"></i>
+        </div>
+        
+        <h2>¡Revisa tu email!</h2>
+        <p>
+            Hemos enviado un enlace de activación
+        </p>
+        <p>
+            Haz clic en el enlace para activar tu cuenta.<br>
+            <small class="text-muted">Revisa tu carpeta de spam si no lo encuentras.</small>
+        </p>
+        
+        <a href="{% url 'inicio' %}" class="btn-home">
+            <i class="bi bi-house"></i> Volver al inicio
+        </a>
+        
+        <p class="mt-4 text-muted" style="font-size: 0.9rem;">
+            Gracias por formar parte de nuestra familia 
+            <i class="bi bi-heart-fill" style="color: #FF6B6B;"></i>
+        </p>
+    </div>
+</section>
+{% endblock %}

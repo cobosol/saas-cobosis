@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+<title>Iniciar sesión</title>
+{% endblock %}
+{% block content %}
+
+<!-- Page Header Start<section id="Encabezado_login" class="page-section"> -->
+<div class="container-fluid" style="background: rgb(78, 154, 187);" >
+  <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 100px">
+    <h1 class="font-weight-bold" style="font-family: roboto; color: rgb(35,82,101);">Ingrese sus datos para iniciar sesión</h1>
+  </div>
+</div>
+<!-- </section>Page Header End -->
+
+<style>.errorlist{color:red;}</style>
+
+<main role="main">
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col-md-5 mx-auto mb-5">
+        {% if 'register' in request.GET %}
+        <p style="color:green;">
+          Usuario registrado correctamente, ya puedes identificarte.
+        </p>
+        {% endif %}
+        <form action="" method="post">{% csrf_token %}
+          <!-- <h3 class="mb-4">Iniciar sesión</h3> -->
+          {% if form.non_field_errors %}
+            <p style="color:red">Usuario o contraseña incorrectos, prueba de nuevo.</p>
+          {% endif %}
+          <p>
+            <input type="text" name="username" autofocus maxlength="254" required
+              id="id_username" class="form-control" placeholder="Nombre de usuario"/>
+          </p>
+          <p>
+            <input type="password" name="password" required
+              id="id_password" class="form-control" placeholder="Contraseña"/>
+          </p>
+          <p><input type="submit" class="btn btn-primary btn-block" style="background: rgb(35,82,101);border-color: rgb(35, 82, 101);" value="Acceder"></p>
+        </form>
+        <p>
+          ¿Ha olvidado su clave? Puede restaurarla <a href="{% url 'password_reset' %}">aquí</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

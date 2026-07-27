@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %} Cobosis | Gestión de información {% endblock %}
+{% block content %}
+
+    <!-- HERO -->
+    <header class="bg-gradient-to-r from-teal-600 to-blue-700 text-white py-20 px-6 text-center" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
+        <div class="max-w-4xl mx-auto">
+            <i class="fas fa-table text-5xl mb-4 text-teal-200" style="color: var(--warning);"></i>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6">De Mensaje de WhatsApp a Tabla Ordenada</h1>
+            <p class="text-lg md:text-xl mb-8 text-blue-100">
+                Convierte el caos de las solicitudes por redes sociales en datos estructurados. Ahorra tiempo, evita errores y exporta a Excel en un solo clic.
+            </p>
+            <a href="#como-funciona" class="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-100 transition">Descubre cómo funciona</a>
+        </div>
+    </header>
+
+    <!-- MOCKUP VISUAL (Simulación de la herramienta) -->
+    <section id="como-funciona" class="py-16 px-6 max-w-6xl mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Transformación en 3 Pasos</h2>
+        
+        <div class="grid md:grid-cols-2 gap-8 items-center bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+            <!-- Columna Izquierda: El Caos -->
+            <div>
+                <div class="flex items-center mb-3 text-red-500">
+                    <i class="fas fa-comment-dots mr-2"></i>
+                    <h3 class="font-bold text-lg">1. El Mensaje Original</h3>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-600 italic">
+                    "Hola, soy María. Necesito pedir 3 cajas de tornillos M6 y 2 llaves inglesas para el día 20 de octubre. Mi teléfono es 555-1234. Lo pago en efectivo."
+                </div>
+                
+                <div class="flex justify-center my-4">
+                    <i class="fas fa-arrow-down text-blue-500 text-2xl md:hidden"></i>
+                    <i class="fas fa-arrow-right text-blue-500 text-2xl hidden md:block"></i>
+                </div>
+
+                <div class="flex items-center mb-3 text-teal-600">
+                    <i class="fas fa-magic mr-2"></i>
+                    <h3 class="font-bold text-lg">2. Inteligencia Artificial</h3>
+                </div>
+                <p class="text-sm text-gray-500">Pegas el texto en nuestra plataforma y haces clic en procesar. Nuestra IA extrae exactamente las variables que necesitas.</p>
+            </div>
+
+            <!-- Columna Derecha: El Orden -->
+            <div>
+                <div class="flex items-center mb-3 text-green-600">
+                    <i class="fas fa-table mr-2"></i>
+                    <h3 class="font-bold text-lg">3. Tabla Estructurada</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-blue-50 text-blue-800">
+                                <th class="py-2 px-3 border">Cliente</th>
+                                <th class="py-2 px-3 border">Producto</th>
+                                <th class="py-2 px-3 border">Cantidad</th>
+                                <th class="py-2 px-3 border">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-2 px-3 border">María</td>
+                                <td class="py-2 px-3 border">Caja tornillos M6, Llave inglesa</td>
+                                <td class="py-2 px-3 border text-center">3, 2</td>
+                                <td class="py-2 px-3 border">20/10</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="mt-4 w-full bg-green-500 text-white font-bold py-2 rounded-lg opacity-80 cursor-not-allowed">
+                    <i class="fas fa-file-excel mr-2"></i> Exportar a Excel (Demo)
+                </button>
+            </div>
+        </div>
+        
+        <!-- Características clave -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12 text-center">
+            <div class="p-4">
+                <i class="fas fa-sliders-h text-3xl text-blue-500 mb-2"></i>
+                <h4 class="font-bold">Variables Personalizables</h4>
+                <p class="text-sm text-gray-500">Define qué quieres extraer: Nombre, producto, dirección, fecha de entrega, etc.</p>
+            </div>
+            <div class="p-4">
+                <i class="fas fa-clock text-3xl text-purple-500 mb-2"></i>
+                <h4 class="font-bold">Histórico y Retención</h4>
+                <p class="text-sm text-gray-500">Tus datos se guardan según tu plan para que puedas revisar pedidos pasados.</p>
+            </div>
+            <div class="p-4">
+                <i class="fas fa-chart-line text-3xl text-teal-500 mb-2"></i>
+                <h4 class="font-bold">Decisiones Inteligentes</h4>
+                <p class="text-sm text-gray-500">Filtra y exporta para analizar tendencias de tus clientes.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PLANES DE GESTIONA -->
+    <section id="planes" class="py-16 px-6 bg-gray-100">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-4">Planes para Gestiona</h2>
+            <p class="text-center text-gray-500 mb-12">Comienza gratis. Mejora tu plan cuando necesites más potencia.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for plan in planes %}
+                <div class="relative bg-white rounded-2xl shadow-md border border-gray-100 p-8 flex flex-col transition transform hover:scale-105 hover:shadow-xl {% if plan.destacado %}border-2 border-blue-600 ring-4 ring-blue-100 z-10 lg:scale-105{% endif %}">
+                    
+                    {% if plan.destacado %}
+                    <div class="absolute top-0 right-0 -mt-3 mr-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                        MÁS POPULAR
+                    </div>
+                    {% endif %}
+
+                    <h3 class="text-xl font-bold text-gray-900">{{ plan.nombre }}</h3>
+                    <div class="my-4">
+                        <span class="text-4xl font-extrabold text-blue-600">${{ plan.precio }}</span>
+                        <span class="text-gray-500">/ {{ plan.vigencia_dias }} días</span>
+                    </div>
+                    
+                    <!-- Detalles de límites -->
+                    <ul class="text-sm text-gray-600 mb-6 space-y-2 flex-grow">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i> Variables: <strong>{{ plan.max_variables }}</strong></li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i> Extracciones: <strong>{% if plan.max_extracciones == 0 %}Ilimitadas{% else %}{{ plan.max_extracciones }}{% endif %}</strong></li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i> Retención de datos: <strong>{{ plan.dias_retencion }} días</strong></li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i> Exportar a Excel</li>
+                        {% if plan.variables_ajustables %}
+                        <li><i class="fas fa-star text-yellow-500 mr-2"></i> Variables ajustables por extracción</li>
+                        {% endif %}
+                    </ul>
+
+                    <!-- Llamada a la Acción -->
+                    {% if plan.precio == 0 %}
+                        <a href="{% url 'procesar_suscripcion' plan.id %}" class="mt-auto block text-center bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition">
+                            <i class="fas fa-gift mr-2"></i>Comenzar Gratis
+                        </a>
+                    {% else %}
+                        <a href="{% url 'procesar_suscripcion' plan.id %}" class="mt-auto block text-center {% if plan.destacado %}bg-blue-600 hover:bg-blue-700{% else %}bg-gray-800 hover:bg-gray-900{% endif %} text-white font-bold py-3 px-6 rounded-lg transition">
+                            <i class="fas fa-arrow-right mr-2"></i>Suscribirme
+                        </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

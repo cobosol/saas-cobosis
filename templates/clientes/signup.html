@@ -1,0 +1,402 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Cuenta | Zaas{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ========== ESTILOS DEL REGISTRO ========== */
+    .register-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+    }
+    
+    .register-card {
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .register-header {
+        background: linear-gradient(135deg, #6C63FF 0%, #4ECDC4 100%);
+        padding: 1rem;
+        text-align: center;
+        color: white;
+    }
+    
+    .register-header i {
+        font-size: 2.5rem;
+        margin-bottom: 0.10rem;
+    }
+    
+    .register-header h2 {
+        font-weight: 700;
+        margin-bottom: 0.10rem;
+    }
+    
+    .register-header p {
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+    
+    .register-body {
+        padding: 1.5rem;
+    }
+    
+    /* Estilos para los campos del formulario */
+    .register-body label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.375rem;
+        font-size: 0.875rem;
+    }
+    
+    .register-body input[type="text"],
+    .register-body input[type="email"],
+    .register-body input[type="password"],
+    .register-body input[type="url"],
+    .register-body textarea,
+    .register-body select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background-color: #f9fafb;
+        color: #1f2937;
+    }
+    
+    .register-body input:focus,
+    .register-body textarea:focus,
+    .register-body select:focus {
+        outline: none;
+        border-color: #6C63FF;
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+    }
+    
+    .register-body input::placeholder {
+        color: #9ca3af;
+    }
+    
+    /* Estilos para help text */
+    .register-body .helptext {
+        display: block;
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    
+    /* Estilos para errores */
+    .errorlist {
+        list-style: none;
+        padding: 0.5rem 0.75rem;
+        margin: 0.5rem 0;
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 0.5rem;
+        color: #dc2626;
+        font-size: 0.85rem;
+    }
+    
+    .errorlist li {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+    
+    .errorlist li::before {
+        content: '⚠️';
+        font-size: 0.85rem;
+    }
+    
+    /* Campo con error */
+    .register-body .error input,
+    .register-body .error textarea,
+    .register-body .error select {
+        border-color: #dc2626;
+        background-color: #fef2f2;
+    }
+    
+    /* Botón de registro */
+    .btn-register {
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(135deg, #6C63FF 0%, #5A52D5 100%);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(108, 99, 255, 0.3);
+    }
+    
+    .btn-register:active {
+        transform: translateY(0);
+    }
+    
+    /* Separador */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #9ca3af;
+        font-size: 0.85rem;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .divider::before {
+        margin-right: 1rem;
+    }
+    
+    .divider::after {
+        margin-left: 1rem;
+    }
+    
+    /* Link de inicio de sesión */
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+    
+    .login-link a {
+        color: #6C63FF;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .login-link a:hover {
+        color: #5A52D5;
+        text-decoration: underline;
+    }
+    
+    /* Grid para campos en línea */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    /* Checkbox personalizado */
+    .register-body input[type="checkbox"] {
+        width: 1.125rem;
+        height: 1.125rem;
+        accent-color: #6C63FF;
+        margin-right: 0.5rem;
+    }
+    
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .register-body {
+            padding: 1.5rem;
+        }
+        
+        .register-header {
+            padding: 1.5rem;
+        }
+        
+        .register-header i {
+            font-size: 2rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .register-card {
+            border-radius: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ========== HERO HEADER ========== -->
+<header class="relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
+    <div class="max-w-4xl mx-auto text-center py-10 md:py-16 px-6">
+        <div class="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm mb-6 border border-white/20">
+            <i class="bi bi-rocket-takeoff mr-2"></i>
+            Comienza en menos de 2 minutos
+        </div>
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-2 leading-tight">
+            Crea tu <span style="color: #FFD93D;">cuenta gratuita</span>
+        </h1>
+    </div>
+    
+    <!-- Onda decorativa -->
+    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="w-full h-[60px]">
+            <path d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z" fill="#f9fafb"></path>
+        </svg>
+    </div>
+</header>
+
+<!-- ========== FORMULARIO DE REGISTRO ========== -->
+<section class="bg-gray-50" style="background-color: #f9fafb;">
+    <div class="register-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                  <div class="register-card">
+                    <!-- Cabecera de la tarjeta -->
+                      <div class="register-header py-0">
+                        <i class="bi bi-person-plus"></i>
+                          <h2>Crear Cuenta</h2>
+                       </div>
+                        
+                        <!-- Cuerpo del formulario -->
+                        <div class="register-body">
+                            <form method="post" novalidate>
+                                {% csrf_token %}
+                                
+                                {% if form.non_field_errors %}
+                                <div class="errorlist">
+                                    {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Renderizado manual de campos para mejor control -->
+                                {% for field in form %}
+                                <div class="mb-4 {% if field.errors %}error{% endif %}">
+                                    <label for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                        {% if field.field.required %}
+                                        <span style="color: #dc2626;">*</span>
+                                        {% endif %}
+                                    </label>
+                                    
+                                    {{ field }}
+                                    
+                                    {% if field.help_text %}
+                                    <span class="helptext">{{ field.help_text }}</span>
+                                    {% endif %}
+                                    
+                                    {% if field.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                                
+                                <!-- Términos y condiciones -->
+                                <div class="checkbox-label mb-4">
+                                    <input type="checkbox" id="terms" required>
+                                    <label for="terms">
+                                        Acepto los <a href="#" style="color: #6C63FF;">Términos y Condiciones</a> y la 
+                                        <a href="#" style="color: #6C63FF;">Política de Privacidad</a>
+                                    </label>
+                                </div>
+                                
+                                <!-- Botón de registro -->
+                                <button type="submit" class="btn-register">
+                                    <i class="bi bi-rocket-takeoff mr-2"></i> Crear Cuenta Gratis
+                                </button>
+                                
+                                <!-- Separador -->
+                                <div class="divider">¿Ya tienes cuenta?</div>
+                                
+                                <!-- Link a login -->
+                                <div class="login-link">
+                                    <a href="{% url 'login' %}">
+                                        <i class="bi bi-box-arrow-in-right mr-1"></i> Iniciar Sesión
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Beneficios debajo del formulario -->
+                    <div class="text-center mt-4">
+                        <div class="row g-3">
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="bi bi-shield-check d-block mb-1" style="color: #6BCB77; font-size: 1.5rem;"></i>
+                                    <small class="text-muted">Seguro</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="bi bi-lightning-charge d-block mb-1" style="color: #FFD93D; font-size: 1.5rem;"></i>
+                                    <small class="text-muted">Rápido</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="bi bi-gift d-block mb-1" style="color: #FF6B6B; font-size: 1.5rem;"></i>
+                                    <small class="text-muted">Gratis</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Mejorar accesibilidad del formulario
+    document.addEventListener('DOMContentLoaded', function() {
+        // Agregar placeholders a los campos
+        const inputs = document.querySelectorAll('.register-body input:not([type="checkbox"]):not([type="submit"])');
+        inputs.forEach(input => {
+            if (!input.getAttribute('placeholder')) {
+                const label = document.querySelector(`label[for="${input.id}"]`);
+                if (label) {
+                    input.setAttribute('placeholder', label.textContent.trim());
+                }
+            }
+        });
+        
+        // Validación del checkbox de términos
+        const form = document.querySelector('form');
+        const termsCheckbox = document.getElementById('terms');
+        
+        form.addEventListener('submit', function(e) {
+            if (!termsCheckbox.checked) {
+                e.preventDefault();
+                alert('Debes aceptar los Términos y Condiciones para registrarte.');
+                termsCheckbox.focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

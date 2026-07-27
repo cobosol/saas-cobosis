@@ -1,0 +1,262 @@
+/* static/css/main.css */
+
+/* ========== PALETA DE COLORES ========== */
+:root {
+    /* Colores principales */
+    --primary: #6C63FF;
+    --primary-dark: #5A52D5;
+    --primary-light: #8B85FF;
+    
+    --secondary: #FF6B6B;
+    --secondary-dark: #E55555;
+    
+    --accent: #4ECDC4;
+    --accent-dark: #3DBDB5;
+    
+    --warning: #FFD93D;
+    --success: #6BCB77;
+    --danger: #FF6B6B;
+    --info: #4D96FF;
+    
+    /* Fondos */
+    --bg-dark: #1a1a2e;
+    --bg-darker: #16213e;
+    --bg-card: #ffffff;
+    --bg-light: #f8f9fa;
+    
+    /* Textos */
+    --text-primary: #2D3436;
+    --text-secondary: #636E72;
+    --text-light: #B2BEC3;
+    --text-white: #FFFFFF;
+    
+    /* Gradientes */
+    --gradient-primary: linear-gradient(135deg, #6C63FF 0%, #FF6B6B 100%);
+    --gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --gradient-card: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* ========== SMOOTH SCROLL ========== */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ========== CLASES PERSONALIZADAS QUE COMPLEMENTAN A TAILWIND ========== */
+
+/* Fondos con gradientes personalizados */
+.bg-gradient-custom {
+    background: var(--gradient-primary);
+}
+
+.bg-gradient-dark-custom {
+    background: var(--gradient-dark);
+}
+
+/* Texto con colores de la paleta */
+.text-primary-custom {
+    color: var(--primary) !important;
+}
+
+.text-secondary-custom {
+    color: var(--secondary) !important;
+}
+
+/* Bordes personalizados */
+.border-primary-custom {
+    border-color: var(--primary) !important;
+}
+
+/* Badges personalizados */
+.badge-custom {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.25em 0.75em;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Hover effects para tarjetas */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(108, 99, 255, 0.15);
+}
+
+/* ========== FOOTER ========== */
+/* Forzar el fondo oscuro y borde superior */
+footer[role="contentinfo"] {
+    background-color: var(--bg-dark) !important;
+    border-top: 3px solid var(--primary) !important;
+    color: #fff !important;
+}
+
+/* Enlaces del footer */
+.footer-link {
+    color: rgba(255, 255, 255, 0.6) !important;
+    transition: all 0.3s ease;
+    position: relative;
+    text-decoration: none;
+}
+
+.footer-link:hover {
+    color: var(--primary-light) !important;
+    padding-left: 5px;
+}
+
+.footer-link::before {
+    content: '›';
+    position: absolute;
+    left: -10px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    color: var(--primary-light);
+}
+
+.footer-link:hover::before {
+    opacity: 1;
+    left: -5px;
+}
+
+/* Botones sociales en footer */
+footer .btn-outline-light {
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+footer .btn-outline-light:hover {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+}
+
+/* Textos en footer */
+footer .text-white-50 {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+footer h5, 
+footer h6 {
+    color: #fff !important;
+}
+
+/* Botones con estilos de la paleta */
+.btn-primary-custom {
+    background-color: var(--primary);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+}
+
+.btn-secondary-custom {
+    background-color: var(--secondary);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-custom:hover {
+    background-color: var(--secondary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+}
+
+/* ========== HEADER Y CARRUSEL ========== */
+header[role="banner"] {
+    background-color: var(--bg-dark) !important;
+}
+
+.carousel-indicators button {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background-color: var(--text-white) !important;
+    border: 2px solid var(--primary) !important;
+    opacity: 0.7;
+}
+
+.carousel-indicators button.active {
+    background-color: var(--primary) !important;
+    opacity: 1;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .carousel-item .card-body {
+        padding: 2rem !important;
+    }
+    
+    .carousel-item h2 {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Navbar */
+#navbar {
+    transition: all 0.3s ease;
+}
+
+/* Efecto de línea debajo de los links */
+.nav-link-underline {
+    position: relative;
+}
+
+.nav-link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.nav-link-underline:hover::after {
+    width: 100%;
+}
+
+/* Dropdown animado */
+.group:hover .group-hover\:opacity-100 {
+    transition-delay: 0.1s;
+}
+
+/* Sticky navbar con backdrop blur */
+@supports (backdrop-filter: blur(12px)) {
+    .navbar-blur {
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+    }
+}
+
+/* Animación del logo */
+.logo-pulse {
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}

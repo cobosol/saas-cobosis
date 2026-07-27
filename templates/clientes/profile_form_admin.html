@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Perfil{% endblock %}
+{% block content %}
+
+<!-- Page Header Start -->
+<div class="container-fluid bg-secondary mb-2">
+  <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 100px">
+      <h4 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;"> Perfil de usuario </h4>
+      <h3 >{{user.first_name}} {{user.last_name}}</h3>
+  </div>
+</div>
+<!-- Page Header End -->
+
+
+<style>.errorlist{color:red;} label{display:none}</style>
+<main role="main">
+  <div class="container">
+    {% if form.errors %}
+          <div class="alert alert-danger">
+              <strong>Error:</strong> Por favor corrige los siguientes errores.
+              {{ form.non_field_errors }}
+          </div>
+    {% endif %}
+    <form action="" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="col-md-12">
+        <div class="row mt-3">
+          <div id="avatar" class="col col-md-5 mx-auto mb-4 col-lg-5 pb-0">
+            {% if user.profile.avatar %}
+              <img width="200" height="200" src="{{request.user.profile.get_avatar_url}}" alt="{{request.user.profile.get_avatar_url}}">
+            <!--   <h6 class="text-dark font-weight-semi-bold mb-3" style="font-family: roboto;">Foto del perfil</h6> -->
+<!--                <img src="{{request.user.profile.avatar.url}}" class="img-fluid"> -->
+<!--               <p class="mt-1">¿Borrar? <input type="checkbox" id="avatar-clear" name="avatar-clear" /></p> -->
+            {% else %}
+              <img src="{% static 'img/Profile/pensativo.jpg' %}" class="img-fluid">
+            {% endif %}
+            <h3 class="text-dark font-weight-semi-bold mb-3" style="font-family: sans-serif;">{{user.username}}</h3>
+            <h6 class="text-dark font-weight-semi-bold mb-3" style="font-family: sans-serif;">Cambiar foto</h6>
+            <input type="file" name="avatar" class="form-control-file btn-block mt-3" id="id_avatar">
+            <br>
+            <h6 class="text-dark font-weight-semi-bold mb-3" style="font-family: sans-serif;">Correo electrónico</h6>
+            <input type="email" value="{{user.email}}" class="form-control mt-3" readonly>
+
+                      <!-- Datos del monedero -->
+            <div class="wallet-balance">
+              <h5>Saldo: {{ request.user.wallet.balance }} CUP</h5>
+              <h5>Transacciones:</h5>
+              <ul>
+                {% for transaction in user.wallet.transaction_set.all %}
+                  <li>{{ transaction.created_at }}: {{ transaction.amount }} - {{ transaction.description }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div> 
+
+          <div id="datos" class="col col-md-7 mx-auto mb-5 col-lg-7 pb-1">
+          <!-- Formulario -->  
+            <!-- <h6 class="text-dark font-weight-semi-bold mb-3" style="font-family: roboto;">Resumen biográfico</h6> -->
+            {{ form.bio }}
+            {% if form.bio.errors %}
+                  <div class="text-danger">{{ form.bio.errors }}</div>
+            {% endif %}
+            <br>
+            <br>
+<!--             <h6 class="text-dark font-weight-semi-bold mb-3" style="font-family: roboto;">Sitio web personal</h6> -->
+            <h6 class="text-dark mb-3" style="font-family: sans-serif;">Sitio personal:</h6>
+            {{ form.link }}
+            {% if form.link.errors %}
+                  <div class="text-danger">{{ form.link.errors }}</div>
+            {% endif %}
+            <br>
+            <br>
+            <h6 class="text-dark mb-3" style="font-family: sans-serif;">Número de identidad:</h6>
+            {{ form.cid }}
+            {% if form.cid.errors %}
+              <div class="text-danger">{{ form.cid.errors }}</div>
+            {% endif %}
+            <br>
+            <br>
+            <h6 class="text-dark mb-3" style="font-family: sans-serif;">Número de teléfono:</h6>
+            {{ form.phone }}
+            <br>
+            Formato: X-XXX-XXXX
+            {% if form.phone.errors %}
+              <div class="text-danger">{{ form.phone.errors }}</div>
+            {% endif %}
+            <br>
+            <br>
+            <h6 class="text-dark mb-3" style="font-family: sans-serif;">Número de teléfono para WhatsApp:</h6>
+            {{ form.ws }}
+            <br>
+            Formato: X-XXX-XXXX
+            <br>
+            {% if form.ws.errors %}
+              <div class="text-danger">{{ form.ws.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col col-md-12">
+            <!-- <h6 class="text-primary mb-3" style="font-family: sans-serif;">Si está interesado en ser distribuidor de nuestros productos, colaborar en la producción o tener su propia línea de productos utilizando nuestras materias primas de primera calidad, seleccione a continuación la opción correpondiente y llene la información que sigue. </h6> -->
+            <h6 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Tipo de cliente en nuestra tienda virtual</h6> 
+            {{ form.client_type }}
+            <br>
+            <br>
+            <h6 class="text-primary font-weight mb-3" style="font-family: sans-serif;"> Si aún no tiene contrato con nosotros, escríbanos. Si ya lo tiene, por favor llene los siguientes datos: </h6>  
+            <br>
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Número de contrato</h6>
+                {{ form.contract }}
+                {% if form.contract.errors %}
+                  <div class="text-danger">{{ form.contract.errors }}</div>
+                {% endif %}
+                <br>
+                <br>
+                <h6 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Código NIT: </h6>
+                {{ form.nit }}
+                {% if form.nit.errors %}
+                  <div class="text-danger">{{ form.nit.errors }}</div>
+                {% endif %}
+                <br>
+                <br>
+                <h6 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Código REEUP: </h6>
+                {{ form.reeup }}
+                {% if form.reeup.errors %}
+                  <div class="text-danger">{{ form.reeup.errors }}</div>
+                {% endif %}
+                <br>
+                <br>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Dirección legal: </h6>
+                {{ form.address }}
+                {% if form.address.errors %}
+                  <div class="text-danger">{{ form.address.errors }}</div>
+                {% endif %}
+                <br>
+                <br>
+              <h6 class="text-primary font-weight-semi-bold mb-3" style="font-family: sans-serif;">Agencia bancaria: </h6>
+              {{ form.agency }}
+              {% if form.agency.errors %}
+                <div class="text-danger">{{ form.agency.errors }}</div>
+              {% endif %}
+              <br>
+              <br>
+            </div>
+          </div>
+          <div class="col-lg-7">
+
+          </div>
+            <div class="col-md-3">
+              <input type="submit" class="btn btn-primary btn-block mt-3" value="Actualizar">
+            </div>
+      </div>
+      
+    </form>
+  </div>
+</main>
+{% endblock %}

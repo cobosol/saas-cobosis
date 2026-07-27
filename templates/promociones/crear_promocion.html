@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Promoción | Cobosis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="max-w-4xl mx-auto my-10 bg-white p-8 rounded-xl shadow-md border border-gray-100">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Crear Nueva Promoción</h1>
+        <p class="text-gray-500 mb-8">Selecciona el plan que mejor se adapte a tu necesidad y completa los datos. Posteriormente te contactaremos.</p>
+
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            <!-- PASO 1: SELECCIÓN DE PLAN -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">1. Selecciona tu Plan</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for plan in planes %}
+                    <label class="plan-card cursor-pointer border-2 rounded-xl p-4 flex items-start gap-3 transition hover:border-blue-400 {% if forloop.first %}border-blue-500 bg-blue-50{% else %}border-gray-200{% endif %}">
+                        <input type="radio" name="plan_id" value="{{ plan.id }}" class="mt-1 hidden plan-radio" {% if forloop.first %}checked{% endif %} data-tipo="{{ plan.tipo_formulario }}">
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center mt-1 plan-radio-custom">
+                            <div class="w-3 h-3 bg-blue-600 rounded-full hidden radio-dot"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-gray-800">{{ plan.nombre }}</h3>
+                                <span class="text-blue-600 font-bold">${{ plan.precio }}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ plan.vigencia_dias }} días de vigencia</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ plan.descripcion|truncatewords:15 }}</p>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- PASO 2: DATOS DE LA PROMOCIÓN -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">2. Datos de tu Promoción</h2>
+                
+                <!-- Campos para EVENTO -->
+                <div id="form-evento" class="form-section space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre o Título Principal *</label>
+                        <input type="text" name="titulo_evento" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: Fiesta de Cumpleaños">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
+                            <input type="date" name="fecha_evento" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Hora *</label>
+                            <input type="time" name="hora_evento" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Lugar *</label>
+                        <input type="text" name="lugar_evento" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Dirección o nombre del salón">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Información detallada *</label>
+                        <textarea name="info_evento" rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Detalles adicionales: dress code, confirmación, etc."></textarea>
+                    </div>
+                </div>
+
+                <!-- Campos para NEGOCIO -->
+                <div id="form-negocio" class="form-section space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Negocio *</label>
+                        <input type="text" name="nombre_negocio" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: Restaurante La Fogata">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Rubro *</label>
+                            <input type="text" name="rubro_negocio" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: Comida rápida">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono / WhatsApp *</label>
+                            <input type="tel" name="telefono_negocio" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="+1234567890">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción general *</label>
+                        <textarea name="descripcion_negocio" rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Breve reseña de lo que ofrece tu negocio."></textarea>
+                    </div>
+                </div>
+
+                <!-- Campos para GENÉRICO -->
+                <div id="form-ninguno" class="form-section space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Título de la promoción *</label>
+                        <input type="text" name="titulo_generico" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+                        <textarea name="descripcion_generica" rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
+                    Enviar Solicitud <i class="fas fa-paper-plane ml-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Lógica para mostrar/ocultar formularios según el plan seleccionado
+        const radios = document.querySelectorAll('.plan-radio');
+        const sections = document.querySelectorAll('.form-section');
+
+        function actualizarFormulario() {
+            let tipoSeleccionado = 'ninguno';
+            
+            radios.forEach(radio => {
+                if (radio.checked) {
+                    tipoSeleccionado = radio.dataset.tipo;
+                    // Actualizar estilo visual de la tarjeta seleccionada
+                    document.querySelectorAll('.plan-card').forEach(card => {
+                        card.classList.remove('border-blue-500', 'bg-blue-50');
+                        card.classList.add('border-gray-200');
+                        card.querySelector('.radio-dot').classList.add('hidden');
+                    });
+                    const cardSeleccionada = radio.closest('.plan-card');
+                    cardSeleccionada.classList.add('border-blue-500', 'bg-blue-50');
+                    cardSeleccionada.classList.remove('border-gray-200');
+                    cardSeleccionada.querySelector('.radio-dot').classList.remove('hidden');
+                }
+            });
+
+            sections.forEach(section => {
+                if (section.id === `form-${tipoSeleccionado}`) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                    // Opcional: limpiar valores de campos ocultos para no enviar datos basura
+                    section.querySelectorAll('input, textarea').forEach(input => input.value = '');
+                }
+            });
+        }
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', actualizarFormulario);
+        });
+
+        // Ejecutar al cargar la página
+        actualizarFormulario();
+    </script>
+</body>
+</html>
