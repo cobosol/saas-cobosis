@@ -44,6 +44,8 @@ class GroqClient:
                 "1. Debes responder ÚNICAMENTE con un objeto JSON válido. No incluyas texto adicional."
                 "2. Las claves del JSON deben ser exactamente los nombres de las variables solicitadas."
                 "3. Si una variable no se encuentra en el texto, su valor debe ser null."
+                "4. Si de una variable se encuentra más de un valor, reflejalos como valores diferentes de la misma entrada, pero sin valores repetidos."
+                "5. Si hay variables relacionadas, asegúrate de extraerlas correctamente y reflejarlas en el JSON."
             )
             data = {
                 "messages": [
