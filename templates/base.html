@@ -79,50 +79,82 @@
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     {% endblock %}
     
-    {% block extra_styles %}{% endblock %}
+    {% block extra_styles %}
+        <style>
+        /* Ajustes para el navbar con dos logos */
+        .navbar-container {
+            position: relative;
+        }
+        
+        .logo-zaas {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo-cobosis {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        
+        /* En móvil, ocultar el logo de Cobosis */
+        @media (max-width: 640px) {
+            .logo-cobosis {
+                display: none;
+            }
+        }
+        
+        /* En pantallas muy pequeñas, hacer el logo de Zaas más pequeño */
+        @media (max-width: 380px) {
+            .logo-zaas img {
+                height: 2rem !important;
+            }
+        }
+    </style>
+    {% endblock %}
 </head>
 <body class="bg-white text-gray-900 font-sans">
 
     <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white backdrop-blur-md shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 navbar-container">
+            <div class="flex justify-between items-center h-16 relative">
                 <!-- Logo saas-cobosis/static/img/logoZ.png-->
-                <a href="{% url 'inicio' %}" class="flex items-center gap-3 group">
+                <a href="{% url 'inicio' %}" class="logo-zaas flex items-center gap-3 group flex-shrink-0">
                     <div class="relative">
                         <img src="{% static 'img/logoZ.png' %}" alt="Zaas" 
                                 class="h-10 w-auto transition-transform duration-300 group-hover:scale-105"> 
                     </div>
                 </a>
             
-                <a href="https://www.cobosis.com" class="flex items-center gap-3 group flex-shrink-0">
-                    <div class="relative">
-                        <img src="{% static 'img/logoS.jpg' %}" alt="Cobosis" 
+                <a href="https://www.cobosis.com" class="logo-cobosis flex items-center gap-3 group flex-shrink-0">
+                    <img src="{% static 'img/logoS.jpg' %}" alt="Cobosis" 
                             class="h-10 w-auto transition-transform duration-300 group-hover:scale-105"> 
-                    </div>
                 </a>
-                <div class="flex-1"></div>
-                <div class="flex items-center space-x-2 pl-6 border-l border-gray-200">
+                <div class="flex-1 sm:hidden"></div>
+                <div class="flex items-center space-x-2 pl-4 sm:pl-6 sm:border-l border-gray-200">
                     {% if user.is_authenticated %}
                     <div class="dropdown">
-                    <!-- Botón con data-bs-toggle -->
-                    <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors border-0 bg-transparent"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <div class="user-avatar relative">
+                        <!-- Botón con data-bs-toggle -->
+                        <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors border-0 bg-transparent"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        <div class="user-avatar relative" style="width: 36px; height: 36px; background: linear-gradient(135deg, #FFD93D, #FF6B6B); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; color: #1a1a2e;">
                             {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
                         </div>
                         <div class="hidden md:block text-left">
                             <span class="block text-sm font-semibold text-gray-900 leading-tight">
                                 {{ user.get_full_name|default:user.username }}
                             </span>
-                            <span class="block text-xs text-gray-500 leading-tight">Mi cuenta</span>
+                            <span class="block text-xs text-gray-500 leading-tight">
+                                Mi cuenta</span>
                         </div>
                         <i class="bi bi-chevron-down text-xs text-gray-400 ml-1"></i>
                     </button>
     
                     <!-- Menú desplegable con clases estándar de Bootstrap -->
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" style="min-width: 280px;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" style="min-width: 260px;">
                         <li class="px-3 py-2">
                             <div class="user-info">
                                 <span class="user-name d-block fw-bold">{{ user.get_full_name|default:user.username }}</span>
@@ -163,7 +195,7 @@
                         Iniciar Sesión
                     </a>
                     <a href="{% url 'registro' %}" 
-                       class="bg-[#6C63FF] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#5A52D5] transition-all duration-300 hover:shadow-lg hover:shadow-[#6C63FF]/25 hover:-translate-y-0.5 whitespace-nowrap">
+                       class="bg-[#6C63FF] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#5A52D5] transition-all duration-300 hover:shadow-lg hover:shadow-[#6C63FF]/25 hover:-translate-y-0.5 whitespace-nowrap">
                         <i class="bi bi-person-plus me-1"></i> Registrarse
                     </a>
                     {% endif %}
@@ -207,70 +239,77 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer role="contentinfo" class="pt-3 pb-3 " style="background-color: var(--bg-darker);">
+    <footer role="contentinfo" class="pt-5 pb-4 mt-5" style="background-color: var(--bg-darker);">
         <div class="container">
-            <div class="row">
+            <div class="row g-4">
                 <!-- Sección 1: Logo y descripción -->
-                <div class="col-4 col-lg-4 mb-3">
-                    <i class="bi bi-rocket-takeoff text-white"></i>
-                    <span class="text-2xl text-white font-extrabold">
-                        <span style="color: #FFD93D;">Z</span>aas
-                    </span>
+                <div class="col-12 col-md-6 col-lg-4 mb-3 mb-lg-0">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-rocket-takeoff text-white"></i>
+                        <span class="text-2xl text-white font-extrabold">
+                            <span style="color: #FFD93D;">Z</span>aas
+                        </span>
+                    </div>
                     <p class="text-white-50 mb-3">
-                        ...
+                        Plataforma SaaS para promoción y gestión de negocios. 
+                        Impulsa tu negocio con herramientas inteligentes.
                     </p>
                     <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="Facebook">
-                            <i class="bi bi-facebook"></i>
+                        <a href="#" class="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 36px; height: 36px;" aria-label="Facebook">
+                            <i class="bi bi-facebook small"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="Instagram">
-                            <i class="bi bi-instagram"></i>
+                        <a href="#" class="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 36px; height: 36px;" aria-label="Instagram">
+                            <i class="bi bi-instagram small"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="Twitter">
-                            <i class="bi bi-twitter-x"></i>
+                        <a href="#" class="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 36px; height: 36px;" aria-label="Twitter">
+                            <i class="bi bi-twitter-x small"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="WhatsApp">
-                            <i class="bi bi-whatsapp"></i>
+                        <a href="#" class="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 36px; height: 36px;" aria-label="WhatsApp">
+                            <i class="bi bi-whatsapp small"></i>
                         </a>
                     </div>
                 </div>
             
                 <!-- Sección 2: Enlaces rápidos -->
-                <div class="col-2 col-lg-2 col-md-4 mb-4">
-                    <h6 class="fw-bold text-uppercase mb-3 text-white">Explorar</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{% url 'inicio_promo' %}" class="text-white-50 text-decoration-none footer-link">Promociones</a></li>
+                <div class="col-6 col-md-3 col-lg-2 mb-3 mb-lg-0">
+                    <h6 class="fw-bold text-uppercase text-white mb-3 small">Explorar</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="{% url 'inicio_promo' %}" class="text-white-50 text-decoration-none small footer-link">Promociones</a></li>
                         {% if user.is_authenticated %}
-                        <li class="mb-2"><a href="{% url 'gestiona_panel' %}" class="text-white-50 text-decoration-none footer-link">Gestión de información</a></li>
+                        <li class="mb-2"><a href="{% url 'gestiona_panel' %}" class="text-white-50 text-decoration-none small footer-link">Gestión de información</a></li>
                         {% else %}
-                        <li class="mb-2"><a href="{% url 'detalle_gestiona' %}" class="text-white-50 text-decoration-none footer-link">Gestión de información</a></li>
+                        <li class="mb-2"><a href="{% url 'detalle_gestiona' %}" class="text-white-50 text-decoration-none small footer-link">Gestión de información</a></li>
                         {% endif %}
                     </ul>
                 </div>
             
                 <!-- Sección 3: Información -->
-                <div class="col-2 col-lg-2 col-md-4 mb-4">
-                    <h6 class="fw-bold text-uppercase mb-3 text-white">Información</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="https://www.cobosis.com/nosotros/" class="text-white-50 text-decoration-none footer-link">Acerca de</a></li>
-                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">FAQ</a></li>
+                <div class="col-6 col-md-3 col-lg-2 mb-3 mb-lg-0">
+                    <h6 class="fw-bold text-uppercase text-white mb-3 small">Información</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><a href="https://www.cobosis.com/nosotros/" class="text-white-50 text-decoration-none small footer-link">Acerca de</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none small footer-link">FAQ</a></li>
                     </ul>
                 </div>
             
                 <!-- Sección 4: Legal -->
-                <div class="col-2 col-lg-2 col-md-4 mb-4">
-                    <h6 class="fw-bold text-uppercase mb-3 text-white">Legal</h6>
+                <div class="col-6 col-md-3 col-lg-2 mb-3 mb-lg-0">
+                    <h6 class="fw-bold text-uppercase mb-3 text-white small ">Legal</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Privacidad</a></li>
-                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Términos</a></li>
-                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Cookies</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none small footer-link">Privacidad</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none small footer-link">Términos</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none small footer-link">Cookies</a></li>
                     </ul>
                 </div>
             
                 <!-- Sección 5: Contacto -->
-                <div class="col-lg-2 mb-4">
-                    <h6 class="fw-bold text-uppercase mb-3 text-white">Contacto</h6>
-                    <ul class="list-unstyled text-white-50">
+                <div class="col-6 col-md-3 col-lg-2 mb-3 mb-lg-0">
+                    <h6 class="fw-bold text-uppercase mb-3 text-white small">Contacto</h6>
+                    <ul class="list-unstyled text-white-50 small mb-0">
                         <li class="mb-2"><i class="bi bi-envelope me-2"></i>ycoca@cobosis.com</li>
                         <li class="mb-2"><i class="bi bi-telephone me-2"></i>(+53) 58 236469</li>
                         <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>La Habana, Cuba</li>
@@ -278,17 +317,17 @@
                 </div>
             </div>
         
-            <hr class="border-secondary my-1">
+            <hr class="border-secondary my-4" style="border-color: rgba(255,255,255,0.1) !important;">
         
             <!-- Copyright -->
             <div class="row align-items-center">
-                <div class="col-md-4 text-center text-md-start">
+                <div class="col-12 col-md-4 text-center text-md-start mb-2 mb-md-0">
                     <p class="small text-white-50 mb-0">
                         &copy; {% now "Y" %} <span style="color: #ff6b00;">Co</span><span style="color: #0056b3;">bo</span>sis. Todos los derechos reservados.
                     </p>
                 </div>
-                <div class="col-md-4 text-center text-md-start">
-                    <p class="text-sm text-gray-400 mt-2">Plataforma SaaS para promoción y gestión de negocios.</p>
+                <div class="col-12 col-md-4 text-center mb-2 mb-md-0">
+                    <p class="small text-sm text-gray-400 mt-2">Plataforma SaaS para promoción y gestión de negocios.</p>
                 </div>
                 <div class="col-md-4 text-center text-md-end mt-2 mt-md-0">
                     <p class="small text-white-50 mb-0">
