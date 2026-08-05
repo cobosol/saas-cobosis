@@ -120,7 +120,7 @@ def gestiona_panel(request):
     ).select_related('plan').first()
 
     if not suscripcion:
-        return render(request, 'core/no_suscripcion.html', {'servicio': 'Gestiona'})
+        return render(request, 'gestiona/no_suscripcion.html', {'servicio': 'Gestiona'})
 
     plan = suscripcion.plan
     
