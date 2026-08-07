@@ -5,6 +5,9 @@
 {% block extra_styles %}
 <style>
     /* Estilos adicionales específicos de esta página */
+    main#main-content {
+        padding-top: 56px !important; /* Solo lo necesario para el navbar */
+    }
     .service-card {
         transition: all 0.3s ease;
     }
@@ -29,7 +32,7 @@
 
 {% block content %}
 <!-- HERO BANNER - Calidez y Cercanía -->
-<header class="relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
+<header class="relative overflow-hidden" style="margin-top: -1px; background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
     <div class="max-w-4xl mx-auto text-center py-24 px-6">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg">
             El Éxito de tu Negocio<br>

@@ -1,5 +1,23 @@
 {% extends 'base.html' %}
 {% block title %} Cobosis | Gestión de información {% endblock %}
+{% block extra_styles %}
+<style>
+    /* ========== ESTILOS UNIFICADOS PARA PROMOCIONES ========== */
+    
+    /* Reducir padding del main */
+    main#main-content {
+        padding-top: 56px !important; /* Solo lo necesario para el navbar */
+    }
+    
+    /* Ajustes responsive */
+    @media (max-width: 768px) {
+        
+        main#main-content {
+            padding-top: 48px !important;
+        }
+    }
+</style>
+{% endblock %}
 {% block content %}
 
     <!-- HERO -->
