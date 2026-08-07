@@ -1,0 +1,270 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Descubre las mejores promociones culturales{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}promociones, cultura, eventos, descuentos{% endblock %}">
+    <meta name="author" content="{% block meta_author %}Promociones Culturales{% endblock %}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{% block title %}Promociones Culturales{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Descubre las mejores promociones y eventos culturales{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'img/og-default.jpg' %}{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logoZ.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/logoZ.png' %}">
+    
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    <title>Promociones</title>
+    
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    
+    <!-- CSS Personalizado -->
+    {% block styles %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% endblock %}
+    
+    {% block extra_styles %}
+    <style>
+         /* ========== NAVBAR 100% FUNCIONAL ========== */
+    .navbar-sticky {
+        position: fixed !important; /* Forzar fixed */
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important; /* Z-index muy alto */
+        background-color: #1a1a2e !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+        min-height: 56px;
+        display: block !important;
+    }
+    
+    .navbar-sticky.scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+        background-color: #0f0f23 !important;
+    }
+    
+    /* Espacio para el contenido */
+    body {
+        padding-top: 56px !important; /* Altura del navbar */
+    }
+    
+    /* Asegurar que los links se vean bien */
+    .navbar-sticky .nav-link {
+        color: rgba(255, 255, 255, 0.85) !important;
+        transition: color 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .navbar-sticky .nav-link:hover {
+        color: #ffffff !important;
+    }
+    </style>
+    {% endblock %}
+</head>
+<body>
+    <!-- Skip Navigation -->
+    <a href="#main-content" class="visually-hidden-focusable bg-dark text-white p-2">Saltar al contenido principal</a>
+    
+    <!-- NAVBAR FUERA DEL HEADER -->
+    <nav class="navbar-sticky" role="navigation" style="background-color: var(--bg-darker);">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-2">
+                <!-- Logo -->
+                <a href="{% url 'inicio_promo' %}" class="d-flex align-items-center text-white text-decoration-none">
+                    <div class="me-2">
+                        <i class="bi bi-ticket-perforated fs-4"></i>
+                    </div>
+                    <span class="fw-bold fs-5">{% block logo %}Promociones{% endblock %}</span>
+                </a>
+                
+                <ul class="nav">
+                    {% block secondary_nav %}
+                    <li class="nav-item">
+                        <a href="https://www.cobosis.com/nosotros/" class="nav-link text-white">
+                            <i class="bi bi-info-circle me-1"></i>Acerca
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://www.cobosis.com/contacto/" class="nav-link text-white">
+                            <i class="bi bi-envelope me-1"></i>Contacto
+                        </a>
+                    </li>
+                    {% endblock %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    
+    
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <main id="main-content" role="main">
+        <!-- Mensajes de Django -->
+        {% block messages %}
+            {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endblock %}
+        
+        <!-- Contenido de la página -->
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- ========== FOOTER CLÁSICO CORREGIDO ========== -->
+    <footer role="contentinfo" class="pt-3 pb-3" style="background-color: var(--bg-darker);">
+        <div class="container">
+            <div class="row">
+                <!-- Sección 1: Logo y descripción -->
+                <div class="col-lg-4 mb-3">
+                    <h5 class="fw-bold mb-3 text-white">
+                        <i class="bi bi-ticket-perforated me-2"></i>{% block footer_title %}Promociones{% endblock %}
+                    </h5>
+                    <p class="text-white-50 mb-3">
+                        Descubre las mejores promociones, negocios, eventos culturales y descuentos exclusivos. 
+                        Comparte con amigos y no te pierdas nada.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="Twitter">
+                            <i class="bi bi-twitter-x"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm" aria-label="WhatsApp">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+            
+                <!-- Sección 2: Enlaces rápidos -->
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h6 class="fw-bold text-uppercase mb-3 text-white">Explorar</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'inicio' %}" class="text-white-50 text-decoration-none footer-link">Zaas</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Categorías</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Eventos</a></li>
+                    </ul>
+                </div>
+            
+                <!-- Sección 3: Información -->
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h6 class="fw-bold text-uppercase mb-3 text-white">Información</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="https://www.cobosis.com/nosotros/" class="text-white-50 text-decoration-none footer-link">Acerca de</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">FAQ</a></li>
+                    </ul>
+                </div>
+            
+                <!-- Sección 4: Legal -->
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h6 class="fw-bold text-uppercase mb-3 text-white">Legal</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Privacidad</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Términos</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none footer-link">Cookies</a></li>
+                    </ul>
+                </div>
+            
+                <!-- Sección 5: Contacto -->
+                <div class="col-lg-2 mb-4">
+                    <h6 class="fw-bold text-uppercase mb-3 text-white">Contacto</h6>
+                    <ul class="list-unstyled text-white-50">
+                        <li class="mb-2"><i class="bi bi-envelope me-2"></i>ycoca@cobosis.com</li>
+                        <li class="mb-2"><i class="bi bi-telephone me-2"></i>(+53) 58 236469</li>
+                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>La Habana, Cuba</li>
+                    </ul>
+                </div>
+            </div>
+        
+            <hr class="border-secondary my-1">
+        
+            <!-- Copyright -->
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small text-white-50 mb-0">
+                        &copy; {% now "Y" %} <span style="color: #ff6b00;">Co</span><span style="color: #0056b3;">bo</span>sis. Todos los derechos reservados.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+                    <p class="small text-white-50 mb-0">
+                        Hecho con <i class="bi bi-heart-fill text-danger"></i>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block scripts %}
+    <script src="{% static 'js/main.js' %}" defer></script>
+    {% endblock %}
+    
+    {% block extra_scripts %}{% endblock %}
+    
+    <script>
+        // Agregar sombra al navbar cuando se hace scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar-sticky');
+            if (window.scrollY > 10) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        function compartirPromocion(promoId) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Promoción Cultural',
+                    text: '¡Mira esta promoción increíble!',
+                    url: window.location.origin + '/promocion/' + promoId + '/',
+                }).catch(console.error);
+            } else {
+                const url = window.location.origin + '/promocion/' + promoId + '/';
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Enlace copiado al portapapeles');
+                });
+            }
+        }
+    </script>
+    
+    {% block analytics %}
+        {% if GOOGLE_ANALYTICS_ID %}
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
+        </script>
+        {% endif %}
+    {% endblock %}
+</body>
+</html>

@@ -1,4 +1,4 @@
-{% extends 'promociones/base/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Promociones - Descubre eventos y negocios{% endblock %}
@@ -10,305 +10,353 @@
 
 {% block extra_styles %}
 <style>
-    /* ========== ESTILOS PARA FILTROS ========== */
+    /* ========== ESTILOS UNIFICADOS PARA PROMOCIONES ========== */
+    
+    /* Reducir padding del main */
+    main#main-content {
+        padding-top: 56px !important; /* Solo lo necesario para el navbar */
+    }
+    
+    /* Filtros */
     .filter-pill {
         cursor: pointer;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
+        transition: all 0.25s ease;
+        border: 1.5px solid #e5e7eb;
         white-space: nowrap;
+        background: white;
+        color: #6b7280;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.9rem;
     }
     
     .filter-pill:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(108, 99, 255, 0.12);
+        border-color: var(--primary, #6C63FF);
+        color: var(--primary, #6C63FF);
     }
     
     .filter-pill.active {
-        background-color: var(--primary) !important;
+        background-color: var(--primary, #6C63FF) !important;
         color: white !important;
-        border-color: var(--primary-dark);
+        border-color: var(--primary-dark, #5A52D5) !important;
+    }
+    
+    .filter-pill.negocios-active {
+        background-color: var(--secondary, #FF6B6B) !important;
+        color: white !important;
+        border-color: var(--secondary-dark, #E55555) !important;
     }
     
     .filter-pill .badge {
-        transition: all 0.3s ease;
+        font-size: 0.65rem;
+        padding: 0.2em 0.5em;
     }
     
     .filter-pill.active .badge {
-        background-color: rgba(255, 255, 255, 0.3) !important;
+        background-color: rgba(255, 255, 255, 0.25) !important;
         color: white !important;
     }
     
-    /* ========== CARRUSEL DE TARJETAS ========== */
-    .promo-carousel {
-        position: relative;
-    }
-    
+    /* Carrusel de tarjetas */
     .promo-carousel .carousel-inner {
-        padding: 10px 0;
+        padding: 6px 0;
     }
     
     .promo-carousel .card {
         transition: all 0.3s ease;
-        border: none;
-        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.9rem;
         overflow: hidden;
+        height: 100%;
     }
     
     .promo-carousel .card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 30px rgba(108, 99, 255, 0.15);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(108, 99, 255, 0.1);
+        border-color: var(--primary-light, #8B85FF);
     }
     
     .promo-carousel .card-img-top {
-        height: 220px;
+        height: 190px;
         object-fit: cover;
         transition: transform 0.5s ease;
     }
     
     .promo-carousel .card:hover .card-img-top {
-        transform: scale(1.05);
+        transform: scale(1.04);
     }
     
     .promo-carousel .carousel-control-prev,
     .promo-carousel .carousel-control-next {
-        width: 40px;
-        height: 40px;
-        background-color: var(--primary);
+        width: 36px;
+        height: 36px;
+        background-color: var(--primary, #6C63FF);
         border-radius: 50%;
         top: 50%;
         transform: translateY(-50%);
         opacity: 0.8;
     }
     
-    .promo-carousel .carousel-control-prev {
-        left: -20px;
-    }
-    
-    .promo-carousel .carousel-control-next {
-        right: -20px;
-    }
+    .promo-carousel .carousel-control-prev { left: -14px; }
+    .promo-carousel .carousel-control-next { right: -14px; }
     
     .promo-carousel .carousel-control-prev:hover,
     .promo-carousel .carousel-control-next:hover {
         opacity: 1;
-        background-color: var(--primary-dark);
+        background-color: var(--primary-dark, #5A52D5);
     }
     
-    /* ========== SECCIÓN DE PLANES ========== */
-    .plan-card {
-        transition: all 0.3s ease;
+    /* Badge de categoría */
+    .category-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        backdrop-filter: blur(6px);
+        background: rgba(255, 255, 255, 0.95) !important;
+        color: var(--primary, #6C63FF) !important;
+        font-weight: 600;
+        padding: 3px 9px;
         border-radius: 16px;
-        overflow: hidden;
+        font-size: 0.7rem;
+        border: 1px solid rgba(108, 99, 255, 0.15);
+    }
+    
+    /* Planes */
+    .plan-card {
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
     }
     
     .plan-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        transform: translateY(-6px);
+        box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
     }
     
     .plan-card.popular {
-        border: 3px solid var(--primary);
-        position: relative;
+        border: 2px solid var(--primary, #6C63FF);
     }
     
-    .plan-card.popular::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--gradient-primary);
-    }
-    
-    .plan-price {
-        font-size: 3rem;
-        font-weight: 700;
-        color: var(--primary);
-    }
-    
-    .plan-price small {
-        font-size: 1rem;
-        font-weight: 400;
-        color: var(--text-secondary);
-    }
-    
-    /* ========== BADGE DE CATEGORÍA ========== */
-    .category-badge {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        z-index: 2;
-        backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.95) !important;
-        color: var(--primary) !important;
-        font-weight: 600;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-    }
-    
-    /* ========== ANIMACIONES ========== */
+    /* Animaciones */
     @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     .animate-section {
-        animation: slideUp 0.8s ease-out;
+        animation: slideUp 0.6s ease-out;
     }
     
-    /* ========== RESPONSIVE ========== */
-    @media (max-width: 768px) {
-        .filter-pill {
-            font-size: 0.8rem;
-            padding: 6px 12px;
-        }
-        
-        .promo-carousel .carousel-control-prev,
-        .promo-carousel .carousel-control-next {
-            width: 35px;
-            height: 35px;
-        }
-        
-        .promo-carousel .carousel-control-prev {
-            left: -10px;
-        }
-        
-        .promo-carousel .carousel-control-next {
-            right: -10px;
-        }
-        
-        .promo-carousel .card-img-top {
-            height: 160px;
-        }
-    }
-    
-    /* Scroll horizontal para filtros en móvil */
+    /* Scroll horizontal para filtros */
     .filters-scroll {
         overflow-x: auto;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         -ms-overflow-style: none;
+        padding-bottom: 4px;
     }
     
-    .filters-scroll::-webkit-scrollbar {
-        display: none;
+    .filters-scroll::-webkit-scrollbar { display: none; }
+    
+    /* Reducir márgenes del footer en esta página */
+    footer {
+        margin-top: 0 !important;
+    }
+    
+    /* Ajustes responsive */
+    @media (max-width: 768px) {
+        .filter-pill {
+            font-size: 0.72rem;
+            padding: 0.35rem 0.7rem;
+        }
+        
+        .promo-carousel .card-img-top {
+            height: 150px;
+        }
+        
+        .promo-carousel .carousel-control-prev { left: -6px; }
+        .promo-carousel .carousel-control-next { right: -6px; }
+        
+        main#main-content {
+            padding-top: 48px !important;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- ========== SECCIÓN 1: CARRUSEL DE EVENTOS CON FILTRO ========== -->
-<section class="py-5 bg-white" id="eventos">
-    <div class="container animate-section">
-        <!-- Encabezado de sección -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-2">
-                    <i class="bi bi-calendar-event text-primary-custom me-2"></i>
-                    Eventos destacados
-                </h2>
-                <p class="text-muted mb-0">Descubre los mejores eventos culturales cerca de ti</p>
+<!-- ========== HERO CARRUSEL PRINCIPAL ========== -->
+<header role="banner" style="background-color: var(--bg-darker, #1a1a2e); margin-top: -1px;">
+    <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-indicators">
+            {% for promo in promociones_carrusel %}
+            <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="{{ forloop.counter0 }}" 
+                    {% if forloop.first %}class="active"{% endif %} 
+                    aria-label="Promoción {{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        
+        <div class="carousel-inner">
+            {% for promo in promociones_carrusel %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="card border-0 text-white" 
+                     style="background: linear-gradient(135deg, #1a1a2e 0%, var(--primary, #6C63FF) 50%, var(--accent, #4ECDC4) 100%); min-height: 350px;">
+                    <div class="row g-0 align-items-center h-100">
+                        <div class="col-md-5">
+                            {% if promo.imagen %}
+                            <img src="{{ promo.imagen.url }}" class="img-fluid h-100 w-100" 
+                                 alt="{{ promo.titulo }}" style="object-fit: cover; min-height: 350px;">
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-25" 
+                                 style="min-height: 350px;">
+                                <i class="bi bi-image display-1 opacity-50"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-7">
+                            <div class="card-body p-4">
+                                <div class="mb-2">
+                                    <span class="badge bg-warning text-dark me-2 small">
+                                        <i class="bi bi-star-fill me-1"></i>Prioridad {{ promo.prioridad }}
+                                    </span>
+                                    {% if promo.proximo_vencer %}
+                                    <span class="badge bg-danger small">
+                                        <i class="bi bi-hourglass-split me-1"></i>¡Últimos días!
+                                    </span>
+                                    {% endif %}
+                                    <span class="badge bg-info ms-2 small">{{ promo.categoria.nombre }}</span>
+                                </div>
+                                
+                                <h2 class="fw-bold mb-2" style="font-size: 1.6rem;">{{ promo.titulo }}</h2>
+                                <p class="mb-2 opacity-90 small">{{ promo.descripcion|truncatechars:120 }}</p>
+                                
+                                <div class="row mb-2 small">
+                                    <div class="col-sm-6">
+                                        <p class="mb-1"><i class="bi bi-geo-alt me-2"></i>{{ promo.lugar|default:"Por confirmar" }}</p>
+                                        <p class="mb-1"><i class="bi bi-calendar-event me-2"></i>{{ promo.fecha_evento|date:"d M Y" }}</p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <p class="mb-1"><i class="bi bi-clock me-2"></i>{{ promo.fecha_evento|time:"H:i" }}</p>
+                                        <p class="mb-0"><i class="bi bi-people me-2"></i>{{ promo.asistentes|default:0 }} interesados</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <a href="{{ promo.get_absolute_url }}" class="btn btn-light btn-sm fw-semibold rounded-3 px-3">
+                                        <i class="bi bi-ticket-detailed me-1"></i>Ver promoción
+                                    </a>
+                                    {% if promo.puede_compartir %}
+                                    <button class="btn btn-outline-light btn-sm rounded-3" onclick="compartirPromocion('{{ promo.id }}')">
+                                        <i class="bi bi-share me-1"></i>Compartir
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <a href="#" class="btn btn-outline-primary mt-3 mt-md-0">
-                Ver todos los eventos <i class="bi bi-arrow-right ms-1"></i>
+            {% empty %}
+            <div class="carousel-item active">
+                <div class="card border-0 text-white d-flex align-items-center justify-content-center" 
+                     style="background: linear-gradient(135deg, var(--primary, #6C63FF), var(--accent, #4ECDC4)); min-height: 350px;">
+                    <div class="text-center p-4">
+                        <i class="bi bi-megaphone display-3 mb-2 opacity-75"></i>
+                        <h2 class="fw-bold h4">¡Próximamente!</h2>
+                        <p class="opacity-80 small">Estamos preparando nuevas promociones para ti</p>
+                        <a href="#" class="btn btn-light btn-sm rounded-3 mt-2 fw-semibold">
+                            <i class="bi bi-plus-circle me-1"></i>Crear primera promoción
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button class="carousel-control-prev" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+</header>
+
+<!-- ========== SECCIÓN 1: EVENTOS ========== -->
+<section class="py-3 bg-white" id="eventos">
+    <div class="container animate-section">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2">
+            <div>
+                <h2 class="fw-bold mb-0 h6">
+                    <i class="bi bi-calendar-event me-2" style="color: var(--primary, #6C63FF);"></i>Eventos destacados
+                </h2>
+                <p class="text-muted mb-0 small">Descubre los mejores eventos culturales cerca de ti</p>
+            </div>
+            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-1 mt-md-0">
+                Ver todos <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
         
-        <!-- Filtros por categoría (Eventos) -->
-        <div class="filters-scroll mb-4">
-            <div class="d-flex gap-2 pb-2">
-                <button class="btn btn-sm filter-pill active" data-filter="todos" data-section="eventos">
+        <div class="filters-scroll mb-2">
+            <div class="d-flex gap-1.5 pb-1">
+                <button class="btn btn-sm filter-pill active rounded-pill" data-filter="todos" data-section="eventos">
                     <i class="bi bi-grid me-1"></i>Todos
-                    <span class="badge bg-light text-dark ms-1">{{ total_eventos|default:0 }}</span>
                 </button>
                 {% for cat in categorias_eventos %}
-                <button class="btn btn-sm btn-outline-secondary filter-pill" 
-                        data-filter="{{ cat.slug }}" 
-                        data-section="eventos">
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" 
+                        data-filter="{{ cat.slug }}" data-section="eventos">
                     {% if cat.icono %}<i class="bi bi-{{ cat.icono }} me-1"></i>{% endif %}
                     {{ cat.nombre }}
-                    <span class="badge bg-light text-dark ms-1">{{ cat.total|default:0 }}</span>
                 </button>
                 {% empty %}
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="musica" data-section="eventos">
-                    <i class="bi bi-music-note me-1"></i>Música
-                </button>
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="teatro" data-section="eventos">
-                    <i class="bi bi-drama me-1"></i>Teatro
-                </button>
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="arte" data-section="eventos">
-                    <i class="bi bi-palette me-1"></i>Arte
-                </button>
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="deporte" data-section="eventos">
-                    <i class="bi bi-trophy me-1"></i>Deporte
-                </button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="musica" data-section="eventos"><i class="bi bi-music-note me-1"></i>Música</button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="teatro" data-section="eventos"><i class="bi bi-drama me-1"></i>Teatro</button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="arte" data-section="eventos"><i class="bi bi-palette me-1"></i>Arte</button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="deporte" data-section="eventos"><i class="bi bi-trophy me-1"></i>Deporte</button>
                 {% endfor %}
             </div>
         </div>
         
-        <!-- Carrusel de Eventos -->
         <div id="carouselEventos" class="carousel slide promo-carousel" data-bs-ride="carousel" data-bs-interval="4000">
             <div class="carousel-inner">
                 {% for grupo in eventos_agrupados %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <div class="row g-4">
+                    <div class="row g-2">
                         {% for promo in grupo %}
                         <div class="col-md-4" data-category="{{ promo.categoria.slug }}">
-                            <div class="card h-100 shadow-sm">
+                            <div class="card shadow-sm">
                                 <div class="position-relative overflow-hidden">
                                     {% if promo.imagen %}
                                     <img src="{{ promo.imagen.url }}" class="card-img-top" alt="{{ promo.titulo }}">
                                     {% else %}
-                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
-                                        <i class="bi bi-calendar-event text-muted" style="font-size: 3rem;"></i>
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                        <i class="bi bi-calendar-event text-muted" style="font-size: 2.5rem;"></i>
                                     </div>
                                     {% endif %}
-                                    
-                                    <!-- Badge de categoría -->
-                                    <span class="category-badge">
-                                        <i class="bi bi-tag me-1"></i>{{ promo.categoria.nombre|default:"Evento" }}
-                                    </span>
-                                    
-                                    <!-- Badge de prioridad -->
+                                    <span class="category-badge"><i class="bi bi-tag me-1"></i>{{ promo.categoria.nombre|default:"Evento" }}</span>
                                     {% if promo.prioridad > 1 %}
-                                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3">
-                                        <i class="bi bi-star-fill me-1"></i>Destacado
-                                    </span>
+                                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2 small"><i class="bi bi-star-fill me-1"></i>Destacado</span>
                                     {% endif %}
                                 </div>
-                                
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title fw-bold">{{ promo.titulo|truncatechars:50 }}</h5>
-                                    <p class="card-text text-muted small flex-grow-1">
-                                        {{ promo.descripcion|truncatechars:80 }}
-                                    </p>
-                                    
-                                    <div class="d-flex align-items-center text-muted small mb-3">
-                                        <span class="me-3">
-                                            <i class="bi bi-geo-alt me-1"></i>{{ promo.lugar|default:"Online" }}
-                                        </span>
-                                        <span>
-                                            <i class="bi bi-calendar me-1"></i>{{ promo.fecha_evento|date:"d M" }}
-                                        </span>
+                                <div class="card-body d-flex flex-column p-2">
+                                    <h5 class="card-title fw-bold small mb-1">{{ promo.titulo|truncatechars:45 }}</h5>
+                                    <p class="card-text text-muted small flex-grow-1 mb-2">{{ promo.descripcion|truncatechars:65 }}</p>
+                                    <div class="d-flex align-items-center text-muted small mb-2">
+                                        <span class="me-2"><i class="bi bi-geo-alt me-1"></i>{{ promo.lugar|default:"Online"|truncatechars:10 }}</span>
+                                        <span><i class="bi bi-calendar me-1"></i>{{ promo.fecha_evento|date:"d M" }}</span>
                                     </div>
-                                    
-                                    <div class="d-flex gap-2">
-                                        <a href="{{ promo.get_absolute_url }}" class="btn btn-primary btn-sm flex-grow-1">
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ promo.get_absolute_url }}" class="btn btn-sm flex-grow-1 text-white rounded-3 fw-semibold" 
+                                           style="background: var(--primary, #6C63FF); font-size: 0.75rem;">
                                             <i class="bi bi-ticket-detailed me-1"></i>Ver evento
                                         </a>
-                                        <button class="btn btn-outline-secondary btn-sm" 
-                                                onclick="compartirPromocion('{{ promo.id }}')"
-                                                title="Compartir">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="compartirPromocion('{{ promo.id }}')" title="Compartir">
                                             <i class="bi bi-share"></i>
                                         </button>
                                     </div>
@@ -320,172 +368,100 @@
                 </div>
                 {% empty %}
                 <div class="carousel-item active">
-                    <div class="text-center py-5">
-                        <i class="bi bi-calendar-x display-1 text-muted"></i>
-                        <h3 class="mt-3">No hay eventos disponibles</h3>
-                        <p class="text-muted">¡Vuelve pronto para descubrir nuevos eventos!</p>
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-calendar-x display-1"></i>
+                        <h3 class="mt-2 h6">No hay eventos disponibles</h3>
+                        <p class="small">¡Vuelve pronto para descubrir nuevos eventos!</p>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            
-            <!-- Controles del carrusel -->
             {% if eventos_agrupados|length > 1 %}
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselEventos" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Anterior</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselEventos" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Siguiente</span>
-            </button>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselEventos" data-bs-slide="prev"></button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselEventos" data-bs-slide="next"></button>
             {% endif %}
         </div>
-        
-        <!-- Indicadores del carrusel -->
-        {% if eventos_agrupados|length > 1 %}
-        <div class="text-center mt-3">
-            {% for grupo in eventos_agrupados %}
-            <button type="button" data-bs-target="#carouselEventos" data-bs-slide-to="{{ forloop.counter0 }}" 
-                    class="btn btn-sm {% if forloop.first %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill mx-1" 
-                    style="width: 12px; height: 12px; padding: 0;">
-            </button>
-            {% endfor %}
-        </div>
-        {% endif %}
     </div>
 </section>
 
-<!-- Divisor decorativo -->
-<div class="container">
-    <hr class="my-0" style="border-top: 2px solid var(--bg-light);">
-</div>
-
-<!-- ========== SECCIÓN 2: CARRUSEL DE NEGOCIOS CON FILTRO ========== -->
-<section class="py-5" style="background-color: var(--bg-light);" id="negocios">
+<!-- ========== SECCIÓN 2: NEGOCIOS ========== -->
+<section class="py-3 bg-light" id="negocios">
     <div class="container animate-section">
-        <!-- Encabezado de sección -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2">
             <div>
-                <h2 class="fw-bold mb-2">
-                    <i class="bi bi-shop text-secondary me-2" style="color: var(--secondary) !important;"></i>
-                    Negocios y servicios
+                <h2 class="fw-bold mb-0 h6">
+                    <i class="bi bi-shop me-2" style="color: var(--secondary, #FF6B6B);"></i>Negocios y servicios
                 </h2>
-                <p class="text-muted mb-0">Promociones exclusivas de negocios locales</p>
+                <p class="text-muted mb-0 small">Promociones exclusivas de negocios locales</p>
             </div>
-            <a href="#" class="btn btn-outline-secondary mt-3 mt-md-0" style="border-color: var(--secondary); color: var(--secondary);">
-                Ver todos los negocios <i class="bi bi-arrow-right ms-1"></i>
+            <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mt-1 mt-md-0"
+               style="border-color: var(--secondary, #FF6B6B); color: var(--secondary, #FF6B6B);">
+                Ver todos <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
         
-        <!-- Filtros por categoría (Negocios) -->
-        <div class="filters-scroll mb-4">
-            <div class="d-flex gap-2 pb-2">
-                <button class="btn btn-sm filter-pill active" data-filter="todos" data-section="negocios"
-                        style="background-color: var(--secondary); color: white; border-color: var(--secondary);">
+        <div class="filters-scroll mb-2">
+            <div class="d-flex gap-1.5 pb-1">
+                <button class="btn btn-sm filter-pill active rounded-pill negocios-active" data-filter="todos" data-section="negocios">
                     <i class="bi bi-grid me-1"></i>Todos
-                    <span class="badge bg-light text-dark ms-1">{{ total_negocios|default:0 }}</span>
                 </button>
                 {% for cat in categorias_negocios %}
-                <button class="btn btn-sm btn-outline-secondary filter-pill" 
-                        data-filter="{{ cat.slug }}" 
-                        data-section="negocios"
-                        style="border-color: var(--secondary); color: var(--secondary);">
-                    {% if cat.icono %}<i class="bi bi-{{ cat.icono }} me-1"></i>{% endif %}
-                    {{ cat.nombre }}
-                    <span class="badge bg-light text-dark ms-1">{{ cat.total|default:0 }}</span>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" 
+                        data-filter="{{ cat.slug }}" data-section="negocios"
+                        style="border-color: var(--secondary, #FF6B6B); color: var(--secondary, #FF6B6B);">
+                    {% if cat.icono %}<i class="bi bi-{{ cat.icono }} me-1"></i>{% endif %}{{ cat.nombre }}
                 </button>
                 {% empty %}
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="restaurantes" data-section="negocios"
-                        style="border-color: var(--secondary); color: var(--secondary);">
-                    <i class="bi bi-cup-hot me-1"></i>Restaurantes
-                </button>
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="tiendas" data-section="negocios"
-                        style="border-color: var(--secondary); color: var(--secondary);">
-                    <i class="bi bi-bag me-1"></i>Tiendas
-                </button>
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="servicios" data-section="negocios"
-                        style="border-color: var(--secondary); color: var(--secondary);">
-                    <i class="bi bi-tools me-1"></i>Servicios
-                </button>
-                <button class="btn btn-sm btn-outline-secondary filter-pill" data-filter="belleza" data-section="negocios"
-                        style="border-color: var(--secondary); color: var(--secondary);">
-                    <i class="bi bi-heart me-1"></i>Belleza
-                </button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="restaurantes" data-section="negocios" style="border-color: var(--secondary); color: var(--secondary);"><i class="bi bi-cup-hot me-1"></i>Restaurantes</button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="tiendas" data-section="negocios" style="border-color: var(--secondary); color: var(--secondary);"><i class="bi bi-bag me-1"></i>Tiendas</button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="servicios" data-section="negocios" style="border-color: var(--secondary); color: var(--secondary);"><i class="bi bi-tools me-1"></i>Servicios</button>
+                <button class="btn btn-sm btn-outline-secondary filter-pill rounded-pill" data-filter="belleza" data-section="negocios" style="border-color: var(--secondary); color: var(--secondary);"><i class="bi bi-heart me-1"></i>Belleza</button>
                 {% endfor %}
             </div>
         </div>
         
-        <!-- Carrusel de Negocios -->
         <div id="carouselNegocios" class="carousel slide promo-carousel" data-bs-ride="carousel" data-bs-interval="5000">
             <div class="carousel-inner">
                 {% for grupo in negocios_agrupados %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <div class="row g-4">
+                    <div class="row g-2">
                         {% for promo in grupo %}
                         <div class="col-md-4" data-category="{{ promo.categoria.slug }}">
-                            <div class="card h-100 shadow-sm">
+                            <div class="card shadow-sm">
                                 <div class="position-relative overflow-hidden">
                                     {% if promo.imagen %}
                                     <img src="{{ promo.imagen.url }}" class="card-img-top" alt="{{ promo.titulo }}">
                                     {% else %}
-                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
-                                        <i class="bi bi-shop text-muted" style="font-size: 3rem;"></i>
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                        <i class="bi bi-shop text-muted" style="font-size: 2.5rem;"></i>
                                     </div>
                                     {% endif %}
-                                    
-                                    <!-- Badge de descuento -->
                                     {% if promo.descuento %}
-                                    <span class="badge bg-danger position-absolute top-0 end-0 m-3" style="font-size: 1rem;">
-                                        -{{ promo.descuento }}%
-                                    </span>
+                                    <span class="badge bg-danger position-absolute top-0 end-0 m-2 small">-{{ promo.descuento }}%</span>
                                     {% endif %}
-                                    
-                                    <!-- Badge de categoría -->
-                                    <span class="category-badge">
-                                        <i class="bi bi-tag me-1"></i>{{ promo.categoria.nombre|default:"Negocio" }}
-                                    </span>
+                                    <span class="category-badge"><i class="bi bi-tag me-1"></i>{{ promo.categoria.nombre|default:"Negocio" }}</span>
                                 </div>
-                                
-                                <div class="card-body d-flex flex-column">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="text-warning me-2">
-                                            {% for i in "12345" %}
-                                                {% if forloop.counter <= promo.rating|default:4 %}
-                                                <i class="bi bi-star-fill small"></i>
-                                                {% else %}
-                                                <i class="bi bi-star small"></i>
-                                                {% endif %}
-                                            {% endfor %}
+                                <div class="card-body d-flex flex-column p-2">
+                                    <div class="d-flex align-items-center mb-1 small">
+                                        <span class="text-warning me-1">
+                                            {% for i in "12345" %}{% if forloop.counter <= promo.rating|default:4 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}{% endfor %}
                                         </span>
                                         <small class="text-muted">({{ promo.reviews|default:0 }})</small>
                                     </div>
-                                    
-                                    <h5 class="card-title fw-bold">{{ promo.titulo|truncatechars:45 }}</h5>
-                                    <p class="card-text text-muted small flex-grow-1">
-                                        {{ promo.descripcion|truncatechars:70 }}
-                                    </p>
-                                    
-                                    <div class="d-flex align-items-center justify-content-between mb-3">
-                                        <span class="text-muted small">
-                                            <i class="bi bi-geo-alt me-1"></i>{{ promo.distancia|default:"Cerca de ti" }}
-                                        </span>
+                                    <h5 class="card-title fw-bold small mb-1">{{ promo.titulo|truncatechars:40 }}</h5>
+                                    <p class="card-text text-muted small flex-grow-1 mb-2">{{ promo.descripcion|truncatechars:60 }}</p>
+                                    <div class="d-flex align-items-center justify-content-between mb-2 small">
+                                        <span class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ promo.distancia|default:"Cerca" }}</span>
                                         {% if promo.precio_original %}
-                                        <span>
-                                            <small class="text-decoration-line-through text-muted me-2">${{ promo.precio_original }}</small>
-                                            <strong class="text-success">${{ promo.precio_oferta }}</strong>
-                                        </span>
+                                        <span><small class="text-decoration-line-through text-muted me-1">${{ promo.precio_original }}</small><strong class="text-success">${{ promo.precio_oferta }}</strong></span>
                                         {% endif %}
                                     </div>
-                                    
-                                    <div class="d-flex gap-2">
-                                        <a href="{{ promo.get_absolute_url }}" class="btn btn-secondary btn-sm flex-grow-1"
-                                           style="background-color: var(--secondary); border-color: var(--secondary);">
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ promo.get_absolute_url }}" class="btn btn-sm flex-grow-1 text-white rounded-3 fw-semibold"
+                                           style="background: var(--secondary, #FF6B6B); font-size: 0.75rem;">
                                             <i class="bi bi-info-circle me-1"></i>Ver promoción
                                         </a>
-                                        <button class="btn btn-outline-secondary btn-sm" 
-                                                onclick="compartirPromocion('{{ promo.id }}')"
-                                                title="Compartir"
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="compartirPromocion('{{ promo.id }}')" title="Compartir"
                                                 style="border-color: var(--secondary); color: var(--secondary);">
                                             <i class="bi bi-share"></i>
                                         </button>
@@ -498,131 +474,72 @@
                 </div>
                 {% empty %}
                 <div class="carousel-item active">
-                    <div class="text-center py-5">
-                        <i class="bi bi-shop-window display-1 text-muted"></i>
-                        <h3 class="mt-3">No hay negocios disponibles</h3>
-                        <p class="text-muted">¡Pronto tendremos nuevas promociones para ti!</p>
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-shop-window display-1"></i>
+                        <h3 class="mt-2 h6">No hay negocios disponibles</h3>
+                        <p class="small">¡Pronto tendremos nuevas promociones para ti!</p>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            
-            <!-- Controles del carrusel -->
             {% if negocios_agrupados|length > 1 %}
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselNegocios" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Anterior</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselNegocios" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Siguiente</span>
-            </button>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselNegocios" data-bs-slide="prev"></button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselNegocios" data-bs-slide="next"></button>
             {% endif %}
         </div>
-        
-        <!-- Indicadores del carrusel -->
-        {% if negocios_agrupados|length > 1 %}
-        <div class="text-center mt-3">
-            {% for grupo in negocios_agrupados %}
-            <button type="button" data-bs-target="#carouselNegocios" data-bs-slide-to="{{ forloop.counter0 }}" 
-                    class="btn btn-sm {% if forloop.first %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill mx-1" 
-                    style="width: 12px; height: 12px; padding: 0; {% if forloop.first %}background-color: var(--secondary);{% endif %}">
-            </button>
-            {% endfor %}
-        </div>
-        {% endif %}
     </div>
 </section>
 
-<!-- ========== SECCIÓN 3: LLAMADA A LA ACCIÓN - PLANES DE REGISTRO ========== -->
-<section class="py-5" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);" id="planes">
-    <div class="container py-4">
-        <!-- Encabezado -->
-        <div class="text-center text-white mb-5">
-            <h2 class="display-5 fw-bold mb-3">
-                <i class="bi bi-rocket-takeoff me-2"></i>
-                Impulsa tu negocio <span style="color: #FFD93D;">¡Promociónate!</span>
+<!-- ========== SECCIÓN 3: CTA PLANES (pegada al footer) ========== -->
+<section class="py-4 text-white" style="background: linear-gradient(135deg, #1a1a2e 0%, var(--primary, #6C63FF) 50%, #1a1a2e 100%);" id="planes">
+    <div class="container py-2">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold mb-1" style="font-size: 1.5rem;">
+                <i class="bi bi-rocket-takeoff me-2"></i>Impulsa tu negocio <span style="color: var(--custom-warning, #FFD93D);">¡Promociónate!</span>
             </h2>
-            <p class="lead mb-0 opacity-90">
-                Elige el plan perfecto para ti y comienza a compartir tus eventos o negocios
-            </p>
+            <p class="opacity-80 small mb-0">Elige el plan perfecto y comienza a compartir tus eventos o negocios</p>
         </div>
         
-        <!-- Planes - Tarjetas en columnas -->
-        <div class="row g-4 justify-content-center">
+        <div class="row g-3 justify-content-center">
             {% for plan in planes %}
             <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 border-0 rounded-4 shadow-sm position-relative transition hover-shadow 
-                            {% if plan.destacado %}border-primary border-2 shadow-lg{% endif %}">
-                    
+                <div class="card h-100 border-0 rounded-3 shadow-sm plan-card {% if plan.destacado %}popular{% endif %}">
                     {% if plan.destacado %}
-                    <!-- Badge de popular -->
                     <div class="position-absolute top-0 start-50 translate-middle">
-                        <span class="badge bg-primary px-4 py-2 rounded-pill fw-semibold">
+                        <span class="badge px-3 py-1 rounded-pill fw-semibold small" style="background: var(--custom-warning, #FFD93D); color: #1a1a2e;">
                             <i class="bi bi-star-fill me-1"></i>MÁS POPULAR
                         </span>
                     </div>
                     {% endif %}
-                    
-                    <div class="card-body d-flex flex-column p-4 p-lg-5 {% if plan.destacado %}pt-5{% endif %}">
-                        <!-- Nombre del plan -->
-                        <h3 class="card-title h4 fw-bold text-center mb-3">{{ plan.nombre }}</h3>
-                        
-                        <!-- Precio -->
-                        <div class="text-center mb-4">
+                    <div class="card-body d-flex flex-column p-3 {% if plan.destacado %}pt-4{% endif %}">
+                        <h3 class="h6 fw-bold text-center mb-1">{{ plan.nombre }}</h3>
+                        <div class="text-center mb-2">
                             {% if plan.precio == 0 %}
-                            <span class="display-4 fw-bold text-primary">Gratis</span>
+                            <span class="fw-bold" style="font-size: 1.5rem; color: var(--primary, #6C63FF);">Gratis</span>
                             {% else %}
-                            <span class="display-4 fw-bold text-primary">${{ plan.precio }}</span>
-                            <span class="text-muted">/ {{ plan.vigencia_dias }} días</span>
+                            <span class="fw-bold" style="font-size: 1.5rem; color: var(--primary, #6C63FF);">${{ plan.precio }}</span>
+                            <span class="text-muted small">/ {{ plan.vigencia_dias }} días</span>
                             {% endif %}
                         </div>
-                        
-                        <!-- Descripción -->
-                        <div class="text-muted mb-4 flex-grow-1">
-                            <p class="small">{{ plan.descripcion|linebreaksbr }}</p>
-                        </div>
-                        
-                        <!-- Características (opcional, si tienes una lista) -->
-                        {% if plan.caracteristicas %}
-                        <ul class="list-unstyled mb-4">
-                            {% for caracteristica in plan.caracteristicas %}
-                            <li class="mb-2 small">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                {{ caracteristica }}
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                        
-                        <!-- Botón de acción -->
+                        <div class="text-muted mb-2 small flex-grow-1">{{ plan.descripcion|linebreaksbr }}</div>
                         {% if plan.precio == 0 %}
-                        <a href="#" class="btn btn-success btn-lg w-100 mt-auto rounded-3 fw-semibold">
-                            <i class="bi bi-gift me-2"></i>Comenzar Gratis
-                        </a>
+                        <a href="#" class="btn btn-success btn-sm w-100 mt-auto rounded-3 fw-semibold"><i class="bi bi-gift me-1"></i>Comenzar Gratis</a>
                         {% else %}
-                        <a href="#" class="btn btn-lg w-100 mt-auto rounded-3 fw-semibold 
-                                  {% if plan.destacado %}btn-primary{% else %}btn-dark{% endif %}">
-                            <i class="bi bi-rocket me-2"></i>Suscribirme
-                        </a>
+                        <a href="#" class="btn btn-sm w-100 mt-auto rounded-3 fw-semibold text-white {% if plan.destacado %}btn-primary{% else %}btn-dark{% endif %}"><i class="bi bi-rocket me-1"></i>Suscribirme</a>
                         {% endif %}
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="col-12 text-center text-white py-5">
-                <i class="bi bi-inbox display-1 mb-3 d-block opacity-50"></i>
-                <p class="lead opacity-75">No hay planes disponibles en este momento.</p>
+            <div class="col-12 text-center py-4 opacity-75">
+                <i class="bi bi-inbox display-1 mb-2 d-block"></i>
+                <p class="small">No hay planes disponibles en este momento.</p>
             </div>
             {% endfor %}
         </div>
         
-        <!-- Garantía -->
-        <div class="text-center mt-5">
-            <p class="text-white mb-0">
-                <i class="bi bi-shield-check me-1"></i>
-                Todos los planes incluyen 7 días de prueba gratuita. Cancela cuando quieras.
-            </p>
+        <div class="text-center mt-3 opacity-70 small">
+            <i class="bi bi-shield-check me-1"></i> Todos los planes incluyen 7 días de prueba gratuita.
         </div>
     </div>
 </section>
@@ -632,7 +549,6 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ========== FUNCIONALIDAD DE FILTROS ==========
     const filterPills = document.querySelectorAll('.filter-pill');
     
     filterPills.forEach(pill => {
@@ -641,75 +557,36 @@ document.addEventListener('DOMContentLoaded', function() {
             const filter = this.dataset.filter;
             const carouselId = section === 'eventos' ? 'carouselEventos' : 'carouselNegocios';
             
-            // Actualizar estado visual de los filtros
             const sectionFilters = document.querySelectorAll(`.filter-pill[data-section="${section}"]`);
             sectionFilters.forEach(f => {
-                f.classList.remove('active');
-                if (section === 'negocios') {
-                    f.style.backgroundColor = '';
-                    f.style.color = '';
-                }
+                f.classList.remove('active', 'negocios-active');
+                f.style.backgroundColor = '';
+                f.style.color = '';
             });
             
             this.classList.add('active');
-            if (section === 'negocios') {
-                this.style.backgroundColor = 'var(--secondary)';
-                this.style.color = 'white';
-            }
+            if (section === 'negocios') this.classList.add('negocios-active');
             
-            // Filtrar tarjetas en el carrusel activo
             const carousel = document.getElementById(carouselId);
             const cards = carousel.querySelectorAll('[data-category]');
-            
             cards.forEach(card => {
-                const cardCategory = card.dataset.category;
-                if (filter === 'todos' || cardCategory === filter) {
-                    card.style.display = '';
-                    card.style.animation = 'slideUp 0.5s ease-out';
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = (filter === 'todos' || card.dataset.category === filter) ? '' : 'none';
             });
             
-            // Resetear el carrusel al primer slide
             const bsCarousel = bootstrap.Carousel.getInstance(carousel);
-            if (bsCarousel) {
-                bsCarousel.to(0);
-            }
+            if (bsCarousel) bsCarousel.to(0);
         });
     });
     
-    // ========== INICIALIZAR CARRUSELES ==========
-    const carouselEventos = document.getElementById('carouselEventos');
-    const carouselNegocios = document.getElementById('carouselNegocios');
+    ['carouselEventos', 'carouselNegocios'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) new bootstrap.Carousel(el, { interval: id === 'carouselEventos' ? 4000 : 5000, pause: 'hover', wrap: true });
+    });
     
-    if (carouselEventos) {
-        new bootstrap.Carousel(carouselEventos, {
-            interval: 4000,
-            pause: 'hover',
-            wrap: true
-        });
-    }
-    
-    if (carouselNegocios) {
-        new bootstrap.Carousel(carouselNegocios, {
-            interval: 5000,
-            pause: 'hover',
-            wrap: true
-        });
-    }
-    
-    // ========== SMOOTH SCROLL PARA LOS BOTONES ==========
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
+            if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
         });
     });
 });
