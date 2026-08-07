@@ -73,7 +73,6 @@ class GroqClient:
         except Exception as e:
             return f"Error inesperado: {str(e)}"
 
-
 def procesar_texto_con_ia(texto, variables_solicitadas):
     """
     Llama a la API de Groq para extraer variables específicas.
@@ -109,10 +108,8 @@ def procesar_texto_con_ia(texto, variables_solicitadas):
         print(f"Error inesperado: {e}")
         return {var: "Error IA" for var in variables_solicitadas}
 
-
 @login_required
 def gestiona_panel(request):
-    # Obtenemos LA suscripción activa actual
     suscripcion = Suscripcion.objects.filter(
         usuario=request.user, 
         plan__servicio__slug='gestiona', 
@@ -120,24 +117,37 @@ def gestiona_panel(request):
     ).select_related('plan').first()
 
     if not suscripcion:
-        return render(request, 'core/no_suscripcion.html', {'servicio': 'Gestiona'})
+        return render(request, 'gestiona/no_suscripcion.html', {'servicio': 'Gestiona'})
 
     plan = suscripcion.plan
     
     variables_usuario = VariableUsuario.objects.filter(usuario=request.user).order_by('orden')
     variables_lista = [v.nombre for v in variables_usuario]
 
-    if request.method == 'POST' and 'guardar_config' in request.POST and not plan.variables_ajustables:
+    # Lógica de guardado de variables
+    if request.method == 'POST' and 'guardar_config' in request.POST:
+        # Regla 1: Si es plan fijo y YA tiene variables, no permitir cambio.
+        if not plan.variables_ajustables and variables_lista:
+            messages.error(request, 'Tu plan actual no permite modificar las variables una vez configuradas.')
+            return redirect('gestiona_panel')
+        
+        # Regla 2: Planes ajustables o fijos sin configurar todavía
         variables_input = request.POST.get('variables_input', '')
         nuevas_vars = [v.strip() for v in variables_input.split(',') if v.strip()]
         
-        if len(nuevas_vars) <= plan.max_variables:
+        if len(nuevas_vars) > plan.max_variables:
+            messages.error(request, f'Excediste el límite de {plan.max_variables} variables.')
+        elif len(nuevas_vars) == 0:
+            messages.error(request, 'Debes definir al menos una variable.')
+        else:
+            # Guardar las nuevas variables
             variables_usuario.delete()
             for i, var_name in enumerate(nuevas_vars):
                 VariableUsuario.objects.create(usuario=request.user, nombre=var_name, orden=i)
+            messages.success(request, 'Variables guardadas correctamente.')
             return redirect('gestiona_panel')
 
-    # ¡AQUÍ ESTÁ EL CAMBIO CLAVE! Filtramos solo las extracciones de esta suscripción
+    # Historial de extracciones de la suscripción actual
     extracciones = Extraccion.objects.filter(suscripcion=suscripcion)
     extracciones_realizadas = extracciones.count()
     limite_alcanzado = plan.max_extracciones > 0 and extracciones_realizadas >= plan.max_extracciones
@@ -180,23 +190,17 @@ def gestiona_procesar(request):
     if not texto:
         return JsonResponse({'error': 'El texto no puede estar vacío'}, status=400)
 
-    # Validar límites SOLO de la suscripción actual
+    # Validar límites
     extracciones_actuales = Extraccion.objects.filter(suscripcion=suscripcion)
     if plan.max_extracciones > 0 and extracciones_actuales.count() >= plan.max_extracciones:
         return JsonResponse({'error': f'Has alcanzado el límite de {plan.max_extracciones} extracciones de tu plan actual.'}, status=403)
 
-    # Determinar variables
-    if plan.variables_ajustables:
-        variables_input = request.POST.get('variables_momento', '')
-        variables_solicitadas = [v.strip() for v in variables_input.split(',') if v.strip()]
-        if len(variables_solicitadas) > plan.max_variables:
-            return JsonResponse({'error': f'Excediste el límite de {plan.max_variables} variables.'}, status=400)
-    else:
-        vars_obj = VariableUsuario.objects.filter(usuario=request.user).order_by('orden')
-        variables_solicitadas = [v.nombre for v in vars_obj]
+    # LÓGICA UNIFICADA: Ambos planes usan las variables guardadas en BD
+    vars_obj = VariableUsuario.objects.filter(usuario=request.user).order_by('orden')
+    variables_solicitadas = [v.nombre for v in vars_obj]
         
     if not variables_solicitadas:
-        return JsonResponse({'error': 'Debes configurar tus variables fijas primero.'}, status=400)
+        return JsonResponse({'error': 'Debes configurar tus variables primero en el panel superior.'}, status=400)
 
     # Llamar a la IA
     datos_dict = procesar_texto_con_ia(texto, variables_solicitadas)
@@ -204,10 +208,10 @@ def gestiona_procesar(request):
     datos_texto = ", ".join([f"{k}: {v}" for k, v in datos_dict.items()])
     variables_usadas_texto = ", ".join(variables_solicitadas)
 
-    # Guardar en BD vinculada a la suscripción
+    # Guardar en BD
     nueva_extraccion = Extraccion.objects.create(
         usuario=request.user,
-        suscripcion=suscripcion, # <--- Se vincula aquí
+        suscripcion=suscripcion,
         texto_original=texto,
         datos_extraidos=datos_texto,
         variables_utilizadas=variables_usadas_texto
@@ -270,7 +274,6 @@ def gestiona_exportar_excel(request):
     
     return response
 
-        
 
 def detalle_gestiona(request):
     # Busca el servicio con slug 'gestiona'

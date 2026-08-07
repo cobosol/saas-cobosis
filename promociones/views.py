@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from .models import Promocion
+from .models import Promocion, SolicitudPromocion
 from servicios.models import Plan
 from clientes.models import Suscripcion, PerfilCliente
 
@@ -14,14 +14,12 @@ def promociones(request):
 
 @login_required
 def crear_promocion(request):
-    # Obtenemos todos los planes activos del servicio Promociones
     planes = Plan.objects.filter(servicio__slug='promociones', activo=True).order_by('precio')
     
     if request.method == 'POST':
         plan_id = request.POST.get('plan_id')
         plan = get_object_or_404(Plan, id=plan_id, activo=True)
         
-        # Recopilar datos dinámicamente según el tipo de formulario del plan
         datos = {}
         if plan.tipo_formulario == 'evento':
             datos['titulo'] = request.POST.get('titulo_evento')
@@ -38,26 +36,36 @@ def crear_promocion(request):
             datos['titulo'] = request.POST.get('titulo_generico')
             datos['descripcion'] = request.POST.get('descripcion_generica')
 
-        # 1. Crear la Solicitud de Promoción con los datos
-        solicitud = Promocion.objects.create(
-            cliente=request.user,
+        # Convertir diccionario a texto para SQLite
+        datos_texto = ", ".join([f"{k}: {v}" for k, v in datos.items()])
+
+        # Leer nuevos campos de imagen
+        generar_ia = request.POST.get('generar_imagen_ia') == 'on'
+        imagen_subida = request.FILES.get('imagen_subida')
+
+        # Crear la solicitud
+        solicitud = SolicitudPromocion.objects.create(
+            usuario=request.user,
+            plan=plan,
+            tipo=plan.tipo_formulario if plan.tipo_formulario != 'ninguno' else 'evento',
+            datos_recopilados=datos_texto,
+            generar_imagen_ia=generar_ia,
+            imagen_subida=imagen_subida,
             estado='pendiente'
         )
         
-        # 2. Crear la Suscripción en estado "solicitada" para tu gestión
+        # Crear Suscripcion solicitada (igual que en Gestiona)
         Suscripcion.objects.get_or_create(
             usuario=request.user,
             plan=plan,
             estado='solicitada',
-            defaults={'fecha_vencimiento': timezone.now()} # Temporal, se actualiza al aprobar
+            defaults={'fecha_fin': timezone.now()}
         )
         
         messages.success(request, f'¡Solicitud enviada con éxito para el plan "{plan.nombre}"! Nos pondremos en contacto contigo para el diseño y la activación.')
         return redirect('panel_cliente')
 
-    context = {
-        'planes': planes
-    }
+    context = {'planes': planes}
     return render(request, 'promociones/crear_promocion.html', context)
 
 # En views.py

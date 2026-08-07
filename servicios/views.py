@@ -27,8 +27,6 @@ def detalle_servicio(request, slug):
     }
     return render(request, 'servicios/detalle_servicio.html', context)
 
-
-
 @login_required(login_url='/login/')
 def procesar_suscripcion(request, plan_id):
     plan = get_object_or_404(Plan, id=plan_id, activo=True)
