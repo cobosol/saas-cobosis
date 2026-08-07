@@ -92,7 +92,7 @@ def procesar_texto_con_ia(texto, variables_solicitadas):
 
         # Intentar parsear el JSON
         datos = json.loads(resultado_str)
-        print(f"Datos extraídos: {datos}")  # Para depuración
+        print(f"Datos extraidos: {datos}")  # Para depuración
         # Asegurar que todas las variables solicitadas estén presentes
         for var in variables_solicitadas:
             if var not in datos:

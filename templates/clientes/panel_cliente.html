@@ -15,7 +15,7 @@
     /* ===== SIDEBAR (Azul claro #4D96FF) ===== */
     .sidebar {
         width: 260px;
-        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        background-color: #636E72;
         color: white;
         display: flex;
         flex-direction: column;
@@ -25,33 +25,12 @@
         bottom: 0;
         z-index: 40;
         transition: transform 0.3s ease;
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .sidebar-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--primary-dark);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    
-    .sidebar-logo {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, #4D96FF, #6C63FF);
-        border-radius: 0.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1rem;
-        color: white;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
     
     .sidebar-nav {
         flex: 1;
-        padding: 1rem 0.75rem;
+        padding: 1.5rem 0.75rem 1rem;
         overflow-y: auto;
     }
     
@@ -61,7 +40,7 @@
         gap: 0.75rem;
         padding: 0.75rem 1rem;
         border-radius: 0.75rem;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.7);
         text-decoration: none;
         transition: all 0.2s ease;
         margin-bottom: 0.25rem;
@@ -69,15 +48,18 @@
     }
     
     .sidebar-link:hover {
-        background: rgba(77, 150, 255, 0.15);
+        background: rgba(255, 255, 255, 0.1);
         color: white;
     }
     
     .sidebar-link.active {
-        background: rgba(77, 150, 255, 0.25);
-        color: white;
+        background: var(--accent, #4ECDC4);
+        color: #1a1a2e;
         font-weight: 600;
-        border-left: 3px solid #4D96FF;
+    }
+    
+    .sidebar-link.active i {
+        color: #1a1a2e;
     }
     
     .sidebar-link i {
@@ -88,16 +70,20 @@
     
     .sidebar-link .badge-count {
         margin-left: auto;
-        background: #FF6B6B;
+        background: rgba(0, 0, 0, 0.2);
         color: white;
         font-size: 0.7rem;
         padding: 0.15rem 0.5rem;
         border-radius: 999px;
     }
     
+    .sidebar-link.active .badge-count {
+        background: rgba(0, 0, 0, 0.3);
+    }
+    
     .sidebar-footer {
         padding: 1rem 0.75rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .sidebar-user {
@@ -110,20 +96,20 @@
     }
     
     .sidebar-user:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.08);
     }
     
     .sidebar-user .user-avatar {
         width: 38px;
         height: 38px;
-        background: linear-gradient(135deg, #FFD93D, #FF6B6B);
+        background: var(--secondary, #FF6B6B);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
         font-size: 0.85rem;
-        color: #1a1a2e;
+        color: white;
     }
     
     .sidebar-user .user-info {
@@ -142,17 +128,18 @@
     
     .sidebar-user .user-role {
         font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(255, 255, 255, 0.6);
     }
     
     .sidebar-user .logout-link {
-        color: rgba(255, 255, 255, 0.4);
+        color: rgba(255, 255, 255, 0.5);
         transition: color 0.2s;
         padding: 0.25rem;
+        font-size: 1.1rem;
     }
     
     .sidebar-user .logout-link:hover {
-        color: #FF6B6B;
+        color: white;
     }
     
     /* ===== CONTENIDO PRINCIPAL ===== */
@@ -185,14 +172,14 @@
     
     .topbar .public-link {
         font-size: 0.85rem;
-        color: #4D96FF;
+        color: var(--primary, #6C63FF);
         text-decoration: none;
         font-weight: 500;
         transition: color 0.2s;
     }
     
     .topbar .public-link:hover {
-        color: #6C63FF;
+        color: var(--primary-dark, #5A52D5);
     }
     
     /* ===== CONTENIDO ===== */
@@ -214,9 +201,9 @@
     }
     
     .service-card:hover {
-        box-shadow: 0 8px 25px rgba(77, 150, 255, 0.12);
+        box-shadow: 0 8px 25px rgba(108, 99, 255, 0.12);
         transform: translateY(-2px);
-        border-color: #4D96FF;
+        border-color: var(--primary, #6C63FF);
     }
     
     .service-card .service-icon {
@@ -227,19 +214,11 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-    }
-    
-    .service-card .service-icon.purple {
         background: rgba(108, 99, 255, 0.1);
-        color: #6C63FF;
+        color: var(--primary, #6C63FF);
     }
     
-    .service-card .service-icon.teal {
-        background: rgba(78, 205, 196, 0.1);
-        color: #4ECDC4;
-    }
-    
-    /* Badges de estado con colores de la paleta */
+    /* Badges de estado */
     .status-badge {
         font-size: 0.7rem;
         padding: 0.25rem 0.75rem;
@@ -252,22 +231,22 @@
     .status-badge.active {
         background: rgba(107, 203, 119, 0.15);
         color: #065f46;
-        border: 1px solid #6BCB77;
+        border: 1px solid var(--success, #6BCB77);
     }
     
     .status-badge.pending {
         background: rgba(255, 217, 61, 0.15);
         color: #92400e;
-        border: 1px solid #FFD93D;
+        border: 1px solid var(--warning, #FFD93D);
     }
     
     .status-badge.expired {
         background: rgba(255, 107, 107, 0.15);
         color: #991b1b;
-        border: 1px solid #FF6B6B;
+        border: 1px solid var(--danger, #FF6B6B);
     }
     
-    /* Tarjeta "Adquirir nuevo" con acento amarillo */
+    /* Tarjeta "Adquirir nuevo" */
     .add-service-card {
         background: #fafafa;
         border: 2px dashed #d1d5db;
@@ -285,8 +264,8 @@
     }
     
     .add-service-card:hover {
-        border-color: #FFD93D;
-        background: rgba(255, 217, 61, 0.05);
+        border-color: var(--primary, #6C63FF);
+        background: rgba(108, 99, 255, 0.03);
     }
     
     .add-service-card i {
@@ -297,7 +276,7 @@
     }
     
     .add-service-card:hover i {
-        color: #FFD93D;
+        color: var(--primary, #6C63FF);
         transform: scale(1.1);
     }
     
@@ -323,8 +302,8 @@
     
     .quick-extract textarea:focus {
         outline: none;
-        border-color: #4D96FF;
-        box-shadow: 0 0 0 4px rgba(77, 150, 255, 0.08);
+        border-color: var(--primary, #6C63FF);
+        box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.08);
         background: white;
     }
     
@@ -352,15 +331,13 @@
     
     .empty-state i {
         font-size: 3rem;
-        color: #FFD93D;
+        color: var(--primary, #6C63FF);
         margin-bottom: 1rem;
     }
     
-    /* ===== BOTONES CON COLORES DE LA PALETA ===== */
-    
-    /* Botón teal - Gestiona */
+    /* ===== BOTONES ===== */
     .btn-teal {
-        background: linear-gradient(135deg, #4ECDC4, #3DBDB5);
+        background: var(--primary, #6C63FF);
         color: white;
         font-weight: 600;
         padding: 0.625rem 1.25rem;
@@ -376,14 +353,14 @@
     }
     
     .btn-teal:hover {
+        background: var(--primary-dark, #5A52D5);
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(78, 205, 196, 0.35);
+        box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
         color: white;
     }
     
-    /* Botón púrpura - Promociones */
     .btn-purple {
-        background: linear-gradient(135deg, #6C63FF, #5A52D5);
+        background: var(--primary, #6C63FF);
         color: white;
         font-weight: 600;
         padding: 0.625rem 1.25rem;
@@ -399,14 +376,14 @@
     }
     
     .btn-purple:hover {
+        background: var(--primary-dark, #5A52D5);
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(108, 99, 255, 0.35);
+        box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
         color: white;
     }
     
-    /* Botón amarillo - Acción principal */
     .btn-warning-custom {
-        background: linear-gradient(135deg, #FFD93D, #FFC107);
+        background: var(--warning, #FFD93D);
         color: #1a1a2e;
         font-weight: 700;
         padding: 0.625rem 1.25rem;
@@ -427,32 +404,8 @@
         color: #1a1a2e;
     }
     
-    /* Botón coral - Acción importante */
-    .btn-coral {
-        background: linear-gradient(135deg, #FF6B6B, #E55555);
-        color: white;
-        font-weight: 600;
-        padding: 0.625rem 1.25rem;
-        border-radius: 0.75rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-    }
-    
-    .btn-coral:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.35);
-        color: white;
-    }
-    
-    /* Botón primario (azul) */
     .btn-primary {
-        background: linear-gradient(135deg, #4D96FF, #6C63FF);
+        background: var(--primary, #6C63FF);
         color: white;
         font-weight: 600;
         padding: 0.75rem 2rem;
@@ -467,14 +420,14 @@
     }
     
     .btn-primary:hover {
+        background: var(--primary-dark, #5A52D5);
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(77, 150, 255, 0.3);
+        box-shadow: 0 10px 25px rgba(108, 99, 255, 0.3);
         color: white;
     }
     
-    /* Botón verde */
     .btn-green {
-        background: linear-gradient(135deg, #6BCB77, #5ab868);
+        background: var(--success, #6BCB77);
         color: white;
         font-weight: 600;
         padding: 0.625rem 1.25rem;
@@ -506,13 +459,17 @@
         font-size: 0.9rem;
     }
     
-    /* ===== DESTACAR PRÓXIMO VENCIMIENTO ===== */
+    /* ===== UTILIDADES ===== */
     .text-danger-custom {
-        color: #FF6B6B !important;
+        color: var(--danger, #FF6B6B) !important;
     }
     
     .text-warning-custom {
-        color: #FFD93D !important;
+        color: var(--warning, #FFD93D) !important;
+    }
+    
+    .icon-warning {
+        color: var(--warning, #FFD93D);
     }
     
     /* Mobile menu toggle */
@@ -579,7 +536,7 @@
             </a>
             {% endif %}
             
-            <hr style="border-color: rgba(255,255,255,0.08); margin: 0.5rem 0;">
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 0.5rem 0;">
             
             <a href="{% url 'profile' %}" class="sidebar-link">
                 <i class="bi bi-person-gear"></i> Mi Perfil
@@ -639,10 +596,11 @@
                     <i class="bi bi-rocket-takeoff me-2"></i> Ver Planes
                 </a>
             </div>
+            
             {% else %}
             <!-- ===== TUS SERVICIOS ACTIVOS ===== -->
             <h2 class="text-lg fw-bold text-gray-800 mb-4">
-                <i class="bi bi-star-fill me-2" style="color: #FFD93D;"></i>Tus Servicios Activos
+                <i class="bi bi-star-fill me-2 icon-warning"></i>Tus Servicios Activos
             </h2>
             
             <div class="row g-4 mb-5">
@@ -652,7 +610,7 @@
                         <!-- Cabecera -->
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="service-icon {% if sub.plan.servicio.slug == 'gestiona' %}teal{% else %}purple{% endif %}">
+                                <div class="service-icon">
                                     <i class="{{ sub.plan.servicio.icono }}"></i>
                                 </div>
                                 <h3 class="fw-bold text-gray-800 mb-0" style="font-size: 1rem;">
@@ -733,7 +691,7 @@
             {% if 'gestiona' in servicios_activos|slugify %}
             <div class="quick-extract">
                 <h2 class="text-lg fw-bold text-gray-800 mb-4">
-                    <i class="bi bi-lightning-charge me-2" style="color: #FFD93D;"></i>
+                    <i class="bi bi-lightning-charge me-2 icon-warning"></i>
                     Extracción Rápida (Gestiona)
                 </h2>
                 
