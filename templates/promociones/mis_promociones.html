@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Promociones - Descubre eventos y negocios{% endblock %}
+
+{% block content %}
+
+    <div class="max-w-6xl mx-auto p-6">
+        
+        <!-- Cabecera -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-2xl font-bold text-gray-800"><i class="fas fa-bullhorn text-purple-500 mr-2"></i>Mis Promociones</h1>
+                <p class="text-sm text-gray-500">Gestiona tus tarjetas activas y revisa el estado de tus solicitudes.</p>
+            </div>
+            <a href="{% url 'crear_promocion' %}" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700 transition flex items-center">
+                <i class="fas fa-plus mr-2"></i> Crear Nueva Promoción
+            </a>
+        </div>
+
+        <!-- SECCIÓN 1: PROMOCIONES ACTIVAS -->
+        <div class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Activas y Publicadas</h2>
+            
+            {% if promociones_activas %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for promo in promociones_activas %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="h-40 bg-gray-100 overflow-hidden">
+                        {% if promo.imagen %}
+                            <img src="{{ promo.imagen.url }}" alt="{{ promo.titulo }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-gray-400">Sin imagen</div>
+                        {% endif %}
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-800">{{ promo.titulo|truncatechars:30 }}</h3>
+                            <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Activa</span>
+                        </div>
+                        
+                        <!-- Enlace Directo -->
+                        <div class="mt-2 bg-gray-50 p-2 rounded-lg border border-gray-200 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 truncate flex-1 mr-2">{{ request.get_host }}/p/{{ promo.slug }}/</span>
+                            <button onclick="copyToClipboard('{{ request.get_host }}/p/{{ promo.slug }}/')" class="text-blue-500 hover:text-blue-700 text-sm">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+
+                        <div class="mt-4 flex gap-2">
+                            <a href="{% url 'ver_promocion' promo.slug %}" target="_blank" class="flex-1 text-center bg-blue-50 text-blue-600 text-sm font-bold py-2 rounded-lg hover:bg-blue-100 transition">
+                                <i class="fas fa-eye mr-1"></i> Ver
+                            </a>
+                            <a href="https://wa.me/?text=Mira%20mi%20promoción:%20{{ request.get_host }}/p/{{ promo.slug }}/" target="_blank" class="flex-1 text-center bg-green-50 text-green-600 text-sm font-bold py-2 rounded-lg hover:bg-green-100 transition">
+                                <i class="fab fa-whatsapp mr-1"></i> Compartir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="bg-white p-8 rounded-xl border-2 border-dashed border-gray-200 text-center text-gray-400">
+                <i class="fas fa-images text-4xl mb-3"></i>
+                <p>Aún no tienes promociones activas. ¡Crea tu primera!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SECCIÓN 2: SOLICITUDES EN PROCESO -->
+        <div>
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Solicitudes en Proceso</h2>
+            
+            {% if solicitudes %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="py-3 px-4 text-gray-600 text-sm">Plan Solicitado</th>
+                            <th class="py-3 px-4 text-gray-600 text-sm">Fecha</th>
+                            <th class="py-3 px-4 text-gray-600 text-sm">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sol in solicitudes %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-sm font-medium text-gray-800">{{ sol.plan.nombre }}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500">{{ sol.fecha_solicitud|date:'Y-m-d' }}</td>
+                            <td class="py-3 px-4 text-sm">
+                                {% if sol.estado == 'pendiente' %}
+                                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-semibold">Pendiente de Contacto/Pago</span>
+                                {% elif sol.estado == 'disenando' %}
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">En Proceso de Diseño</span>
+                                {% elif sol.estado == 'rechazada' %}
+                                    <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">Cancelada</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="bg-white p-6 rounded-xl border-2 border-dashed border-gray-200 text-center text-gray-400">
+                <p>No tienes solicitudes pendientes.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+
+<!-- Script para copiar al portapapeles -->
+    <script>
+        function copyToClipboard(text) {
+            // Añadir https:// si no está presente para que el enlace sea absoluto
+            const fullUrl = text.startsWith('http') ? text : 'https://' + text;
+            navigator.clipboard.writeText(fullUrl).then(() => {
+                alert('¡Enlace copiado al portapapeles!: ' + fullUrl);
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+            });
+        }
+    </script>
+
+{% endblock %}
