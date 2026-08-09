@@ -86,3 +86,21 @@ def ver_promocion(request, slug):
     }
     return render(request, 'promociones/ver_promocion.html', context)
 
+@login_required
+def mis_promociones(request):
+    # 1. Promociones ya activas/públicas
+    promociones_activas = Promocion.objects.filter(
+        cliente=request.user, 
+        estado='publicado'
+    ).order_by('-creado')
+
+    # 2. Solicitudes en proceso (pendientes de pago/diseño)
+    solicitudes = SolicitudPromocion.objects.filter(
+        usuario=request.user
+    ).exclude(estado='activa').order_by('-fecha_solicitud')
+
+    context = {
+        'promociones_activas': promociones_activas,
+        'solicitudes': solicitudes,
+    }
+    return render(request, 'promociones/mis_promociones.html', context)
