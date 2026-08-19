@@ -27,7 +27,6 @@ def detalle_servicio(request, slug):
     }
     return render(request, 'servicios/detalle_servicio.html', context)
 
-
 @login_required(login_url='/login/')
 def procesar_suscripcion(request, plan_id):
     plan = get_object_or_404(Plan, id=plan_id, activo=True)
@@ -66,7 +65,24 @@ def procesar_suscripcion(request, plan_id):
     # 3. LÓGICA PARA PLANES DE PAGO (Solicitud manual)
     else:
         if plan.servicio.slug == 'promociones':
-            return redirect('solicitar_promocion', plan_id=plan.id)
+            #return redirect('solicitar_promocion', plan_id=plan.id)
+            ya_solicitada = Suscripcion.objects.filter(
+            usuario=request.user, 
+            plan=plan, 
+            estado='solicitada'
+            ).exists()
+                        
+            if ya_solicitada:
+                messages.info(request, 'Ya tienes una solicitud pendiente para este plan.')
+            else:
+                Suscripcion.objects.create(
+                    usuario=request.user,
+                    plan=plan,
+                    estado='solicitada',
+                    fecha_fin=timezone.now() + timedelta(days=plan.vigencia_dias)
+                )
+                messages.success(request, f'¡Solicitud recibida para el plan "{plan.nombre}"! Nos pondremos en contacto contigo.')
+            return redirect('panel_cliente')
         
         elif plan.servicio.slug == 'gestiona':
             # Verificar si ya tiene una solicitud pendiente para este plan
