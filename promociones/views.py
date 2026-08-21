@@ -14,6 +14,7 @@ def promociones(request):
 
 @login_required
 def crear_promocion(request):
+    # Obtenemos todos los planes activos del servicio Promociones
     planes = Plan.objects.filter(servicio__slug='promociones', activo=True).order_by('precio')
     
     if request.method == 'POST':
@@ -27,11 +28,29 @@ def crear_promocion(request):
             datos['hora'] = request.POST.get('hora_evento')
             datos['lugar'] = request.POST.get('lugar_evento')
             datos['informacion'] = request.POST.get('info_evento')
+
+            #solicitud = Promocion.objects.create(
+            #            cliente=request.user,
+            #            estado='pendiente',
+            #            tipo = plan.tipo_formulario,
+            #            titulo = datos['titulo'],
+            #            descripcion = datos['informacion'],
+            #            fecha_evento = datos['fecha'],
+            #            lugar = datos['lugar']
+            #        )
         elif plan.tipo_formulario == 'negocio':
             datos['nombre_negocio'] = request.POST.get('nombre_negocio')
             datos['rubro'] = request.POST.get('rubro_negocio')
             datos['telefono'] = request.POST.get('telefono_negocio')
             datos['descripcion'] = request.POST.get('descripcion_negocio')
+
+            #solicitud = Promocion.objects.create(
+            #                cliente=request.user,
+            #                estado='pendiente',
+            #                tipo = plan.tipo_formulario,
+            #                titulo = datos['titulo'],
+            #                descripcion = datos['informacion'],
+            #            )
         else:
             datos['titulo'] = request.POST.get('titulo_generico')
             datos['descripcion'] = request.POST.get('descripcion_generica')

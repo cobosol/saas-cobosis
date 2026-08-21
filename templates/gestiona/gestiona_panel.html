@@ -6,7 +6,7 @@
     {% load custom_tags %} 
 
     <div class="max-w-6xl mx-auto">
-        <!-- Cabecera y Límites (igual que antes) -->
+        <!-- Cabecera y Límites -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
             <div class="mb-4 md:mb-0">
                 <h1 class="text-2xl font-bold text-gray-800"><i class="fas fa-table text-teal-500 mr-2"></i> Herramienta Gestiona</h1>
@@ -15,6 +15,7 @@
             <div class="flex flex-wrap gap-2 text-sm">
                 <div class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg">Variables máx.: <strong>{{ plan.max_variables }}</strong></div>
                 <div class="bg-purple-50 text-purple-700 px-3 py-1 rounded-lg">Extracciones: <strong>{% if plan.max_extracciones == 0 %}∞{% else %}{{ extracciones_realizadas }}/{{ plan.max_extracciones }}{% endif %}</strong></div>
+                <div class="bg-green-50 text-green-700 px-3 py-1 rounded-lg">Retención: <strong>{{ plan.dias_retencion }} días</strong></div>
             </div>
         </div>
 
@@ -30,7 +31,7 @@
         <!-- ALERTA LÍMITE -->
         {% if limite_alcanzado %}
         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-            <strong>Límite alcanzado:</strong> Has llegado al máximo de extracciones de tu plan.
+            <strong>Límite alcanzado:</strong> Has llegado al máximo de extracciones de tu plan. ¡Mejora tu plan para seguir gestionando!
         </div>
         {% endif %}
 

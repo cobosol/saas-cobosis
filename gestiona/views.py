@@ -110,6 +110,7 @@ def procesar_texto_con_ia(texto, variables_solicitadas):
 
 @login_required
 def gestiona_panel(request):
+    # Obtenemos LA suscripción activa actual
     suscripcion = Suscripcion.objects.filter(
         usuario=request.user, 
         plan__servicio__slug='gestiona', 
