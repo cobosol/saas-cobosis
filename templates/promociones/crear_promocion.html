@@ -10,14 +10,6 @@
 <body class="bg-gray-100 font-sans">
 
     <div class="max-w-4xl mx-auto my-10 bg-white p-8 rounded-xl shadow-md border border-gray-100">
-<<<<<<< Updated upstream
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Crear Nueva Promoción</h1>
-        <p class="text-gray-500 mb-8">Selecciona el plan que mejor se adapte a tu necesidad y completa los datos. Posteriormente te contactaremos.</p>
-
-        <form method="POST" action="">
-            {% csrf_token %}
-            
-=======
         <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ titulo_pagina|default:"Crear Nueva Promoción" }}</h1>
         <p class="text-gray-500 mb-8">
             {% if modo == 'suscripcion' %}
@@ -39,7 +31,6 @@
                 </p>
             </div>
             
->>>>>>> Stashed changes
             <!-- PASO 1: SELECCIÓN DE PLAN -->
             <div class="mb-8">
                 <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">1. Selecciona tu Plan</h2>
@@ -63,9 +54,6 @@
                                 {% endif %}
                             </div>
                             <p class="text-xs text-gray-500 mt-1">{{ plan.vigencia_dias }} días de vigencia</p>
-<<<<<<< Updated upstream
-                            <p class="text-xs text-gray-400 mt-1">{{ plan.descripcion|truncatewords:15 }}</p>
-=======
                             <p class="text-xs text-gray-400 mt-1">{{ plan.descripcion|truncatewords:12 }}</p>
                             <!-- Info de límite -->
                             <p class="text-xs text-purple-500 mt-1 font-mono">
@@ -78,9 +66,10 @@
                                     Hasta {{ plan.max_promociones }} promociones
                                 {% endif %}
                             </p>
->>>>>>> Stashed changes
                         </div>
                     </label>
+                    {% empty %}
+                    <p class="text-red-500">No hay planes disponibles</p>
                     {% endfor %}
                 </div>
             </div>
@@ -126,15 +115,17 @@
                 </h2>
                 
                 <!-- Campos para EVENTO -->
-                <div id="form-evento" class="form-section space-y-4 hidden">
+                <div id="form-evento" class="form-section space-y-4" style="display: none;">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre o Título Principal *</label>
                         <input type="text" name="titulo_evento" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: Fiesta de Cumpleaños">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
-                            <input type="date" name="fecha_evento" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="date" name="fecha_evento" id="fecha_evento" 
+                                   class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                   style="min-height: 42px;">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Hora *</label>
@@ -152,12 +143,12 @@
                 </div>
 
                 <!-- Campos para NEGOCIO -->
-                <div id="form-negocio" class="form-section space-y-4 hidden">
+                <div id="form-negocio" class="form-section space-y-4" style="display: none;">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Negocio *</label>
                         <input type="text" name="nombre_negocio" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: Restaurante La Fogata">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Rubro *</label>
                             <input type="text" name="rubro_negocio" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: Comida rápida">
@@ -174,7 +165,7 @@
                 </div>
 
                 <!-- Campos para GENÉRICO -->
-                <div id="form-ninguno" class="form-section space-y-4 hidden">
+                <div id="form-ninguno" class="form-section space-y-4" style="display: none;">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Título de la promoción *</label>
                         <input type="text" name="titulo_generico" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
@@ -186,109 +177,146 @@
                 </div>
             </div>
 
-<<<<<<< Updated upstream
-            <div class="flex justify-end">
-                <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
-                    Enviar Solicitud <i class="fas fa-paper-plane ml-2"></i>
-=======
-            <!-- PASO 3: IMAGEN DE LA PROMOCIÓN -->
+            <!-- PASO 3: IMAGEN DE LA PROMOCIÓN (NUEVO) -->
             <div class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-                    {% if modo == 'suscripcion' %}3.{% else %}2.{% endif %} Imagen de la Tarjeta
-                </h2>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">3. Imagen de la Tarjeta</h2>
                 
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <!-- Opción 1: Generar con IA -->
                     <div class="flex items-start mb-4">
-                        <input type="checkbox" id="generar_ia" name="generar_imagen_ia" class="mt-1 mr-2 w-5 h-5">
+                        <input type="checkbox" id="generar_ia" name="generar_imagen_ia" class="mt-1 mr-2 w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
                         <label for="generar_ia" class="text-sm font-medium text-gray-700 cursor-pointer">
-                            Deseo que el equipo de Cobosis diseñe mi tarjeta con IA
-                            <p class="text-xs text-gray-500 font-normal mt-1">Nosotros la crearemos por ti.</p>
+                            Deseo que el equipo de Cobosis diseñe/generé mi tarjeta con Inteligencia Artificial
+                            <p class="text-xs text-gray-500 font-normal mt-1">Si marcas esta opción, no necesitas subir una imagen. Nosotros la crearemos por ti.</p>
                         </label>
                     </div>
 
                     <div class="border-t border-gray-200 my-4"></div>
 
+                    <!-- Opción 2: Subir imagen -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">O sube tu propia imagen</label>
                         <p class="text-xs text-gray-500 mb-2">
                             <i class="fas fa-info-circle text-blue-500"></i> 
-                            Proporción: <strong>1:1.618</strong> (Ancho:Alto)
+                            Proporción obligatoria: <strong>1 de ancho x 1.618 de alto</strong> (Ej: 600px de ancho por 970px de alto).
                         </p>
-                        <input type="file" name="imagen_subida" id="imagen_subida" accept="image/*" 
-                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <input type="file" name="imagen_subida" id="imagen_subida" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                         <div id="image-error" class="text-red-500 text-xs mt-2 hidden"></div>
                         <div id="image-preview-container" class="mt-4 hidden">
-                            <img id="image-preview" src="#" alt="Vista previa" class="max-h-48 rounded-lg">
+                            <p class="text-xs text-gray-500 mb-1">Vista previa:</p>
+                            <img id="image-preview" src="#" alt="Vista previa" class="max-h-48 rounded-lg border border-gray-300">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Botón de envío -->
             <div class="flex justify-end">
-                <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition">
-                    {% if modo == 'suscripcion' %}
-                        Suscribirme y Enviar <i class="fas fa-paper-plane ml-2"></i>
-                    {% else %}
-                        Enviar Solicitud <i class="fas fa-paper-plane ml-2"></i>
-                    {% endif %}
->>>>>>> Stashed changes
+                <button type="submit" id="btn-submit" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
+                    Enviar Solicitud <i class="fas fa-paper-plane ml-2"></i>
                 </button>
             </div>
         </form>
     </div>
 
     <script>
-<<<<<<< Updated upstream
-        // Lógica para mostrar/ocultar formularios según el plan seleccionado
-=======
         console.log('🔍 DEBUG: Template de promoción cargado');
         console.log('Modo:', '{{ modo|default:"desconocido" }}');
         
         // ========== LÓGICA DE CAMBIO DE FORMULARIO ==========
->>>>>>> Stashed changes
+
         const radios = document.querySelectorAll('.plan-radio');
         const tipoRadios = document.querySelectorAll('.tipo-radio');
         const sections = document.querySelectorAll('.form-section');
-<<<<<<< Updated upstream
-
+        
+        console.log(`Radios encontrados: ${radios.length}`);
+        console.log(`Secciones de formulario: ${sections.length}`);
+        
         function actualizarFormulario() {
             let tipoSeleccionado = 'ninguno';
-            
             radios.forEach(radio => {
                 if (radio.checked) {
-                    tipoSeleccionado = radio.dataset.tipo;
-                    // Actualizar estilo visual de la tarjeta seleccionada
+                    tipoSeleccionado = radio.dataset.tipo || 'ninguno';
+                    console.log(`Radio seleccionado: ${radio.value}, tipo: ${tipoSeleccionado}`);
+                    
+                    // Actualizar estilo visual
                     document.querySelectorAll('.plan-card').forEach(card => {
                         card.classList.remove('border-blue-500', 'bg-blue-50');
                         card.classList.add('border-gray-200');
-                        card.querySelector('.radio-dot').classList.add('hidden');
+                        const dot = card.querySelector('.radio-dot');
+                        if (dot) dot.classList.add('hidden');
                     });
                     const cardSeleccionada = radio.closest('.plan-card');
-                    cardSeleccionada.classList.add('border-blue-500', 'bg-blue-50');
-                    cardSeleccionada.classList.remove('border-gray-200');
-                    cardSeleccionada.querySelector('.radio-dot').classList.remove('hidden');
+                    if (cardSeleccionada) {
+                        cardSeleccionada.classList.add('border-blue-500', 'bg-blue-50');
+                        cardSeleccionada.classList.remove('border-gray-200');
+                        const dot = cardSeleccionada.querySelector('.radio-dot');
+                        if (dot) dot.classList.remove('hidden');
+                    }
                 }
             });
-
+            
+            console.log(`Tipo de formulario a mostrar: ${tipoSeleccionado}`);
+            
             sections.forEach(section => {
-                if (section.id === `form-${tipoSeleccionado}`) {
-                    section.classList.remove('hidden');
+                const sectionId = section.id;
+                const shouldShow = sectionId === `form-${tipoSeleccionado}`;
+                
+                console.log(`  - ${sectionId}: ${shouldShow ? 'MOSTRAR' : 'ocultar'}`);
+                
+                if (shouldShow) {
+                    section.style.display = 'block';
                 } else {
-                    section.classList.add('hidden');
-                    // Opcional: limpiar valores de campos ocultos para no enviar datos basura
-                    section.querySelectorAll('input, textarea').forEach(input => input.value = '');
+                    section.style.display = 'none';
+                    // Limpiar campos ocultos
+                    section.querySelectorAll('input:not([type="radio"]), textarea').forEach(input => {
+                        input.value = '';
+                    });
                 }
             });
         }
+        radios.forEach(radio => radio.addEventListener('change', actualizarFormulario));
+        actualizarFormulario();
 
-        radios.forEach(radio => {
-            radio.addEventListener('change', actualizarFormulario);
+        // 2. Lógica de Validación de Proporción de Imagen (1:1.618)
+        const inputImagen = document.getElementById('imagen_subida');
+        const errorDiv = document.getElementById('image-error');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImg = document.getElementById('image-preview');
+        const form = document.querySelector('form');
+
+        inputImagen.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            errorDiv.classList.add('hidden');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const width = img.width;
+                        const height = img.height;
+                        const ratioEsperado = 1.618;
+                        const ratioActual = height / width;
+                        
+                        // Permitimos una tolerancia del 2% (entre 1.58 y 1.65)
+                        if (ratioActual < 1.58 || ratioActual > 1.65) {
+                            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> La proporción de tu imagen es ${ratioActual.toFixed(2)} (Ancho: ${width}, Alto: ${height}). Debe ser 1.618. Por favor ajusta la imagen.`;
+                            errorDiv.classList.remove('hidden');
+                            inputImagen.value = ''; // Limpiar input
+                            previewContainer.classList.add('hidden');
+                        } else {
+                            previewImg.src = e.target.result;
+                            previewContainer.classList.remove('hidden');
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.classList.add('hidden');
+            }
         });
 
-        // Ejecutar al cargar la página
-        actualizarFormulario();
-=======
         
         function mostrarFormulario(tipo) {
             console.log('Mostrando formulario tipo:', tipo);
@@ -382,7 +410,7 @@
                 alert('Corrige la proporción de la imagen antes de enviar.');
             }
         });
->>>>>>> Stashed changes
+
     </script>
 </body>
 </html>

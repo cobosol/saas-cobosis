@@ -18,6 +18,7 @@ urlpatterns = [
     
     # Mis promociones
     path('p/<uuid:slug>/', views.ver_promocion, name='ver_promocion'),
+    path('promociones/mis-promociones/', views.mis_promociones, name='mis_promociones'),
 ]
 
 

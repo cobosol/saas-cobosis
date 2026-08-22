@@ -19,6 +19,15 @@
             </div>
         </div>
 
+        <!-- MENSAJES DE DJANGO (Errores o Éxitos) -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="border-l-4 p-4 mb-6 rounded {% if message.tags == 'error' %}bg-red-50 border-red-500 text-red-700{% else %}bg-green-50 border-green-500 text-green-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <!-- ALERTA LÍMITE -->
         {% if limite_alcanzado %}
         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
@@ -26,44 +35,76 @@
         </div>
         {% endif %}
 
-        <!-- CONFIG INICIAL (Solo planes no ajustables) -->
-        {% if not plan.variables_ajustables %}
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg mb-6">
-            <h2 class="text-lg font-bold text-blue-900 mb-2">Define tus Variables Fijas</h2>
-            <p class="text-blue-700 text-sm mb-4">Estas son las variables que el sistema extraerá automáticamente. Máximo: {{ plan.max_variables }}.</p>
-            <form method="POST" action="">
-                {% csrf_token %}
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" name="variables_input" value="{{ variables_fijas|join:', ' }}" class="flex-1 p-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: cliente, producto, cantidad">
-                    <button type="submit" name="guardar_config" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        <i class="fas fa-save mr-1"></i> Guardar Variables
-                    </button>
+        <!-- SECCIÓN DE CONFIGURACIÓN DE VARIABLES -->
+        <div class="mb-6">
+            {% if plan.variables_ajustables %}
+                <!-- PLAN AJUSTABLE: Formulario siempre visible -->
+                <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg">
+                    <h2 class="text-lg font-bold text-green-900 mb-2">Configura tus Variables (Editables)</h2>
+                    <p class="text-green-700 text-sm mb-4">Estas variables se usarán por defecto. Puedes modificarlas en cualquier momento. Máximo: {{ plan.max_variables }}.</p>
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" name="variables_input" value="{{ variables_fijas|join:', ' }}" class="flex-1 p-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="Ej: cliente, producto, cantidad">
+                            <button type="submit" name="guardar_config" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                <i class="fas fa-save mr-1"></i> Actualizar Variables
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+
+            {% else %}
+                <!-- PLAN FIJO -->
+                {% if not variables_fijas %}
+                    <!-- Aún no las ha definido -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+                        <h2 class="text-lg font-bold text-blue-900 mb-2">Define tus Variables Fijas</h2>
+                        <p class="text-blue-700 text-sm mb-4"><strong>Importante:</strong> Solo podrás hacer esto una vez. Elige cuidadosamente las {{ plan.max_variables }} variables que extraerá el sistema. Máximo: {{ plan.max_variables }}.</p>
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" name="variables_input" class="flex-1 p-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej: cliente, producto, cantidad">
+                                <button type="submit" name="guardar_config" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-lock mr-1"></i> Bloquear Variables
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                {% else %}
+                    <!-- Ya están bloqueadas -->
+                    <div class="bg-gray-100 border border-gray-300 p-6 rounded-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800 mb-2"><i class="fas fa-lock text-gray-500 mr-2"></i>Variables Configuradas (Bloqueadas)</h2>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                {% for var in variables_fijas %}
+                                    <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">{{ var }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
         </div>
-        {% endif %}
 
         <!-- HERRAMIENTA Y ACCIONES -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <div class="bg-white p-6 rounded-xl shadow-sm lg:col-span-2">
                 <h2 class="text-lg font-semibold mb-3">Texto a procesar</h2>
-                <textarea id="texto_entrada" class="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Pega aquí el mensaje de tu cliente..." {% if limite_alcanzado %}disabled{% endif %}></textarea>
                 
-                {% if plan.variables_ajustables %}
-                <div class="mt-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Variables a extraer ahora:</label>
-                    <input type="text" id="variables_momento" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ej: nombre, direccion, total (separadas por coma)">
-                </div>
+                {% if variables_fijas %}
+                    <textarea id="texto_entrada" class="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Pega aquí el mensaje de tu cliente..." {% if limite_alcanzado %}disabled{% endif %}></textarea>
+                    <div class="mt-3 text-xs text-gray-500">
+                        Extrayendo variables: <strong>{{ variables_fijas|join:", " }}</strong>
+                    </div>
+                    <button id="btn-procesar" class="mt-4 w-full bg-teal-500 text-white font-bold py-3 rounded-lg hover:bg-teal-600 transition disabled:opacity-50" {% if limite_alcanzado %}disabled{% endif %}>
+                        <i class="fas fa-magic mr-2"></i> Procesar Texto con IA
+                    </button>
+                    <div id="error-msg" class="text-red-500 text-sm mt-2 hidden"></div>
                 {% else %}
-                <div class="mt-3 text-xs text-gray-500">
-                    Extrayendo variables: <strong>{{ variables_fijas|join:", " }}</strong>
-                </div>
+                    <div class="bg-yellow-50 text-yellow-700 p-4 rounded-lg text-sm">
+                        Debes configurar tus variables en el panel superior antes de poder procesar texto.
+                    </div>
                 {% endif %}
-
-                <button id="btn-procesar" class="mt-4 w-full bg-teal-500 text-white font-bold py-3 rounded-lg hover:bg-teal-600 transition disabled:opacity-50" {% if limite_alcanzado %}disabled{% endif %}>
-                    <i class="fas fa-magic mr-2"></i> Procesar Texto con IA
-                </button>
-                <div id="error-msg" class="text-red-500 text-sm mt-2 hidden"></div>
             </div>
 
             <div class="bg-white p-6 rounded-xl shadow-sm flex flex-col">
@@ -77,7 +118,7 @@
             </div>
         </div>
 
-        <!-- TABLA DINÁMICA -->
+        <!-- TABLA DINÁMICA (Igual que antes) -->
         <div class="bg-white p-6 rounded-xl shadow-sm mt-6 overflow-x-auto">
             <h2 class="text-lg font-semibold mb-4">Historial de Extracciones</h2>
             <table class="w-full text-left border-collapse">
@@ -101,7 +142,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{{ todas_las_variables|length|add:'2' }}" class="py-4 text-center text-gray-400">Aún no tienes extracciones. Prueba pegando un texto arriba.</td>
+                        <td colspan="{{ todas_las_variables|length|add:'2' }}" class="py-4 text-center text-gray-400">Aún no tienes extracciones.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -109,14 +150,12 @@
         </div>
     </div>
 
-    <!-- Script AJAX -->
+    <!-- Script AJAX (Simplificado, sin variables_momento) -->
     <script>
-        document.getElementById('btn-procesar').addEventListener('click', function() {
+        document.getElementById('btn-procesar')?.addEventListener('click', function() {
             const texto = document.getElementById('texto_entrada').value;
             const errorMsg = document.getElementById('error-msg');
             const btn = this;
-            const variablesInput = document.getElementById('variables_momento');
-            const variables = variablesInput ? variablesInput.value : '';
 
             if (!texto.trim()) {
                 errorMsg.textContent = "Por favor, ingresa texto.";
@@ -145,7 +184,6 @@
 
             const params = new URLSearchParams();
             params.append('texto', texto);
-            if (variables) params.append('variables_momento', variables);
 
             fetch('/gestiona/procesar/', {
                 method: 'POST',
@@ -156,10 +194,7 @@
                 body: params.toString()
             })
             .then(response => response.ok ? response.json() : response.json().then(err => Promise.reject(err)))
-            .then(data => {
-                // Recargar la página para que la tabla incluya la nueva fila y todas las columnas actualizadas
-                window.location.reload(); 
-            })
+            .then(data => { window.location.reload(); })
             .catch(error => {
                 errorMsg.textContent = error.error || "Ocurrió un error al conectar con la IA.";
                 errorMsg.classList.remove('hidden');
