@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import redirect, get_object_or_404
 from .models import Plan
-from clientes.models import Suscripcion
+from servicios.models import Suscripcion
 from clientes.models import PerfilCliente
 
 # (Tu vista pagina_principal aquí arriba...)
@@ -66,7 +66,11 @@ def procesar_suscripcion(request, plan_id):
     # 3. LÓGICA PARA PLANES DE PAGO (Solicitud manual)
     else:
         if plan.servicio.slug == 'promociones':
+<<<<<<< Updated upstream
             return redirect('solicitar_promocion', plan_id=plan.id)
+=======
+            return redirect('suscribir_promocion')
+>>>>>>> Stashed changes
         
         elif plan.servicio.slug == 'gestiona':
             # Verificar si ya tiene una solicitud pendiente para este plan

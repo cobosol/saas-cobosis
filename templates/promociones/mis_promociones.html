@@ -1,0 +1,489 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Promociones | Cobosis{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ========== ESTILOS PARA MIS PROMOCIONES ========== */
+    .promo-grid-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem;
+    }
+    
+    .promo-column {
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .promo-column-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    
+    .promo-column-header.activas {
+        background: rgba(107, 203, 119, 0.08);
+        border-bottom: 2px solid #6BCB77;
+    }
+    
+    .promo-column-header.proceso {
+        background: rgba(255, 217, 61, 0.08);
+        border-bottom: 2px solid #FFD93D;
+    }
+    
+    .promo-column-header .count-badge {
+        margin-left: auto;
+        font-size: 0.75rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-weight: 600;
+    }
+    
+    .promo-column-header.activas .count-badge {
+        background: #6BCB77;
+        color: white;
+    }
+    
+    .promo-column-header.proceso .count-badge {
+        background: #FFD93D;
+        color: #1a1a2e;
+    }
+    
+    .promo-column-body {
+        padding: 1rem;
+        flex: 1;
+        overflow-y: auto;
+        max-height: 600px;
+    }
+    
+    /* Tarjetas de promociones activas */
+    .promo-card {
+        background: #fafafa;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        transition: all 0.25s ease;
+        margin-bottom: 0.75rem;
+    }
+    
+    .promo-card:hover {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        border-color: #6BCB77;
+    }
+    
+    .promo-card:last-child {
+        margin-bottom: 0;
+    }
+    
+    .promo-card-img {
+        height: 120px;
+        background: #f3f4f6;
+        overflow: hidden;
+    }
+    
+    .promo-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .promo-card-body {
+        padding: 0.75rem;
+    }
+    
+    .promo-card-title {
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .promo-card-status {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        font-weight: 600;
+    }
+    
+    .status-activa {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+    
+    .status-pendiente {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+    
+    .status-disenando {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+    }
+    
+    .status-rechazada {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+    
+    /* Enlace directo */
+    .promo-link-box {
+        background: white;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .promo-link-box .url-text {
+        font-size: 0.7rem;
+        color: #6b7280;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .btn-copy {
+        background: none;
+        border: none;
+        color: #6C63FF;
+        cursor: pointer;
+        font-size: 0.85rem;
+        padding: 0.25rem;
+        transition: color 0.2s;
+    }
+    
+    .btn-copy:hover {
+        color: #5A52D5;
+    }
+    
+    /* Botones de acción */
+    .promo-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .btn-action {
+        flex: 1;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.4rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    .btn-ver {
+        background: #eff6ff;
+        color: #4D96FF;
+    }
+    
+    .btn-ver:hover {
+        background: #dbeafe;
+    }
+    
+    .btn-compartir {
+        background: #ecfdf5;
+        color: #059669;
+    }
+    
+    .btn-compartir:hover {
+        background: #d1fae5;
+    }
+    
+    /* Solicitudes */
+    .solicitud-item {
+        background: #fafafa;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.25s ease;
+    }
+    
+    .solicitud-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .solicitud-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Empty state */
+    .empty-state-mini {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #9ca3af;
+    }
+    
+    .empty-state-mini i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .empty-state-mini p {
+        font-size: 0.85rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .promo-column-body {
+            max-height: none;
+        }
+        
+        .promo-card-img {
+            height: 100px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ========== MINI HEADER ========== -->
+<header class="relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
+    <div class="max-w-4xl mx-auto text-center py-8 md:py-12 px-6">
+        <div class="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm mb-4 border border-white/20">
+            <i class="bi bi-megaphone mr-2"></i>
+            Gestión de Promociones
+        </div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-white">
+            Mis <span style="color: #FFD93D;">Promociones</span>
+        </h1>
+        <p class="text-white/70 text-sm mt-2">Gestiona tus tarjetas activas y revisa el estado de tus solicitudes</p>
+    </div>
+    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+        <svg viewBox="0 0 1440 40" preserveAspectRatio="none" class="w-full h-[40px]">
+            <path d="M0,0 C480,40 960,40 1440,0 L1440,40 L0,40 Z" fill="#f9fafb"></path>
+        </svg>
+    </div>
+</header>
+
+<!-- ========== CONTENIDO PRINCIPAL ========== -->
+<div class="promo-grid-container">
+    
+    <!-- Botón crear nueva promoción -->
+    <div class="text-end mb-4">
+        <a href="{% url 'crear_promocion' %}" class="btn btn-sm text-white fw-semibold rounded-pill px-4 py-2"
+           style="background: var(--primary, #6C63FF);">
+            <i class="bi bi-plus-lg me-1"></i> Crear Nueva Promoción
+        </a>
+    </div>
+    
+    <!-- Grid de 2 columnas -->
+    <div class="row g-4">
+        
+        <!-- ========== COLUMNA 1: ACTIVAS Y PUBLICADAS ========== -->
+        <div class="col-12 col-lg-6">
+            <div class="promo-column">
+                <div class="promo-column-header activas">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    Activas y Publicadas
+                    <span class="count-badge">{{ promociones_activas|length }}</span>
+                </div>
+                
+                <div class="promo-column-body">
+                    {% if promociones_activas %}
+                        {% for promo in promociones_activas %}
+                        <div class="promo-card">
+                            <!-- Imagen -->
+                            <div class="promo-card-img">
+                                {% if promo.imagen %}
+                                <img src="{{ promo.imagen.url }}" alt="{{ promo.titulo }}">
+                                {% else %}
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                    <i class="bi bi-image fs-3"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Contenido -->
+                            <div class="promo-card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <span class="promo-card-title">{{ promo.titulo|truncatechars:25 }}</span>
+                                    <span class="promo-card-status status-activa">Activa</span>
+                                </div>
+                                
+                                <!-- Enlace directo -->
+                                <div class="promo-link-box">
+                                    <span class="url-text">{{ request.get_host }}/p/{{ promo.slug }}/</span>
+                                    <button onclick="copyToClipboard('{{ request.get_host }}/p/{{ promo.slug }}/')" 
+                                            class="btn-copy" title="Copiar enlace">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Botones de acción -->
+                                <div class="promo-card-actions">
+                                    <a href="{% url 'ver_promocion' promo.slug %}" target="_blank" class="btn-action btn-ver">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    <a href="https://wa.me/?text=Mira%20mi%20promoción:%20{{ request.get_host }}/p/{{ promo.slug }}/" 
+                                       target="_blank" class="btn-action btn-compartir">
+                                        <i class="bi bi-whatsapp"></i> Compartir
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="empty-state-mini">
+                        <i class="bi bi-images"></i>
+                        <p>Aún no tienes promociones activas</p>                        
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== COLUMNA 2: SOLICITUDES EN PROCESO ========== -->
+        <div class="col-12 col-lg-6">
+            <div class="promo-column">
+                <div class="promo-column-header proceso">
+                    <i class="bi bi-hourglass-split text-warning"></i>
+                    Promociones en Proceso
+                    <span class="count-badge">{{ promociones_proceso|length }}</span>
+                </div>
+                
+                <div class="promo-column-body">
+                    {% if promociones_proceso %}
+                        {% for prom in promociones_proceso %}
+                        <div class="promo-card">
+                            <!-- Imagen -->
+                            <div class="promo-card-img">
+                                {% if promo.imagen %}
+                                <img src="{{ promo.imagen.url }}" alt="{{ promo.titulo }}">
+                                {% else %}
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                    <i class="bi bi-image fs-3"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Contenido -->
+                            <div class="promo-card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <span class="promo-card-title">{{ promo.titulo|truncatechars:25 }}</span>
+                                    <span class="promo-card-status status-activa">Activa</span>
+                                </div>
+                                
+                                <!-- Enlace directo -->
+                                <div class="promo-link-box">
+                                    <span class="url-text">{{ request.get_host }}/p/{{ promo.slug }}/</span>
+                                    <button onclick="copyToClipboard('{{ request.get_host }}/p/{{ promo.slug }}/')" 
+                                            class="btn-copy" title="Copiar enlace">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Botones de acción -->
+                                <div class="promo-card-actions">
+                                    <a href="{% url 'ver_promocion' promo.slug %}" target="_blank" class="btn-action btn-ver">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                    <a href="https://wa.me/?text=Mira%20mi%20promoción:%20{{ request.get_host }}/p/{{ promo.slug }}/" 
+                                       target="_blank" class="btn-action btn-compartir">
+                                        <i class="bi bi-whatsapp"></i> Compartir
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="empty-state-mini">
+                        <i class="bi bi-images"></i>
+                        <p>Aún no tienes promociones activas</p>
+                        <a href="{% url 'crear_promocion' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-2">
+                            <i class="bi bi-plus-lg me-1"></i> Crear primera
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- SECCIÓN 2: SOLICITUDES EN PROCESO -->
+        <div>
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Solicitudes en Proceso</h2>
+            
+            {% if solicitudes %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="py-3 px-4 text-gray-600 text-sm">Plan Solicitado</th>
+                            <th class="py-3 px-4 text-gray-600 text-sm">Fecha</th>
+                            <th class="py-3 px-4 text-gray-600 text-sm">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sol in solicitudes %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-sm font-medium text-gray-800">{{ sol.plan.nombre }}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500">{{ sol.fecha_solicitud|date:'Y-m-d' }}</td>
+                            <td class="py-3 px-4 text-sm">
+                                {% if sol.estado == 'pendiente' %}
+                                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-semibold">Pendiente de Contacto/Pago</span>
+                                {% elif sol.estado == 'disenando' %}
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">En Proceso de Diseño</span>
+                                {% elif sol.estado == 'rechazada' %}
+                                    <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">Cancelada</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="bg-white p-6 rounded-xl border-2 border-dashed border-gray-200 text-center text-gray-400">
+                <p>No tienes solicitudes pendientes.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function copyToClipboard(text) {
+        const fullUrl = text.startsWith('http') ? text : 'https://' + text;
+        navigator.clipboard.writeText(fullUrl).then(() => {
+            // Cambiar temporalmente el icono para feedback visual
+            alert('¡Enlace copiado al portapapeles!');
+        }).catch(err => {
+            console.error('Error al copiar:', err);
+        });
+    }
+</script>
+{% endblock %}

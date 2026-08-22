@@ -280,7 +280,7 @@
     </script>
 
     <!-- ========== CONTENIDO PRINCIPAL ========== -->
-    <main id="main-content" role="main" class="pt-16 md:pt-20">
+    <main id="main-content" role="main" class="{% block main_class %}pt-16 md:pt-20{% endblock %}">
         <!-- Mensajes de Django -->
         {% block messages %}
             {% if messages %}
@@ -294,7 +294,7 @@
             </div>
             {% endif %}
         {% endblock %}
-        
+    
         <!-- Contenido de la página -->
         {% block content %}{% endblock %}
     </main>
