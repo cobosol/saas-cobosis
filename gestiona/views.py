@@ -4,8 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from datetime import timedelta
-from clientes.models import Suscripcion
-from servicios.models import Servicio, Plan
+from servicios.models import Servicio, Plan, Suscripcion
 import json # Lo usaremos solo para serializar a texto en el frontend, no en la BD
 from .models import Extraccion, VariableUsuario
 from saas_cobosis.settings import GROK_API

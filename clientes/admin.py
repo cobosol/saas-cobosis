@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import PerfilCliente, Suscripcion
+from .models import PerfilCliente
+from servicios.models import Suscripcion
 
 class ClienteAdmin(admin.ModelAdmin):
     pass

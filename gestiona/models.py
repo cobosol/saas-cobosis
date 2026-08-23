@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from clientes.models import Suscripcion
+from servicios.models import Suscripcion
 
 # Modelo para guardar las variables fijas del usuario (Relación 1 a N)
 class VariableUsuario(models.Model):

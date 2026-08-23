@@ -1,4 +1,4 @@
-from .models import Suscripcion
+from servicios.models import Suscripcion
 from typing import Any
 from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet

@@ -1,8 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
-from clientes.models import Suscripcion
-from servicios.models import Plan
+#from clientes.models import 
+from servicios.models import Plan, Suscripcion
 import uuid
 
 TIPOS = [
