@@ -125,13 +125,14 @@ class Suscripcion(models.Model):
     
     @property
     def vigente(self):
+        from django.utils import timezone
         # lógica para verificar si el plan sigue vigente
-        return not self.fecha_fin or self.fecha_fin >= now().date()
+        return not self.fecha_fin or self.fecha_fin >= timezone.localdate()
     
     @property
     def dias_restantes(self):
-        if self.fecha_fin > now().date():
-            delta = self.fecha_fin - now().date()
+        if self.fecha_fin > timezone.localdate():
+            delta = self.fecha_fin - timezone.localdate()
             return delta.days 
         else:
             return 0

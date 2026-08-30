@@ -18,7 +18,7 @@ class VariableUsuario(models.Model):
 
 # Modelo de Extracción modificado (Sin JSONField)
 class Extraccion(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='extracciones')
+    #usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='extracciones')
     suscripcion = models.ForeignKey(Suscripcion, on_delete=models.CASCADE, related_name='extracciones', null=True, blank=True)
     texto_original = models.TextField()
     # Guardaremos los datos como texto plano. Ej: "cliente: Juan, producto: Camisa, cantidad: 2"
@@ -30,4 +30,4 @@ class Extraccion(models.Model):
         ordering = ['-fecha_creacion']
 
     def __str__(self):
-        return f"Extracción de {self.usuario.username} - {self.fecha_creacion.strftime('%Y-%m-%d')}"
+        return f"Extracción de {self.suscripcion.usuario.username} - {self.fecha_creacion.strftime('%Y-%m-%d')}"

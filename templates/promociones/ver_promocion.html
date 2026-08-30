@@ -1,70 +1,214 @@
-<!-- core/ver_promocion.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ promocion.titulo }} | Cobosis</title>
+    <title>{{ promocion.titulo }} | Cobosis Promociones</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Fuentes e iconos de tu diseño original -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #020617;
+            --card-bg: #0f172a;
+            --primary: #3b82f6;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: #1e293b;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Tarjeta dorada responsiva */
+        .golden-card {
+            width: 100%;
+            max-width: 720px; /* Tamaño máximo en PCs */
+            aspect-ratio: 1 / 1.618; /* Mantiene la proporción áurea */
+            background-color: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin: 0 auto;
+        }
+
+        .bg-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px; z-index: 0;
+        }
+
+        .glow-orb { position: absolute; border-radius: 50%; filter: blur(80px); z-index: 0; }
+        .orb-1 { width: 400px; height: 400px; background: rgba(59, 130, 246, 0.15); top: -10%; right: -10%; }
+        .orb-2 { width: 300px; height: 300px; background: rgba(6, 182, 212, 0.1); bottom: 10%; left: -5%; }
+
+        .content-wrapper { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; }
+
+        .visual-section { height: 62%; width: 100%; position: relative; overflow: hidden; }
+        .main-image { width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0.9; }
+        .image-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(2, 6, 23, 0) 0%, rgba(2, 6, 23, 0.8) 80%, rgba(2, 6, 23, 1) 100%); }
+
+        .badge {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 16px;
+            border-radius: 50px; color: white; font-size: 0.8rem; font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .info-section { flex: 1; padding: clamp(15px, 4vw, 40px) clamp(20px, 5vw, 50px); display: flex; flex-direction: column; justify-content: space-between; }
+        .header-group { margin-bottom: 15px; }
+        .brand-logo { height: 28px; width: auto; margin-bottom: 15px; filter: brightness(0) invert(1); }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.5rem, 4vw, 2.8rem); /* Texto responsivo */
+            font-weight: 700; line-height: 1.1; color: var(--text-light); margin-bottom: 10px;
+        }
+        .highlight { color: var(--secondary); }
+
+        .description {
+            font-size: clamp(0.85rem, 2vw, 1.1rem); color: var(--text-muted);
+            line-height: 1.5; max-width: 95%;
+            /* Limitar a 3 líneas para que no rompa el diseño */
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+
+        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: auto; margin-bottom: 20px; }
+        .feature-item { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; }
+        .icon-box { width: 40px; height: 40px; border-radius: 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; justify-content: center; align-items: center; color: var(--primary); }
+        .feature-title { font-size: 0.85rem; font-weight: 600; color: var(--text-light); }
+        .feature-desc { font-size: 0.7rem; color: var(--text-muted); }
+
+        .cta-container { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        .cta-text { font-size: clamp(0.9rem, 2vw, 1.2rem); font-weight: 600; color: white; }
+        .cta-button { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25); }
+
+        /* Carrusel */
         .carousel-container { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         .carousel-item { scroll-snap-align: start; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="font-sans">
 
-    <nav class="bg-white shadow-sm py-3 px-6 flex justify-between items-center">
-        <a href="/" class="text-xl font-bold text-blue-600">Cobosis</a>
-        <a href="/" class="text-sm text-gray-500 hover:text-blue-600">¿Quieres promocionar tu negocio?</a>
+    <!-- NAVBAR MINIMALISTA -->
+    <nav class="bg-gray-900 py-3 px-6 flex justify-between items-center shadow-md z-10 relative">
+        <a href="/" class="text-xl font-bold text-white">Cobosis</a>
+        <a href="/" class="text-sm text-gray-400 hover:text-white transition">¿Quieres promocionarte aquí?</a>
     </nav>
 
-    <div class="max-w-5xl mx-auto px-4 py-8">
-        <!-- TARJETA PRINCIPAL -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-12">
-            <div class="grid md:grid-cols-2">
-                <div class="bg-gray-50 flex items-center justify-center p-6">
-                    {% if promocion.imagen_tarjeta %}
-                        <img src="{{ promocion.imagen_tarjeta.url }}" alt="{{ promocion.titulo }}" class="w-full h-auto rounded-xl object-cover shadow-md">
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="max-w-5xl mx-auto px-4 py-10">
+        
+        <!-- TARJETA GRANDE PRINCIPAL (Diseño 1.618) -->
+        <div class="golden-card">
+            <div class="bg-grid"></div>
+            <div class="glow-orb orb-1"></div>
+            <div class="glow-orb orb-2"></div>
+
+            <div class="content-wrapper">
+                <!-- Top Visual -->
+                <div class="visual-section">
+                    {% if promocion.imagen %}
+                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="main-image">
                     {% else %}
-                        <div class="w-full h-64 flex items-center justify-center bg-gray-200 rounded-xl text-gray-400">Sin imagen</div>
+                        <div class="w-full h-full bg-gray-800 flex items-center justify-center text-gray-500">Sin imagen</div>
                     {% endif %}
-                </div>
-                <div class="p-8 flex flex-col justify-center">
-                    <span class="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-2">{{ promocion.categoria }}</span>
-                    <h1 class="text-3xl font-extrabold text-gray-900 mb-4">{{ promocion.titulo }}</h1>
-                    <p class="text-gray-600 mb-6">{{ promocion.descripcion }}</p>
+                    <div class="image-overlay"></div>
                     
-                    <div class="flex gap-3 text-gray-500">
-                        <span class="text-sm self-center">Compartir:</span>
-                        <a href="https://wa.me/?text=Mira%20esta%20promoción:%20{{ request.build_absolute_uri }}" target="_blank" class="hover:text-green-500"><i class="fab fa-whatsapp text-xl"></i></a>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="hover:text-blue-600"><i class="fab fa-facebook text-xl"></i></a>
+                    <!-- Badge (Categoría) -->
+                    <div class="badge">
+                        <i class="material-icons" style="font-size: 16px;">auto_awesome</i>
+                        <span>{{ promocion.categoria|default:"Promoción" }}</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Info -->
+                <div class="info-section">
+                    <div class="header-group">
+                        <img src="https://cobosis.com/static/images/logo.png" alt="Cobosis Logo" class="brand-logo" onerror="this.style.display='none'">
+                        
+                        <h1>{{ promocion.titulo }}</h1>
+                        
+                        <p class="description">{{ promocion.descripcion }}</p>
+                    </div>
+
+                    <div class="features">
+                        <div class="feature-item">
+                            <div class="icon-box">
+                                <i class="material-icons" style="font-size: 20px;">event</i>
+                            </div>
+                            <span class="feature-title">Fecha</span>
+                            <span class="feature-desc">{{ promocion.fecha_evento|date:"d M Y"|default:"N/A" }}</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="icon-box">
+                                <i class="material-icons" style="font-size: 20px;">place</i>
+                            </div>
+                            <span class="feature-title">Lugar</span>
+                            <span class="feature-desc">{{ promocion.lugar|default:"N/A" }}</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="icon-box">
+                                <i class="material-icons" style="font-size: 20px;">share</i>
+                            </div>
+                            <span class="feature-title">Comparte</span>
+                            <span class="feature-desc">Fácil y rápido</span>
+                        </div>
+                    </div>
+
+                    <div class="cta-container">
+                        <span class="cta-text">No te lo pierdas</span>
+                        <a href="{% if promocion.enlace_accion %}{{ promocion.enlace_accion }}{% else %}https://wa.me/?text=Estoy%20interesado%20en%20{{ promocion.titulo }}{% endif %}" target="_blank" class="cta-button">
+                            <span>Más Info</span>
+                            <i class="material-icons" style="font-size: 18px;">arrow_forward</i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CARRUSEL -->
+        <!-- BOTONES DE COMPARTIR EN REDES -->
+        <div class="mt-8 flex justify-center gap-6 text-gray-400">
+            <span class="self-center text-sm hidden sm:block">Compartir esta promoción:</span>
+            <a href="https://wa.me/?text=Mira%20esta%20promoción:%20{{ request.build_absolute_uri }}" target="_blank" class="hover:text-green-400 transition flex items-center gap-2"><i class="fab fa-whatsapp text-2xl"></i> <span class="text-sm hidden md:inline">WhatsApp</span></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="hover:text-blue-500 transition flex items-center gap-2"><i class="fab fa-facebook text-2xl"></i> <span class="text-sm hidden md:inline">Facebook</span></a>
+            <a href="https://twitter.com/intent/tweet?text={{ promocion.titulo }}&url={{ request.build_absolute_uri }}" target="_blank" class="hover:text-white transition flex items-center gap-2"><i class="fab fa-x-twitter text-2xl"></i> <span class="text-sm hidden md:inline">Twitter</span></a>
+        </div>
+
+        <!-- CARRUSEL DE PROMOCIONES RELACIONADAS -->
         {% if relacionadas %}
-        <section>
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Otras promociones de {{ promocion.categoria }}</h2>
+        <section class="mt-16">
+            <h2 class="text-2xl font-bold text-gray-300 mb-6 text-center">Otras promociones que te pueden interesar</h2>
+            
             <div class="carousel-container flex overflow-x-auto space-x-6 pb-4 -mx-4 px-4">
                 {% for rel in relacionadas %}
-                <a href="{% url 'ver_promocion' rel.slug %}" class="carousel-item flex-shrink-0 w-72 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition block group">
-                    <div class="h-40 bg-gray-100 overflow-hidden">
-                        {% if rel.imagen_tarjeta %}
-                        <img src="{{ rel.imagen_tarjeta.url }}" alt="{{ rel.titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                <a href="{% url 'ver_promocion' rel.slug %}" class="carousel-item flex-shrink-0 w-72 bg-gray-800 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-500 transition block group">
+                    <div class="h-40 bg-gray-700 overflow-hidden">
+                        {% if rel.imagen %}
+                        <img src="{{ rel.imagen.url }}" alt="{{ rel.titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-gray-500">Sin imagen</div>
                         {% endif %}
                     </div>
                     <div class="p-4">
-                        <h3 class="font-bold text-gray-800 truncate">{{ rel.titulo }}</h3>
-                        <span class="mt-3 inline-block text-blue-600 text-sm font-semibold">Ver promoción →</span>
+                        <h3 class="font-bold text-gray-100 truncate">{{ rel.titulo }}</h3>
+                        <p class="text-xs text-gray-400 mt-1 line-clamp-2 h-8">{{ rel.descripcion }}</p>
+                        <span class="mt-3 inline-block text-blue-400 text-sm font-semibold">Ver promoción →</span>
                     </div>
                 </a>
                 {% endfor %}
             </div>
         </section>
         {% endif %}
+
     </div>
 </body>
 </html>
