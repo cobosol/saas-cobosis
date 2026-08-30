@@ -88,21 +88,23 @@ def crear_promocion(request):
     return render(request, 'promociones/crear_promocion.html', context)
 """
 # En views.py
+
 def ver_promocion(request, slug):
-    promocion = get_object_or_404(Promocion, slug=slug, activa=True)
+    promocion = get_object_or_404(Promocion, slug=slug) #, estado='publicado'
     
-    if not promocion.esta_vigente:
-        return render(request, 'promociones/promocion_expirada.html')
+    """ if not promocion.esta_vigente:
+        return render(request, 'promociones/promocion_expirada.html') """
 
     relacionadas = Promocion.objects.filter(
         categoria=promocion.categoria, 
-        activa=True
-    ).exclude(id=promocion.id).order_by('-es_destacada', '-fecha_inicio')[:10]
+        estado='publicado'
+    ).exclude(id=promocion.id).order_by('-destacado', '-fecha_evento')[:10]
 
     context = {
         'promocion': promocion,
         'relacionadas': relacionadas
     }
+    print(context)
     return render(request, 'promociones/ver_promocion.html', context)
 """
 @login_required
@@ -142,7 +144,7 @@ def suscribir_promocion(request):
         plan_id = request.POST.get('plan_id')
         plan = get_object_or_404(Plan, id=plan_id, activo=True)
         
-        #  VALIDACIÓN 1: Verificar si ya tiene suscripción activa o solicitada
+        # ✅ VALIDACIÓN 1: Verificar si ya tiene suscripción activa o solicitada
         suscripcion_existente = Suscripcion.objects.filter(
             usuario=request.user,
             plan__servicio__slug='promociones',
@@ -157,7 +159,7 @@ def suscribir_promocion(request):
             )
             return redirect('crear_promocion_adicional')
         
-        # VALIDACIÓN 2: Verificar límite de promociones del plan
+        # ✅ VALIDACIÓN 2: Verificar límite de promociones del plan
         if not plan.permite_mas_promociones(request.user):
             messages.error(request, f'El plan "{plan.nombre}" no permite más promociones.')
             return redirect('panel_cliente')
@@ -195,3 +197,137 @@ def suscribir_promocion(request):
         'titulo_pagina': 'Suscríbete y Crea tu Primera Promoción',
     }
     return render(request, 'promociones/crear_promocion.html', context)
+
+@login_required(login_url='/login/')
+def mis_promociones(request):
+    # Obtener suscripción activa
+    suscripcion_activa = Suscripcion.objects.filter(
+        usuario=request.user,
+        plan__servicio__slug='promociones',
+        estado='activa'
+    ).first()
+
+    print(suscripcion_activa)
+
+    # Obtener promociones activas y solicitudes
+    promociones_activas = SolicitudPromocion.objects.filter(
+        usuario=request.user,
+        estado__in=['disenando', 'activa']
+    ).order_by('-fecha_solicitud')
+
+    print(f'promociones_activas {promociones_activas}')
+    print(promociones_activas[0].promocion_creada)
+
+    solicitudes = SolicitudPromocion.objects.filter(
+        usuario=request.user,
+        estado__in=['pendiente', 'disenando']
+    ).order_by('-fecha_solicitud')
+    
+    # Calcular promociones restantes
+    promociones_restantes = None
+    if suscripcion_activa and suscripcion_activa.plan.max_promociones > 0:
+        total_creadas = SolicitudPromocion.objects.filter(
+            usuario=request.user,
+            plan=suscripcion_activa.plan
+        ).count()
+        promociones_restantes = suscripcion_activa.plan.max_promociones - total_creadas
+    
+    context = {
+        'promociones_activas': promociones_activas,
+        'solicitudes': solicitudes,
+        'suscripcion_activa': suscripcion_activa,
+        'promociones_restantes': promociones_restantes,
+    }
+    return render(request, 'promociones/mis_promociones.html', context)
+
+# ============================================================
+# VISTA 2: CREAR PROMOCIÓN ADICIONAL
+# Se usa cuando el usuario YA tiene una suscripción activa
+# ============================================================
+@login_required(login_url='/login/')
+def crear_promocion_adicional(request):
+    """
+    Crea promociones adicionales para usuarios que ya tienen suscripción activa.
+    """
+    # Obtener la suscripción activa del usuario
+    suscripcion_activa = Suscripcion.objects.filter(
+        usuario=request.user,
+        plan__servicio__slug='promociones',
+        estado='activa'
+    ).first()
+    
+    if not suscripcion_activa:
+        messages.warning(request, 'No tienes una suscripción activa. Debes suscribirte primero.')
+        return redirect('suscribir_promocion')
+    
+    plan = suscripcion_activa.plan
+    
+    # ✅ Validar límite de promociones
+    if not plan.permite_mas_promociones(request.user):
+        messages.error(
+            request, 
+            f'Has alcanzado el límite de {plan.max_promociones} promociones '
+            f'para el plan "{plan.nombre}".'
+        )
+        return redirect('mis_promociones')
+    
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                solicitud = _crear_solicitud_desde_post(request, plan)
+                messages.success(request, '¡Promoción adicional solicitada con éxito!')
+        except Exception as e:
+            messages.error(request, f'Error al procesar: {str(e)}')
+        
+        return redirect('mis_promociones')
+    
+    context = {
+        'plan_actual': plan,
+        'suscripcion': suscripcion_activa,
+        'modo': 'adicional',  # Indica que es promoción adicional
+        'titulo_pagina': f'Crear Promoción Adicional - Plan {plan.nombre}',
+        'tipos_permitidos': plan.get_tipos_permitidos_list(),
+    }
+    return render(request, 'promociones/crear_promocion.html', context)
+
+# ============================================================
+# FUNCIÓN AUXILIAR: Crear solicitud desde POST
+# ============================================================
+def _crear_solicitud_desde_post(request, plan):
+    """
+    Crea una SolicitudPromocion a partir de los datos del POST.
+    """
+    tipo = request.POST.get('tipo_formulario') or plan.tipo_formulario or 'evento'
+    
+    solicitud = SolicitudPromocion.objects.create(
+        usuario=request.user,
+        plan=plan,
+        tipo=tipo,
+        estado='pendiente',
+        generar_imagen_ia=request.POST.get('generar_imagen_ia') == 'on',
+        imagen_subida=request.FILES.get('imagen_subida'),
+    )
+    
+    # Guardar campos según el tipo
+    if tipo == 'evento':
+        solicitud.titulo_evento = request.POST.get('titulo_evento', '')
+        solicitud.fecha_evento = request.POST.get('fecha_evento') or None
+        solicitud.hora_evento = request.POST.get('hora_evento') or None
+        solicitud.lugar_evento = request.POST.get('lugar_evento', '')
+        solicitud.info_evento = request.POST.get('info_evento', '')
+        solicitud.datos_recopilados = f"Título: {solicitud.titulo_evento}, Lugar: {solicitud.lugar_evento}"
+        
+    elif tipo == 'negocio':
+        solicitud.nombre_negocio = request.POST.get('nombre_negocio', '')
+        solicitud.rubro_negocio = request.POST.get('rubro_negocio', '')
+        solicitud.telefono_negocio = request.POST.get('telefono_negocio', '')
+        solicitud.descripcion_negocio = request.POST.get('descripcion_negocio', '')
+        solicitud.datos_recopilados = f"Negocio: {solicitud.nombre_negocio}, Rubro: {solicitud.rubro_negocio}"
+        
+    else:
+        solicitud.titulo_generico = request.POST.get('titulo_generico', '')
+        solicitud.descripcion_generica = request.POST.get('descripcion_generica', '')
+        solicitud.datos_recopilados = f"Título: {solicitud.titulo_generico}"
+    
+    solicitud.save()
+    return solicitud

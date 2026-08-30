@@ -13,6 +13,7 @@ import json
 import os
 from openai import OpenAI
 from django.conf import settings
+from django.contrib import messages
 
 # Inicializar cliente OpenAI
 """ client = OpenAI(
@@ -210,7 +211,6 @@ def gestiona_procesar(request):
 
     # Guardar en BD
     nueva_extraccion = Extraccion.objects.create(
-        usuario=request.user,
         suscripcion=suscripcion,
         texto_original=texto,
         datos_extraidos=datos_texto,

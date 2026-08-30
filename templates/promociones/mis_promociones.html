@@ -27,31 +27,31 @@
                 {% for promo in promociones_activas %}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                     <div class="h-40 bg-gray-100 overflow-hidden">
-                        {% if promo.imagen %}
-                            <img src="{{ promo.imagen.url }}" alt="{{ promo.titulo }}" class="w-full h-full object-cover">
+                        {% if promo.promocion_creada.imagen %}
+                            <img src="{{ promo.promocion_creada.imagen.url }}" alt="{{ promo.promocion_creada.titulo }}" class="w-full h-full object-cover">
                         {% else %}
                             <div class="w-full h-full flex items-center justify-center text-gray-400">Sin imagen</div>
                         {% endif %}
                     </div>
                     <div class="p-4 flex-grow flex flex-col">
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-gray-800">{{ promo.titulo|truncatechars:30 }}</h3>
+                            <h3 class="font-bold text-gray-800">{{ promo.promocion_creada.titulo|truncatechars:30 }}</h3>
                             <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Activa</span>
                         </div>
                         
                         <!-- Enlace Directo -->
                         <div class="mt-2 bg-gray-50 p-2 rounded-lg border border-gray-200 flex items-center justify-between">
-                            <span class="text-xs text-gray-500 truncate flex-1 mr-2">{{ request.get_host }}/p/{{ promo.slug }}/</span>
-                            <button onclick="copyToClipboard('{{ request.get_host }}/p/{{ promo.slug }}/')" class="text-blue-500 hover:text-blue-700 text-sm">
+                            <span class="text-xs text-gray-500 truncate flex-1 mr-2">{{ request.get_host }}/p/{{ promo.promocion_creada.slug }}/</span>
+                            <button onclick="copyToClipboard('{{ request.get_host }}/p/{{ promo.promocion_creada.slug }}/')" class="text-blue-500 hover:text-blue-700 text-sm">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
 
                         <div class="mt-4 flex gap-2">
-                            <a href="{% url 'ver_promocion' promo.slug %}" target="_blank" class="flex-1 text-center bg-blue-50 text-blue-600 text-sm font-bold py-2 rounded-lg hover:bg-blue-100 transition">
+                            <a href="{% url 'ver_promocion' promo.promocion_creada.slug %}" target="_blank" class="flex-1 text-center bg-blue-50 text-blue-600 text-sm font-bold py-2 rounded-lg hover:bg-blue-100 transition">
                                 <i class="fas fa-eye mr-1"></i> Ver
                             </a>
-                            <a href="https://wa.me/?text=Mira%20mi%20promoción:%20{{ request.get_host }}/p/{{ promo.slug }}/" target="_blank" class="flex-1 text-center bg-green-50 text-green-600 text-sm font-bold py-2 rounded-lg hover:bg-green-100 transition">
+                            <a href="https://wa.me/?text=Mira%20mi%20promoción:%20{{ request.get_host }}/p/{{ promo.promocion_creada.slug }}/" target="_blank" class="flex-1 text-center bg-green-50 text-green-600 text-sm font-bold py-2 rounded-lg hover:bg-green-100 transition">
                                 <i class="fab fa-whatsapp mr-1"></i> Compartir
                             </a>
                         </div>

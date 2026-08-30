@@ -7,17 +7,18 @@ from . import views
 
 urlpatterns = [
     path('', views.promociones, name='promociones'),
-    # Suscripción inicial con primera promoción
+    # Suscripciï¿½n inicial con primera promociï¿½n
     path('promociones/suscribir/', views.suscribir_promocion, name='suscribir_promocion'),
     
-    # Crear promoción adicional (requiere suscripción activa)
+    # Crear promociï¿½n adicional (requiere suscripciï¿½n activa)
     path('promociones/crear-adicional/', views.crear_promocion_adicional, name='crear_promocion_adicional'),
     
     # Alias para compatibilidad
     path('promociones/crear/', views.crear_promocion_adicional, name='crear_promocion'),
     
     # Mis promociones
-    path('p/<uuid:slug>/', views.ver_promocion, name='ver_promocion'),
+    path('p/<str:slug>/', views.ver_promocion, name='ver_promocion'),
+
     path('promociones/mis-promociones/', views.mis_promociones, name='mis_promociones'),
 ]
 
