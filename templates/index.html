@@ -47,16 +47,16 @@
         </p>
         
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="#servicios" class="bg-[#FF6B6B] text-white font-bold py-4 px-10 rounded-xl shadow-2xl hover:bg-[#2d1b69] transition-all duration-300 inline-block text-lg">
-                <i class="fas fa-rocket mr-2"></i>Descubre nuestros servicios
+            <a href='promociones' class="bg-[#FF6B6B] text-white font-bold py-4 px-10 rounded-xl shadow-2xl hover:bg-[#2d1b69] transition-all duration-300 inline-block text-lg">
+                <i class="fas fa-rocket mr-2"></i>Promociones
             </a>
             {% if user.is_authenticated %}
             <a href="#servicios" class="bg-white text-[#6C63FF] font-bold py-4 px-10 rounded-xl hover:bg-white hover:text-[#FF6B6B] transition-all duration-300 inline-block text-lg">
-                <i class="fas fa-play mr-2"></i>Empezar Gratis
+                <i class="fas fa-play mr-2"></i>Nuestros servicios
             </a>
             {% else %}
             <a href="{% url 'registro' %}" class="bg-white text-[#6C63FF] font-bold py-4 px-10 rounded-xl hover:bg-white hover:text-[#FF6B6B] transition-all duration-300 inline-block text-lg">
-                <i class="fas fa-play mr-2"></i>Empezar Gratis
+                <i class="fas fa-play mr-2"></i>Nuestros servicios
             </a>
             {%endif%}
         </div>
@@ -137,9 +137,6 @@
                             <a href="{{ servicio.get_absolute_url }}" class="bg-gray-800 text-white text-center font-bold py-3 px-6 rounded-xl hover:bg-gray-900 transition-all duration-300 hover:-translate-y-0.5">
                                 <i class="fas fa-info-circle mr-2"></i>Ver Detalles y Planes
                             </a>
-                            <a href="#" class="bg-[#6C63FF] text-white text-center font-bold py-3 px-6 rounded-xl hover:bg-[#5A52D5] transition-all duration-300 hover:-translate-y-0.5">
-                                <i class="fas fa-crown mr-2"></i>Suscribirse
-                            </a>
                         </div>
                     </div>
                     
@@ -147,10 +144,11 @@
                     <div class="md:w-1/2 bg-gray-50 p-8 rounded-2xl border border-gray-100">
                         <h4 class="font-bold text-lg mb-6 text-gray-800 flex items-center">
                             <i class="fas fa-layer-group text-[#6C63FF] mr-2"></i>
-                            Planes Disponibles
+                            Planes destacados
                         </h4>
                         <ul class="space-y-4">
                             {% for plan in servicio.planes.all %}
+                            {% if plan.destacado or plan.precio == 0 or plan.vigencia_dias == 365 %}
                                 <li class="plan-item flex justify-between items-start pb-4 border-b border-gray-200 last:border-0">
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
@@ -168,6 +166,7 @@
                                         <span class="block text-xs text-gray-400">{{ plan.vigencia_dias }} días</span>
                                     </div>
                                 </li>
+                            {% endif %}
                             {% empty %}
                                 <li class="text-gray-400 text-center py-4">
                                     <i class="fas fa-inbox text-3xl mb-2 block"></i>

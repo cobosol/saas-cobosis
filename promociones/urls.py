@@ -7,6 +7,7 @@ from . import views
 
 urlpatterns = [
     path('', views.promociones, name='promociones'),
+    
     # Suscripci�n inicial con primera promoci�n
     path('promociones/suscribir/', views.suscribir_promocion, name='suscribir_promocion'),
     
