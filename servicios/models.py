@@ -30,6 +30,8 @@ class Plan(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(help_text="Ej: Incluye enlace directo, diseño de tarjeta...")
     precio = models.DecimalField(max_digits=10, decimal_places=2)
+    #price_monthly = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    #price_yearly = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     vigencia_dias = models.PositiveIntegerField(default=30, help_text="Duración de la suscripción en días")
     
     destacado = models.BooleanField(default=False, help_text="Marcar si es el plan más popular")
@@ -111,6 +113,7 @@ class Suscripcion(models.Model):
     fecha_inicio = models.DateField(auto_now=True)
     estado = models.CharField(max_length=20, choices=ESTADO, default='activa')
     fecha_fin = models.DateField(null=True, blank=True)
+    #payment_id = models.CharField(max_length=255, blank=True, null=True)  # ID de pago (Stripe u otro)
 
     class Meta:
         ordering = ['-fecha_inicio']
