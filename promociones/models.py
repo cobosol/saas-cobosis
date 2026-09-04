@@ -24,8 +24,34 @@ class Categoria(models.Model):
     def promociones(self):
         return Promocion.objects.filter(categoria=self, estado='publicado').order_by('-prioridad', '-creado')
 
+from django.db import models
+
+class TemplateCard(models.Model):
+    CATEGORY_CHOICES = (
+        ('evento', 'Evento'),
+        ('invitacion', 'Invitación'),
+        ('negocio', 'Negocio'),
+        ('agradecimiento', 'Agradecimiento'),
+        ('promocion', 'Promoción'),
+    )
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    thumbnail = models.ImageField(upload_to='templates/thumbnails/', blank=True, null=True)
+    html_template = models.TextField(help_text="HTML con variables en {{ variable }}")
+    css_template = models.TextField(blank=True, help_text="CSS personalizado")
+    # Schema de campos dinámicos (JSON)
+    fields_schema = models.JSONField(default=dict, help_text="Ej: {'fields': [{'name':'titulo','type':'text','label':'Título'}, ...]}")
+    # Lista de variables permitidas (para validación)
+    allowed_variables = models.JSONField(default=list, help_text="Lista de variables que pueden usarse en el HTML")
+
+    def __str__(self):
+        return self.name
+
+    
 class Promocion(models.Model):
     ESTADOS = [
+        ('borrador', 'Borrador'),
         ('pendiente', 'Pendiente'),
         ('publicado', 'Publicado'),
         ('vencido', 'Vencido'),
@@ -33,9 +59,12 @@ class Promocion(models.Model):
     
     #cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name='promociones')
     suscripcion = models.ForeignKey(Suscripcion, on_delete=models.CASCADE, related_name='promociones', null=True, blank=True)
+    template = models.ForeignKey(TemplateCard, on_delete=models.PROTECT)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, related_name='promociones')
     tipo = models.CharField(max_length=10, choices=TIPOS, default='evento')
     titulo = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=200, blank=True)
+    content = models.TextField(blank=True)
     slug = models.SlugField(max_length=220, unique=True)
 
     descripcion = models.TextField(blank=True)
@@ -54,9 +83,15 @@ class Promocion(models.Model):
     prioridad = models.PositiveSmallIntegerField(default=0) # se copia del plan del cliente
     destacado = models.BooleanField(default=False, help_text="True si compró 'Visibilidad preferential'")
     permite_actualizar = models.BooleanField(default=False, help_text="True si es plan 'Promoción extendida'")
-    
+
+    custom_data = models.JSONField(default=dict)
+
+    publicado = models.DateTimeField(blank=True, null=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
+
+    visits = models.PositiveIntegerField(default=0)
+    rsvp_clicks = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ['-destacado', '-prioridad', '-creado']  # los de mayor prioridad y más recientes primero
@@ -74,9 +109,22 @@ class Promocion(models.Model):
         return self.titulo
 
     @property
+    def esta_publicado(self):
+        return self.estado == 'publicado'
+
+    @property
     def esta_vigente(self):
         from django.utils import timezone
         return self.estado == 'publicado' and self.fecha_evento > timezone.now()
+
+class RSVP(models.Model):
+    promotion = models.ForeignKey(Promocion, on_delete=models.CASCADE, related_name='rsvps')
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.promotion.title}"
     
 class SolicitudPromocion(models.Model):
     ESTADO = [('pendiente','Pendiente'), ('disenando','Diseñando'), ('activa','Activa'), ('rechazada','Rechazada')]

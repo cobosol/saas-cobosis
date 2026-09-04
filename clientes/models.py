@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 class PerfilCliente(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     cid = models.CharField(max_length=20, verbose_name = "Número de identidad", default='11111111111')
     avatar = models.ImageField(upload_to='profiles', null=True, blank=True, verbose_name = "Foto")
     bio = models.TextField(null=True, blank=True, verbose_name = "Biografía")
