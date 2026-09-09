@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Plan actual</h5>
+                <p>{{ plan.name|default:"Sin plan" }}</p>
+                <p>Días restantes: {{ subscription.end_date|timeuntil }}</p>
+                <p>Promociones activas: {{ active_promotions }}/{{ plan.max_active_promotions|default:"∞" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <a href="{% url 'create_step1' %}" class="btn btn-primary">Crear nueva promoción</a>
+        <hr>
+        <h3>Mis promociones</h3>
+        <ul class="list-group">
+            {% for promo in promotions %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ promo.title }} ({{ promo.get_status_display }})</span>
+                    <span>
+                        <a href="{% url 'ver_promocion' promo.slug %}" target="_blank">Ver</a>
+                        {% if promo.status == 'published' %}
+                            <a href="">Pausar</a>
+                        {% elif promo.status == 'paused' %}
+                            <a href="">Publicar</a>
+                        {% endif %}
+                        <a href="{% url 'edit' promo.id %}">Editar</a>
+                    </span>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No tienes promociones.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

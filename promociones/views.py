@@ -5,95 +5,180 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db import transaction
 from datetime import timedelta
-from .models import Promocion, SolicitudPromocion
-from servicios.models import Plan, Suscripcion
+from .models import Promocion, SolicitudPromocion, TemplateCard, RSVP
+from servicios.models import Plan, Suscripcion, check_plan_capability
 from clientes.models import PerfilCliente
+
+from django.utils.text import slugify
+from .forms import PromotionForm, PromotionStepForm
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.core.exceptions import ValidationError
+from django.contrib.sessions.models import Session
+
+@login_required
+def dashboard(request):
+    user = request.user
+    subscription = Suscripcion.objects.filter(usuario=user, estado='activa').first()
+    active_promotions = Promocion.objects.filter(suscripcion__usuario = user, estado='publicada').count()
+    total_promotions = Promocion.objects.filter(suscripcion__usuario = user).count()
+    plan = subscription.plan if subscription else None
+    context = {
+        'subscription': subscription,
+        'plan': plan,
+        'active_promotions': active_promotions,
+        'total_promotions': total_promotions,
+        'promotions': Promocion.objects.filter(suscripcion__usuario = user).order_by('-creado'),
+    }
+    return render(request, 'promociones/dashboard.html', context)
+
+@login_required
+def create_promotion_step1(request):
+    # Obtener plan activo
+    subscription = Suscripcion.objects.filter(user=request.user, status='active').first()
+    if not subscription:
+        messages.error(request, 'No tienes una suscripción activa.')
+        return redirect('plans:choose')
+    plan = subscription.plan
+
+    # Obtener categorías permitidas según capacidades del plan
+    allowed_categories = plan.capabilities.get('allowed_categories', [])
+    templates = TemplateCard.objects.filter(category__in=allowed_categories)
+
+    if request.method == 'POST':
+        # Guardar la plantilla seleccionada en sesión
+        template_id = request.POST.get('template')
+        request.session['promo_template_id'] = template_id
+        return redirect('promotions:create_step2')
+
+    return render(request, 'promotions/create_step1.html', {'templates': templates})
+
+@login_required
+def create_promotion_step2(request):
+    template_id = request.session.get('promo_template_id')
+    if not template_id:
+        return redirect('promotions:create_step1')
+    template = get_object_or_404(TemplateCard, id=template_id)
+
+    # Validar límite de promociones activas
+    subscription = Suscripcion.objects.filter(user=request.user, status='active').first()
+    if not subscription:
+        messages.error(request, 'Suscripción no activa.')
+        return redirect('plans:choose')
+    plan = subscription.plan
+    active_count = Promocion.objects.filter(user=request.user, status='published').count()
+    if active_count >= plan.max_active_promotions:
+        messages.error(request, f'Has alcanzado el límite de {plan.max_active_promotions} promociones activas.')
+        return redirect('promotions:dashboard')
+
+    # Formulario dinámico basado en fields_schema
+    if request.method == 'POST':
+        form = PromotionStepForm(template, request.POST, request.FILES)
+        if form.is_valid():
+            promotion = form.save(commit=False)
+            promotion.user = request.user
+            promotion.template = template
+            promotion.slug = slugify(promotion.title) + '-' + str(timezone.now().timestamp())
+            promotion.save()
+            # Limpiar sesión
+            del request.session['promo_template_id']
+            messages.success(request, '¡Promoción creada exitosamente!')
+            return redirect('promotions:dashboard')
+    else:
+        form = PromotionStepForm(template)
+
+    return render(request, 'promotions/create_step2.html', {'form': form, 'template': template})
 
 def promociones(request):
     pass
 
-"""@login_required
-def crear_promocion(request):
-    # Obtenemos todos los planes activos del servicio Promociones
-    planes = Plan.objects.filter(servicio__slug='promociones', activo=True).order_by('precio')
+def promotion_public(request, slug):
+    promotion = get_object_or_404(Promocion, slug=slug)
     
-    if request.method == 'POST':
-        plan_id = request.POST.get('plan_id')
-        plan = get_object_or_404(Plan, id=plan_id, activo=True)
+    # 1. Verificar estado de la promoción
+    if promotion.status != 'published':
+        return render(request, 'public/not_available.html', {'reason': 'Esta promoción no está publicada.'})
+    
+    # 2. Verificar suscripción activa del dueño
+    subscription = Suscripcion.objects.filter(user=promotion.user, status='active').first()
+    if not subscription or subscription.end_date < timezone.now():
+        if subscription and subscription.end_date < timezone.now():
+            subscription.status = 'expired'
+            subscription.save()
+        return render(request, 'public/not_available.html', {'reason': 'La suscripción ha expirado.'})
+    
+    # 3. Incrementar visitas
+    promotion.visits += 1
+    promotion.save(update_fields=['visits'])
+
+    # 4. Verificar si el plan permite RSVP
+    can_rsvp = subscription.plan.capabilities.get('can_rsvp', False)
+    rsvp_success = False
+    rsvp_error = None
+
+    # 5. Procesar el POST del RSVP
+    if request.method == 'POST' and can_rsvp:
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
         
-        datos = {}
-        if plan.tipo_formulario == 'evento':
-            datos['titulo'] = request.POST.get('titulo_evento')
-            datos['fecha'] = request.POST.get('fecha_evento')
-            datos['hora'] = request.POST.get('hora_evento')
-            datos['lugar'] = request.POST.get('lugar_evento')
-            datos['informacion'] = request.POST.get('info_evento')
-
-            #solicitud = Promocion.objects.create(
-            #            cliente=request.user,
-            #            estado='pendiente',
-            #            tipo = plan.tipo_formulario,
-            #            titulo = datos['titulo'],
-            #            descripcion = datos['informacion'],
-            #            fecha_evento = datos['fecha'],
-            #            lugar = datos['lugar']
-            #        )
-        elif plan.tipo_formulario == 'negocio':
-            datos['nombre_negocio'] = request.POST.get('nombre_negocio')
-            datos['rubro'] = request.POST.get('rubro_negocio')
-            datos['telefono'] = request.POST.get('telefono_negocio')
-            datos['descripcion'] = request.POST.get('descripcion_negocio')
-
-            #solicitud = Promocion.objects.create(
-            #                cliente=request.user,
-            #                estado='pendiente',
-            #                tipo = plan.tipo_formulario,
-            #                titulo = datos['titulo'],
-            #                descripcion = datos['informacion'],
-            #            )
+        # Validaciones básicas
+        if not name or not email:
+            rsvp_error = 'Nombre y email son obligatorios.'
+        elif '@' not in email:
+            rsvp_error = 'Ingresa un email válido.'
         else:
-            datos['titulo'] = request.POST.get('titulo_generico')
-            datos['descripcion'] = request.POST.get('descripcion_generica')
+            # Evitar duplicados (mismo email para la misma promoción)
+            existing = RSVP.objects.filter(promotion=promotion, email=email).first()
+            if existing:
+                rsvp_error = 'Ya confirmaste asistencia con este correo.'
+            else:
+                # Guardar el RSVP
+                RSVP.objects.create(
+                    promotion=promotion,
+                    name=name,
+                    email=email
+                )
+                # Incrementar contador de clics/confirmaciones
+                promotion.rsvp_clicks += 1
+                promotion.save(update_fields=['rsvp_clicks'])
+                rsvp_success = True
+                # Opcional: guardar en sesión para no mostrar el formulario de nuevo
+                request.session[f'rsvp_{promotion.id}'] = True
 
-        # Convertir diccionario a texto para SQLite
-        datos_texto = ", ".join([f"{k}: {v}" for k, v in datos.items()])
+    # Verificar si este usuario ya confirmó (para ocultar formulario)
+    already_rsvped = request.session.get(f'rsvp_{promotion.id}', False)
+    
+    relacionadas = Promocion.objects.filter(
+        categoria=promotion.categoria, 
+        estado='publicado'
+    ).exclude(id=promotion.id).order_by('-destacado', '-fecha_evento')[:10]
 
-        # Leer nuevos campos de imagen
-        generar_ia = request.POST.get('generar_imagen_ia') == 'on'
-        imagen_subida = request.FILES.get('imagen_subida')
+    context = {
+        'promocion': promotion,
+        'can_rsvp': can_rsvp,
+        'rsvp_success': rsvp_success,
+        'rsvp_error': rsvp_error,
+        'already_rsvped': already_rsvped,
+        'rsvp_count': promotion.rsvps.count(),  # Total de confirmados
+        'relacionadas': relacionadas,
+    }
+    return render(request, 'promociones/ver_promocion.html', context)
 
-        # Crear la solicitud
-        solicitud = SolicitudPromocion.objects.create(
-            usuario=request.user,
-            plan=plan,
-            tipo=plan.tipo_formulario if plan.tipo_formulario != 'ninguno' else 'evento',
-            datos_recopilados=datos_texto,
-            generar_imagen_ia=generar_ia,
-            imagen_subida=imagen_subida,
-            estado='pendiente'
-        )
-        
-        # Crear Suscripcion solicitada (igual que en Gestiona)
-        Suscripcion.objects.get_or_create(
-            usuario=request.user,
-            plan=plan,
-            estado='solicitada',
-            defaults={'fecha_fin': timezone.now()}
-        )
-        
-        messages.success(request, f'¡Solicitud enviada con éxito para el plan "{plan.nombre}"! Nos pondremos en contacto contigo para el diseño y la activación.')
-        return redirect('panel_cliente')
-
-    context = {'planes': planes}
-    return render(request, 'promociones/crear_promocion.html', context)
-"""
-# En views.py
 
 def ver_promocion(request, slug):
     promocion = get_object_or_404(Promocion, slug=slug) #, estado='publicado'
     
     """ if not promocion.esta_vigente:
         return render(request, 'promociones/promocion_expirada.html') """
+    
+    suscripcion = Suscripcion.objects.filter(user=promocion.user, status='active').first()
+    promocion.visits += 1
+    promocion.save(update_fields=['visits'])
+    # Manejar RSVP si el plan lo permite
+    can_rsvp = suscripcion.plan.capabilities.get('can_rsvp', False)
+    if request.method == 'POST' and can_rsvp:
+        # procesar RSVP
+        pass
 
     relacionadas = Promocion.objects.filter(
         categoria=promocion.categoria, 
@@ -132,6 +217,7 @@ def mis_promociones(request):
     }
     return render(request, 'promociones/mis_promociones.html', context)
 """
+
 @login_required(login_url='/login/')
 def suscribir_promocion(request):
     """
@@ -216,7 +302,6 @@ def mis_promociones(request):
     ).order_by('-fecha_solicitud')
 
     print(f'promociones_activas {promociones_activas}')
-    print(promociones_activas[0].promocion_creada)
 
     solicitudes = SolicitudPromocion.objects.filter(
         usuario=request.user,
@@ -331,3 +416,30 @@ def _crear_solicitud_desde_post(request, plan):
     
     solicitud.save()
     return solicitud
+
+from .forms import PromotionForm, PromotionStepForm  # Asegura la importación
+
+@login_required
+def edit_promotion(request, pk):
+    promotion = get_object_or_404(Promocion, pk=pk, user=request.user)
+    
+    # Evitar editar promociones activas a menos que se pausen primero (seguridad)
+    if promotion.estado == 'published':
+        messages.warning(request, 'Para editar, primero debes pausar la promoción.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = PromotionForm(request.POST, request.FILES, instance=promotion)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Promoción actualizada correctamente!')
+            return redirect('promotions:dashboard')
+    else:
+        form = PromotionForm(instance=promotion)
+
+    context = {
+        'form': form,
+        'promotion': promotion,
+        'is_editing': True,
+    }
+    return render(request, 'promociones/edit.html', context)

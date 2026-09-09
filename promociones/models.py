@@ -5,6 +5,29 @@ from django.contrib.auth.models import User
 from servicios.models import Plan, Suscripcion
 import uuid
 
+class TemplateCard(models.Model):
+    CATEGORY_CHOICES = (
+        ('evento', 'Evento'),
+        ('invitacion', 'Invitación'),
+        ('negocio', 'Negocio'),
+        ('agradecimiento', 'Agradecimiento'),
+        ('promocion', 'Promoción'),
+    )
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    thumbnail = models.ImageField(upload_to='templates/thumbnails/', blank=True, null=True)
+    html_template = models.TextField(help_text="HTML con variables en {{ variable }}")
+    css_template = models.TextField(blank=True, help_text="CSS personalizado")
+    # Schema de campos dinámicos (JSON)
+    fields_schema = models.JSONField(default=dict, help_text="Ej: {'fields': [{'name':'titulo','type':'text','label':'Título'}, ...]}")
+    # Lista de variables permitidas (para validación)
+    allowed_variables = models.JSONField(default=list, help_text="Lista de variables que pueden usarse en el HTML")
+
+    def __str__(self):
+        return self.name
+    
+
 TIPOS = [
         ('evento', 'Evento'),
         ('negocio', 'Negocio'),
@@ -38,11 +61,13 @@ class Promocion(models.Model):
     titulo = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True)
 
+    custom_data = models.JSONField(default=dict)
     descripcion = models.TextField(blank=True)
     enlace_accion = models.URLField(blank=True, null=True, help_text="Botón de WhatsApp, web, etc.")
 
     imagen = models.ImageField(upload_to='promociones/', null=True, blank=True, help_text="Imagen subida por el cliente (proporción 1:1.618)")
     html_tarjeta = models.TextField(blank=True, null=True, help_text="HTML con estilos de la tarjeta")
+    template = models.ForeignKey(TemplateCard, on_delete=models.PROTECT, null=True)
     generar_imagen_ia = models.BooleanField(default=False, help_text="True si el cliente quiere que le generemos la imagen")
 
 
@@ -57,6 +82,8 @@ class Promocion(models.Model):
     
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
+    visits = models.PositiveIntegerField(default=0)
+    rsvp_clicks = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ['-destacado', '-prioridad', '-creado']  # los de mayor prioridad y más recientes primero
@@ -77,6 +104,15 @@ class Promocion(models.Model):
     def esta_vigente(self):
         from django.utils import timezone
         return self.estado == 'publicado' and self.fecha_evento > timezone.now()
+    
+class RSVP(models.Model):
+    promotion = models.ForeignKey(Promocion, on_delete=models.CASCADE, related_name='rsvps')
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.promotion.title}"
     
 class SolicitudPromocion(models.Model):
     ESTADO = [('pendiente','Pendiente'), ('disenando','Diseñando'), ('activa','Activa'), ('rechazada','Rechazada')]

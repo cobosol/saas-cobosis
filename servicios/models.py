@@ -5,6 +5,21 @@ from django.utils import timezone
 from datetime import timedelta
 from clientes.models import User
 
+CAPABILITIES_REGISTRY = {
+    'can_customize_color': 'Permite cambiar colores de la tarjeta',
+    'can_remove_logo': 'Permite quitar el logo de la plataforma',
+    'can_rsvp': 'Permite recoger confirmaciones de asistencia',
+    'can_analytics': 'Acceso a estadísticas detalladas',
+    # Añadir nuevas capacidades aquí
+}
+
+def get_capabilities():
+    return CAPABILITIES_REGISTRY
+
+def check_plan_capability(plan, capability):
+    """Verifica si un plan tiene una capacidad específica."""
+    return plan.capabilities.get(capability, False)
+
 class Servicio(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, help_text="Usado para la URL (ej: promociones)")
@@ -59,7 +74,8 @@ class Plan(models.Model):
 
     # Campos para Promociones (Tu idea de prioridad)
     nivel_prioridad = models.PositiveSmallIntegerField(default=0, help_text="Prioridad en el listado (0 es normal, >0 es preferencial)")
-    
+    capabilities = models.JSONField(default=dict, help_text="Ej: {'can_customize_color': True, 'can_remove_logo': False, 'allowed_categories': ['evento','negocio']}")
+        
     class Meta:
         ordering = ['orden']
         verbose_name = "Plan"
