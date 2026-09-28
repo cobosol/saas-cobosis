@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} | Cobosis{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+
+    <!-- Encabezado -->
+    <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-bullhorn text-purple-500 mr-2"></i>Tu primera promoción
+        </h1>
+        <p class="text-gray-500 mt-2">
+            Completa la información de la promoción que quieres publicar en redes y en el landing.
+        </p>
+    </div>
+
+    <!-- Indicador de pasos -->
+    <div class="flex items-center justify-center gap-2 mb-8 text-sm">
+        <span class="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-semibold">
+            <i class="fas fa-check"></i> 1. Plan elegido
+        </span>
+        <i class="fas fa-chevron-right text-gray-300"></i>
+        <span class="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-semibold">
+            <i class="fas fa-check"></i> 2. Datos del negocio
+        </span>
+        <i class="fas fa-chevron-right text-gray-300"></i>
+        <span class="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-full font-semibold">
+            3. Tu promoción
+        </span>
+    </div>
+
+    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+        <form method="POST" action="" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-6 text-sm text-red-700">
+                {{ form.non_field_errors.0 }}
+            </div>
+            {% endif %}
+
+            <!-- Banner del plan y tipo -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6 text-sm text-blue-800">
+                <i class="fas fa-info-circle mr-2"></i>
+                Plan <strong>{{ plan.nombre }}</strong> —
+                {% if tipo == 'evento' %}promoción de <strong>Evento</strong>
+                {% elif tipo == 'negocio' %}promoción de <strong>Negocio</strong>
+                {% else %}promoción <strong>Genérica</strong>{% endif %}
+                . Al enviar, nuestro equipo recibirá tu solicitud y te contactará
+                para el pago y la activación.
+            </div>
+
+            {% include 'promociones/partials/campos_promocion.html' with form=form tipo=tipo %}
+
+            {% include 'promociones/partials/seccion_imagen.html' with form=form %}
+
+            <div class="flex justify-end mt-8">
+                <button type="submit"
+                        class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
+                    Enviar Solicitud <i class="fas fa-paper-plane ml-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    {% include 'promociones/partials/scripts_promocion.html' %}
+{% endblock %}

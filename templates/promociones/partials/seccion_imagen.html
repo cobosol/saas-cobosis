@@ -1,0 +1,47 @@
+{#
+  Sección de imagen / diseño con IA (recibe: form).
+  - Marcar "diseñar con IA" oculta la subida de imagen y muestra el brief.
+  - La subida valida proporción 1:1.618 en el navegador (y en el servidor).
+#}
+<h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Imagen de la Tarjeta</h2>
+
+<div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+
+    {# ---------- Opción 1: Diseño con IA ---------- #}
+    <div class="flex items-start mb-4">
+        {{ form.generar_con_ia }}
+        <label for="{{ form.generar_con_ia.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-pointer ml-2">
+            {{ form.generar_con_ia.label }}
+            <p class="text-xs text-gray-500 font-normal mt-1">
+                Si marcas esta opción no necesitas subir imagen: nuestro equipo la creará
+                con Inteligencia Artificial siguiendo tu brief.
+            </p>
+        </label>
+        {% if form.generar_con_ia.errors %}
+        <p class="text-red-500 text-xs mt-1">{{ form.generar_con_ia.errors.0 }}</p>
+        {% endif %}
+    </div>
+
+    {# ---------- Brief para la IA ---------- #}
+    <div id="bloque-brief" class="{% if not form.generar_con_ia.value %}hidden{% endif %}">
+        {% with field=form.brief_ia %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+    </div>
+
+    <div class="border-t border-gray-200 my-4"></div>
+
+    {# ---------- Opción 2: Imagen propia ---------- #}
+    <div id="bloque-imagen">
+        <p class="text-xs text-gray-500 mb-2">
+            <i class="fas fa-info-circle text-blue-500"></i>
+            Proporción obligatoria: <strong>1 de ancho x 1.618 de alto</strong>
+            (Ej: 600px de ancho por 970px de alto).
+        </p>
+        {% with field=form.imagen_subida %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+        <div id="image-error" class="text-red-500 text-xs mt-2 hidden"></div>
+        <div id="image-preview-container" class="mt-4 hidden">
+            <p class="text-xs text-gray-500 mb-1">Vista previa:</p>
+            <img id="image-preview" src="#" alt="Vista previa"
+                 class="max-h-48 rounded-lg border border-gray-300">
+        </div>
+    </div>
+</div>

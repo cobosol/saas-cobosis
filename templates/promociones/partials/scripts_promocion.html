@@ -1,0 +1,66 @@
+{# Script compartido por primera_promocion.html y crear_promocion.html #}
+<script>
+    (function () {
+        const chkIA = document.getElementById('{{ form.generar_con_ia.id_for_label }}');
+        const bloqueBrief = document.getElementById('bloque-brief');
+        const bloqueImagen = document.getElementById('bloque-imagen');
+        const inputImagen = document.getElementById('{{ form.imagen_subida.id_for_label }}');
+        const errorDiv = document.getElementById('image-error');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImg = document.getElementById('image-preview');
+        const form = document.querySelector('form');
+
+        function actualizarBloques() {
+            const conIA = chkIA && chkIA.checked;
+            if (bloqueBrief) bloqueBrief.classList.toggle('hidden', !conIA);
+            if (bloqueImagen) bloqueImagen.classList.toggle('hidden', conIA);
+        }
+        if (chkIA) {
+            chkIA.addEventListener('change', actualizarBloques);
+            actualizarBloques();
+        }
+
+        // ---------- Validación de proporción 1 : 1.618 ----------
+        if (inputImagen) {
+            inputImagen.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (errorDiv) errorDiv.classList.add('hidden');
+                if (previewContainer) previewContainer.classList.add('hidden');
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const ratio = img.height / img.width;
+                        if (ratio < 1.58 || ratio > 1.65) {
+                            if (errorDiv) {
+                                errorDiv.innerHTML =
+                                    '<i class="fas fa-exclamation-triangle"></i> La proporción de tu imagen es ' +
+                                    ratio.toFixed(2) + ' (Ancho: ' + img.width + ', Alto: ' + img.height +
+                                    '). Debe ser 1.618. Ajusta la imagen.';
+                                errorDiv.classList.remove('hidden');
+                            }
+                            inputImagen.value = '';
+                        } else if (previewContainer && previewImg) {
+                            previewImg.src = event.target.result;
+                            previewContainer.classList.remove('hidden');
+                        }
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Evitar enviar si hay error de proporción visible
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                if (errorDiv && !errorDiv.classList.contains('hidden')) {
+                    e.preventDefault();
+                    alert('Corrige la proporción de la imagen antes de enviar.');
+                }
+            });
+        }
+    })();
+</script>

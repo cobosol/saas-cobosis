@@ -1,8 +1,10 @@
 from django.urls import path
-from .views import SignUpView, ProfileUpdate, EmailUpdate, Actualizar_perfil_admin
+from .views import SignUpView, ProfileUpdate, EmailUpdate, Actualizar_perfil_admin, registro_aux
 from django.contrib.auth import views as auth_views
 from . import views
 from .forms import CustomPasswordResetForm
+
+app_name = 'clientes'
 
 urlpatterns = [
     path('signup/', SignUpView.as_view(), name = 'signup'),
@@ -11,6 +13,8 @@ urlpatterns = [
     path('profile/email/', EmailUpdate.as_view(), name = 'profile_email'),
     path('users_list/', views.users_list, name='users_list'),
     path('profile/editar/<int:pk>', Actualizar_perfil_admin.as_view(template_name = "registration/profile_actualizar_admin.html"), name='actualizar_perfil_admin'),
+
+    path('registro_a/', views.registro_aux, name='registro_aux'),
 
     path('registro/', views.registro, name='registro'),
     path('confirmacion-envio/', views.confirmacion_envio, name='confirmacion_envio'),

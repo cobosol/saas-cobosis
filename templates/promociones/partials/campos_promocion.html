@@ -1,0 +1,33 @@
+{#
+  Campos de la promoción según el tipo (recibe: form, tipo).
+  Los campos los define PromocionSolicitudForm dinámicamente.
+#}
+<div class="space-y-1">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Datos de tu Promoción</h2>
+
+    {% if tipo == 'evento' %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+        {% with field=form.fecha_evento %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+        {% with field=form.hora_evento %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+    </div>
+    {% with field=form.lugar_evento %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+    {% with field=form.info_evento %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+
+    {% elif tipo == 'negocio' %}
+    {% with field=form.descripcion_negocio %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+    {% with field=form.telefono_contacto %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+
+    {% else %}
+    {% with field=form.descripcion_generica %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+    {% endif %}
+
+    {# El título va al final para que la pareja campo-error quede agrupada arriba el tipo #}
+    {% with field=form.titulo %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+
+    {% if form.enlace_accion %}
+    {% with field=form.enlace_accion %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+    {% endif %}
+    {% if form.plantilla %}
+    {% with field=form.plantilla %}{% include 'promociones/partials/campo.html' %}{% endwith %}
+    {% endif %}
+</div>

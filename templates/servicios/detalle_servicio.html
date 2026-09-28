@@ -1,123 +1,62 @@
 {% extends 'base.html' %}
-{% block title %}Cobosis | {{ servicio.nombre }}{% endblock %}
+{% load static %}
+
+{% block title %}{{ servicio.nombre }} | Cobosis{% endblock %}
+
 {% block content %}
-    <!-- ========== HERO DEL SERVICIO (COMPACTO) ========== -->
-<header class="relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
-    <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle, #FFD93D 1px, transparent 1px); background-size: 30px 30px;"></div>
-    
-    <div class="max-w-4xl mx-auto text-center py-10 md:py-16 px-6 relative z-10">
-        
-        <!-- Icono + Título en línea -->
-        <div class="d-flex align-items-center justify-content-center gap-4 mb-4">
-            <div class="d-flex align-items-center justify-content-center rounded-3"
-                 style="width: 60px; height: 60px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2);">
-                <i class="{{ servicio.icono }} text-white" style="font-size: 1.75rem;"></i>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-0">
-                {{ servicio.nombre }}
-            </h1>
-        </div>
-        
-        <p class="text-lg text-white/80 max-w-2xl mx-auto">
-            {{ servicio.descripcion_corta }}
-        </p>
+<div class="max-w-6xl mx-auto p-6">
 
+    <!-- Encabezado del servicio -->
+    <div class="text-center mb-10">
+        <i class="{{ servicio.icono }} text-5xl text-purple-500 mb-4"></i>
+        <h1 class="text-3xl font-bold text-gray-800">{{ servicio.nombre }}</h1>
+        <p class="text-gray-500 mt-3 max-w-2xl mx-auto">{{ servicio.descripcion_larga }}</p>
     </div>
-    
-    <!-- Onda decorativa -->
-    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="w-full h-[50px]">
-            <path d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z" fill="#f9fafb"></path>
-        </svg>
-    </div>
-</header>
 
-    <!-- INFORMACIÓN GENERAL DEL SERVICIO -->
-    <section class="py-12 px-6 max-w-4xl mx-auto">
-        <div class="prose lg:prose-lg mx-auto text-center">
-            <h2 class="text-2xl font-bold mb-4">¿Cómo funciona?</h2>
-            <p class="text-gray-600 leading-relaxed whitespace-pre-line">
-                {{ servicio.descripcion_larga }}
-            </p>
-        </div>
-        
-        <!-- Características clave (Copywriting persuasivo) -->
-        <div class="grid md:grid-cols-3 gap-6 mt-12 text-center">
-            <div class="p-4">
-                <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
-                <h4 class="font-bold">Fácil de usar</h4>
-                <p class="text-sm text-gray-500">Sin curva de aprendizaje. Diseñado para que empieces en minutos.</p>
-            </div>
-            <div class="p-4">
-                <i class="fas fa-rocket text-2xl text-blue-500 mb-2"></i>
-                <h4 class="font-bold">Resultados Inmediatos</h4>
-                <p class="text-sm text-gray-500">Optimiza tu tiempo y incrementa tu alcance desde el primer día.</p>
-            </div>
-            <div class="p-4">
-                <i class="fas fa-shield-alt text-2xl text-purple-500 mb-2"></i>
-                <h4 class="font-bold">Información Segura</h4>
-                <p class="text-sm text-gray-500">Tus datos y los de tus clientes protegidos en todo momento.</p>
-            </div>
-        </div>
-    </section>
+    <!-- Grilla de planes -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        {% for plan in planes %}
+        <div class="bg-white rounded-xl shadow-sm border-2 {% if plan.destacado %}border-purple-500 relative{% else %}border-gray-100{% endif %} p-6 flex flex-col">
+            {% if plan.destacado %}
+            <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs font-bold px-4 py-1 rounded-full">
+                <i class="fas fa-star mr-1"></i>Más popular
+            </span>
+            {% endif %}
 
-    <!-- SECCIÓN DE PLANES (PRICING CARDS) -->
-    <section class="py-16 px-6 bg-gray-100">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl font-bold text-center mb-4">Elige el Plan Ideal para Ti</h2>
-            <p class="text-center text-gray-500 mb-12">Sin costos ocultos. Cancela cuando quieras. Precios en USD.</p>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">{{ plan.nombre }}</h2>
+            <p class="text-4xl font-extrabold text-purple-600 mb-1">${{ plan.precio }}</p>
+            <p class="text-xs text-gray-400 mb-4">{{ plan.vigencia_dias }} días de vigencia</p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for plan in planes %}
-                <div class="relative bg-white rounded-2xl shadow-md border border-gray-100 p-8 flex flex-col transition transform hover:scale-105 hover:shadow-xl {% if plan.destacado %}border-2 border-blue-600 ring-4 ring-blue-100 z-10 lg:scale-105{% endif %}">
-                    
-                    {% if plan.destacado %}
-                    <div class="absolute top-0 right-0 -mt-3 mr-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                        MÁS POPULAR
-                    </div>
-                    {% endif %}
+            <p class="text-sm text-gray-600 mb-4 flex-grow">{{ plan.descripcion }}</p>
 
-                    <h3 class="text-xl font-bold text-gray-900">{{ plan.nombre }}</h3>
-                    <div class="my-4">
-                        <span class="text-4xl font-extrabold text-blue-600">${{ plan.precio }}</span>
-                        <span class="text-gray-500">/ {{ plan.vigencia_dias }} días</span>
-                    </div>
-                    
-                    <div class="text-sm text-gray-600 mb-6 flex-grow">
-                        <p class="whitespace-pre-line">{{ plan.descripcion }}</p>
-                    </div>
+            <!-- Capacidades incluidas -->
+            <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i>
+                    {% if plan.max_promociones == 0 %}Promociones ilimitadas{% else %}Hasta {{ plan.max_promociones }} promoción(es){% endif %}
+                </li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i>
+                    Tipos: {{ plan.get_tipos_permitidos_list|join:", " }}
+                </li>
+                {% if plan.nivel_prioridad > 0 %}
+                <li class="flex items-start gap-2"><i class="fas fa-bolt text-yellow-500 mt-1"></i>Prioridad preferencial en el listado</li>
+                {% endif %}
+                <li class="flex items-start gap-2"><i class="fas fa-check text-green-500 mt-1"></i>Publicación en redes sociales y en el landing</li>
+            </ul>
 
-                    <!-- Llamada a la Acción -->
-                    {% if plan.precio == 0 %}
-                        <!-- Botón Plan Gratis -->
-                        <a href="{% url 'procesar_suscripcion' plan.id %}" class="mt-auto block text-center bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition transform hover:scale-105">
-                            <i class="fas fa-gift mr-2"></i>Comenzar Gratis
-                        </a>
-                    {% else %}
-                        <!-- Botón Plan de Pago -->
-                        <a href="{% url 'procesar_suscripcion' plan.id %}" class="mt-auto block text-center {% if plan.destacado %}bg-blue-600 hover:bg-blue-700{% else %}bg-gray-800 hover:bg-gray-900{% endif %} text-white font-bold py-3 px-6 rounded-lg transition">
-                            {% if plan.servicio.slug == 'promociones' %}
-                                <i class="fas fa-paper-plane mr-2"></i>Solicitar este Plan
-                            {% else %}
-                                <i class="fas fa-arrow-right mr-2"></i>Suscribirme
-                            {% endif %}
-                        </a>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN FINAL DE CONVERSIÓN -->
-    <section class="py-12 px-6 bg-white border-t">
-        <div class="max-w-3xl mx-auto text-center">
-            <h2 class="text-2xl font-bold mb-4">¿Tienes dudas sobre qué plan elegir?</h2>
-            <p class="text-gray-600 mb-6">Nuestro equipo está listo para ayudarte a encontrar la mejor solución para tu negocio.</p>
-            <a href="mailto:soporte@cobosis.com" class="inline-flex items-center bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition">
-                <i class="fas fa-headset mr-2"></i> Hablar con un asesor
+            <!-- Botón de solicitud: paso 1 del flujo -->
+            <a href="{% url 'procesar_suscripcion' plan.id %}"
+               class="mt-auto block text-center font-bold py-3 px-4 rounded-lg transition
+                      {% if plan.destacado %}bg-purple-600 text-white hover:bg-purple-700{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %}">
+                Solicitar este plan <i class="fas fa-arrow-right ml-1"></i>
             </a>
         </div>
-    </section>
+        {% empty %}
+        <div class="col-span-full bg-white p-10 rounded-xl border-2 border-dashed border-gray-200 text-center text-gray-400">
+            <i class="fas fa-box-open text-4xl mb-3"></i>
+            <p>No hay planes disponibles por el momento. Vuelve pronto.</p>
+        </div>
+        {% endfor %}
+    </div>
 
+</div>
 {% endblock %}

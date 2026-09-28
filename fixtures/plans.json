@@ -1,0 +1,40 @@
+[
+    {
+      "model": "plans.plan",
+      "pk": 1,
+      "fields": {
+        "name": "Básico",
+        "slug": "basico",
+        "description": "Plan inicial con 1 promoción activa",
+        "price_monthly": "9.99",
+        "price_yearly": "99.99",
+        "max_active_promotions": 1,
+        "max_monthly_visits": 500,
+        "capabilities": {
+          "can_customize_color": false,
+          "can_remove_logo": false,
+          "can_rsvp": false,
+          "allowed_categories": ["evento", "invitacion"]
+        }
+      }
+    },
+    {
+      "model": "plans.plan",
+      "pk": 2,
+      "fields": {
+        "name": "Profesional",
+        "slug": "profesional",
+        "description": "Plan con 5 promociones y RSVP",
+        "price_monthly": "29.99",
+        "price_yearly": "299.99",
+        "max_active_promotions": 5,
+        "max_monthly_visits": 5000,
+        "capabilities": {
+          "can_customize_color": true,
+          "can_remove_logo": true,
+          "can_rsvp": true,
+          "allowed_categories": ["evento", "invitacion", "negocio", "promocion"]
+        }
+      }
+    }
+  ]
