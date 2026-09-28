@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo_pagina }} | Cobosis{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto p-6 my-8">
+
+    <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-user-plus text-blue-600 text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Crea tu cuenta</h1>
+            <p class="text-sm text-gray-500 mt-2">
+                A falta de un paso: completa tus datos y continúa con la suscripción que elegiste.
+            </p>
+        </div>
+
+        <form method="POST" action="" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-r-lg mb-4 text-sm text-red-700">
+                {{ form.non_field_errors.0 }}
+            </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.username.id_for_label }}">{{ form.username.label }} *</label>
+                {{ form.username }}
+                {% if form.username.errors %}<p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.email.id_for_label }}">{{ form.email.label }} *</label>
+                {{ form.email }}
+                {% if form.email.errors %}<p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.password1.id_for_label }}">{{ form.password1.label }} *</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
+                {% if form.password1.help_text %}<p class="text-xs text-gray-400 mt-1">{{ form.password1.help_text }}</p>{% endif %}
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for="{{ form.password2.id_for_label }}">{{ form.password2.label }} *</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">
+                Crear cuenta y continuar <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 mt-6">
+            ¿Ya tienes cuenta?
+            <a href="{% url 'login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="text-blue-600 font-semibold hover:underline">Inicia sesión</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

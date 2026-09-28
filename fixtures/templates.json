@@ -1,0 +1,22 @@
+[
+    {
+      "model": "templates_engine.templatecard",
+      "pk": 1,
+      "fields": {
+        "name": "Evento Elegante",
+        "slug": "evento-elegante",
+        "category": "evento",
+        "html_template": "<div class='card'><h1>{{ titulo }}</h1><p>{{ descripcion }}</p><p>{{ fecha }}</p><p>{{ lugar }}</p></div>",
+        "css_template": ".card { background: #f0f0f0; padding: 20px; }",
+        "fields_schema": {
+          "fields": [
+            {"name": "titulo", "type": "text", "label": "Título", "required": true},
+            {"name": "descripcion", "type": "textarea", "label": "Descripción"},
+            {"name": "fecha", "type": "date", "label": "Fecha del evento"},
+            {"name": "lugar", "type": "text", "label": "Lugar"}
+          ]
+        },
+        "allowed_variables": ["titulo", "descripcion", "fecha", "lugar"]
+      }
+    }
+  ]

@@ -7,7 +7,7 @@ from datetime import timedelta
 from servicios.models import Servicio, Plan, Suscripcion
 import json # Lo usaremos solo para serializar a texto en el frontend, no en la BD
 from .models import Extraccion, VariableUsuario
-from saas_cobosis.settings import GROK_API
+#from saas_cobosis.settings import GROK_API
 import requests
 import json
 import os
@@ -20,7 +20,7 @@ from django.contrib import messages
     api_key=GROK_API,
     base_url="https://api.x.ai/v1"
 ) """
-
+GROK_API = ''
 import requests
 import json
 

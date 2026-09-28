@@ -536,7 +536,7 @@
     <aside class="sidebar" id="sidebar">
         <!-- Navegación -->
         <nav class="sidebar-nav">
-            <a href="{% url 'panel_cliente' %}" class="sidebar-link active">
+            <a href="{% url 'clientes:panel_cliente' %}" class="sidebar-link active">
                 <i class="bi bi-speedometer2"></i> Panel informativo
             </a>
             
@@ -548,14 +548,14 @@
             </a>
             
             {% if 'promociones' in servicios_activos|slugify %}
-            <a href="{% url 'mis_promociones' %}" class="sidebar-link">
+            <a href="{% url 'promociones:panel_promociones' %}" class="sidebar-link">
                 <i class="bi bi-megaphone"></i> Mis Promociones
             </a>
             {% endif %}
             
             <hr style="border-color: rgba(255,255,255,0.1); margin: 0.5rem 0;">
             
-            <a href="{% url 'profile' %}" class="sidebar-link">
+            <a href="{% url 'clientes:profile' %}" class="sidebar-link">
                 <i class="bi bi-person-gear"></i> Mi Perfil
             </a>
             <a href="#" class="sidebar-link">
@@ -681,7 +681,7 @@
                                 <i class="bi bi-table me-2"></i> Ir a Gestiona
                             </a>
                             {% elif sub.plan.servicio.slug == 'promociones' %}
-                            <a href="{% url 'mis_promociones' %}" class="btn-purple w-100 justify-content-center mt-auto">
+                            <a href="{% url 'promociones:panel_promociones' %}" class="btn-purple w-100 justify-content-center mt-auto">
                                 <i class="bi bi-megaphone me-2"></i> Ir a Promociones
                             </a>
                             {% endif %}

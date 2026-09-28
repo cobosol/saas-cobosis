@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import PerfilCliente
@@ -8,6 +9,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from saas_cobosis.settings import EMAIL_HOST_USER
+
+INPUT_CLS = ('w-full p-2 border border-gray-300 rounded-lg '
+             'focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none')
 
 class CustomPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
@@ -36,7 +40,6 @@ class CustomPasswordResetForm(PasswordResetForm):
             html_email = render_to_string(html_email_template_name, context)
             email.attach_alternative(html_email, 'text/html')
         email.send()
-
 
 class UserCreationFormWithEmail(UserCreationForm):
     email = forms.EmailField(required=True, label='Correo:', help_text="Hasta 254 caracteres y debe ser un correo válido.")
@@ -108,7 +111,6 @@ class ProfileUpdateForm(forms.ModelForm):
             'link': 'Sitio personal:'
         }
 
-
 class EmailForm(forms.ModelForm):
     email = forms.EmailField(required=True, max_length=254, help_text="Requerido. 254 caracteres máximo y debe ser un email válido.")
 
@@ -123,5 +125,56 @@ class EmailForm(forms.ModelForm):
                 raise forms.ValidationError("El email ya está registrado, prueba con otro.")
         return email
                              
+class FormularioRegistro(UserCreationForm):
+    """Registro de usuario nuevo (paso 2 del flujo de promociones).
 
+    Tras registrarse el usuario queda autenticado y el sistema lo devuelve a
+    la suscripción del plan que había elegido (parámetro ?next=).
+    """
+
+    email = forms.EmailField(
+        label='Correo electrónico',
+        required=True,
+        widget=forms.EmailInput(attrs={'class': INPUT_CLS,
+                                       'placeholder': 'tu@correo.com'}))
+    first_name = forms.CharField(
+        label='Nombre',
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'class': INPUT_CLS}))
+    last_name = forms.CharField(
+        label='Apellidos',
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'class': INPUT_CLS}))
+
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'email', 'first_name', 'last_name')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': INPUT_CLS,
+                                               'placeholder': 'Nombre de usuario'}),
+        }
+        labels = {'username': 'Nombre de usuario'}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Clases Tailwind para los campos de contraseña generados por Django
+        for campo in ('password1', 'password2'):
+            if campo in self.fields:
+                self.fields[campo].widget.attrs.update({'class': INPUT_CLS})
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').lower()
+        User = get_user_model()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Ya existe una cuenta con este correo electrónico.')
+        return email
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        usuario.email = self.cleaned_data.get('email', '').lower()
+        if commit:
+            usuario.save()
+        return usuario
     

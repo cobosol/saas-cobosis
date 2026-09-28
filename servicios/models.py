@@ -5,6 +5,21 @@ from django.utils import timezone
 from datetime import timedelta
 from clientes.models import User
 
+CAPABILITIES_REGISTRY = {
+    'can_customize_color': 'Permite cambiar colores de la tarjeta',
+    'can_remove_logo': 'Permite quitar el logo de la plataforma',
+    'can_rsvp': 'Permite recoger confirmaciones de asistencia',
+    'can_analytics': 'Acceso a estadísticas detalladas',
+    # Añadir nuevas capacidades aquí
+}
+
+def get_capabilities():
+    return CAPABILITIES_REGISTRY
+
+def check_plan_capability(plan, capability):
+    """Verifica si un plan tiene una capacidad específica."""
+    return plan.capabilities.get(capability, False)
+
 class Servicio(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, help_text="Usado para la URL (ej: promociones)")
@@ -30,8 +45,6 @@ class Plan(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(help_text="Ej: Incluye enlace directo, diseño de tarjeta...")
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    #price_monthly = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    #price_yearly = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     vigencia_dias = models.PositiveIntegerField(default=30, help_text="Duración de la suscripción en días")
     
     destacado = models.BooleanField(default=False, help_text="Marcar si es el plan más popular")
@@ -61,7 +74,8 @@ class Plan(models.Model):
 
     # Campos para Promociones (Tu idea de prioridad)
     nivel_prioridad = models.PositiveSmallIntegerField(default=0, help_text="Prioridad en el listado (0 es normal, >0 es preferencial)")
-    
+    capabilities = models.JSONField(default=dict, help_text="Ej: {'can_customize_color': True, 'can_remove_logo': False, 'allowed_categories': ['evento','negocio']}")
+        
     class Meta:
         ordering = ['orden']
         verbose_name = "Plan"
@@ -110,10 +124,9 @@ class Suscripcion(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='planes')
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE, related_name='clientes')
     activo = models.BooleanField(default=True)
-    fecha_inicio = models.DateField(auto_now=True)
+    fecha_inicio = models.DateField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADO, default='activa')
     fecha_fin = models.DateField(null=True, blank=True)
-    #payment_id = models.CharField(max_length=255, blank=True, null=True)  # ID de pago (Stripe u otro)
 
     class Meta:
         ordering = ['-fecha_inicio']
@@ -142,7 +155,11 @@ class Suscripcion(models.Model):
 
     def save(self, *args, **kwargs):
         # Si la suscripción se está marcando como 'activa'
-        self.fecha_fin = timezone.localdate() + timedelta(days=self.plan.vigencia_dias)
+            # Solo fija la ventana de vigencia cuando se activa
+        if self.estado == 'activa' and not self.fecha_inicio:
+            self.fecha_inicio = timezone.localdate()
+        if self.estado == 'activa' and self.fecha_inicio and not self.fecha_fin:
+            self.fecha_fin = self.fecha_inicio + timedelta(days=self.plan.vigencia_dias)
         if self.estado == 'activa':
             # Buscar otras suscripciones del mismo usuario y mismo servicio
             # que estén activas o solicitadas, excluyendo la actual
@@ -159,3 +176,4 @@ class Suscripcion(models.Model):
                 super(Suscripcion, sub).save(update_fields=['estado']) 
 
         super(Suscripcion, self).save(*args, **kwargs)
+        
