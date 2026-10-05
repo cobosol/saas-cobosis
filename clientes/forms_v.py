@@ -2,8 +2,6 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django.core.exceptions import ValidationError
-from django.utils.html import strip_tags
 from .models import PerfilCliente
 from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.forms import PasswordResetForm
@@ -15,7 +13,6 @@ from saas_cobosis.settings import EMAIL_HOST_USER
 INPUT_CLS = ('w-full p-2 border border-gray-300 rounded-lg '
              'focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none')
 
-
 class CustomPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,8 +23,11 @@ class CustomPasswordResetForm(PasswordResetForm):
 
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
+        """
+        Envía un correo multipart (texto y html) para restablecer contraseña
+        """
         subject = render_to_string(subject_template_name, context)
-        subject = ''.join(subject.splitlines())
+        subject = ''.join(subject.splitlines())  # Elimina saltos de línea
         body = render_to_string(email_template_name, context)
         email = EmailMultiAlternatives(
             subject,
@@ -35,16 +35,15 @@ class CustomPasswordResetForm(PasswordResetForm):
             EMAIL_HOST_USER,
             to=[to_email]
         )
-
+        
         if html_email_template_name:
             html_email = render_to_string(html_email_template_name, context)
             email.attach_alternative(html_email, 'text/html')
         email.send()
 
-
 class UserCreationFormWithEmail(UserCreationForm):
     email = forms.EmailField(required=True, label='Correo:', help_text="Hasta 254 caracteres y debe ser un correo válido.")
-
+    
     class Meta:
         model = User
         fields = ("username", "first_name", "last_name", "email", "password1", "password2")
@@ -54,7 +53,7 @@ class UserCreationFormWithEmail(UserCreationForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(UserCreationFormWithEmail, self).__init__(*args, **kwargs)
+        super(UserCreationFormWithEmail, self).__init__(*args, **kwargs)   
         self.fields['username'].help_text = """Solo letras, dígitos y @/./+/-/_ """
         self.fields['first_name'].placeholder = 'Nombres'
         self.fields['last_name'].placeholder = 'Apellidos'
@@ -72,34 +71,13 @@ class UserCreationFormWithEmail(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError(u'El correo ya está registrado, pruebe con otro.')
         return email
-
-
+    
 class ProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
+        # override default attributes
         self.fields['link'].widget.attrs['size'] = '100'
         self.fields['address'].widget.attrs['size'] = '40'
-
-    def clean_bio(self):
-        bio = self.cleaned_data.get('bio')
-        if bio is None:
-            return bio
-        cleaned = strip_tags(bio).strip()
-        return cleaned[:2000]
-
-    def clean_link(self):
-        link = self.cleaned_data.get('link')
-        if not link:
-            return link
-        if not link.startswith(('http://', 'https://')):
-            raise ValidationError('La URL debe comenzar con http:// o https://.')
-        return link
-
-    def clean_avatar(self):
-        avatar = self.cleaned_data.get('avatar')
-        if avatar and avatar.size > 5 * 1024 * 1024:
-            raise ValidationError('La imagen debe pesar menos de 5 MB.')
-        return avatar
 
     class Meta:
         model = PerfilCliente
@@ -115,10 +93,10 @@ class ProfileForm(forms.ModelForm):
             'link': 'Sitio personal:'
         }
 
-
 class ProfileUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProfileUpdateForm, self).__init__(*args, **kwargs)
+        # override default attributes
         self.fields['address'].widget.attrs['size'] = '60'
 
     class Meta:
@@ -133,7 +111,6 @@ class ProfileUpdateForm(forms.ModelForm):
             'link': 'Sitio personal:'
         }
 
-
 class EmailForm(forms.ModelForm):
     email = forms.EmailField(required=True, max_length=254, help_text="Requerido. 254 caracteres máximo y debe ser un email válido.")
 
@@ -147,10 +124,13 @@ class EmailForm(forms.ModelForm):
             if User.objects.filter(email=email).exists():
                 raise forms.ValidationError("El email ya está registrado, prueba con otro.")
         return email
-
-
+                             
 class FormularioRegistro(UserCreationForm):
-    """Registro de usuario nuevo (paso 2 del flujo de promociones)."""
+    """Registro de usuario nuevo (paso 2 del flujo de promociones).
+
+    Tras registrarse el usuario queda autenticado y el sistema lo devuelve a
+    la suscripción del plan que había elegido (parámetro ?next=).
+    """
 
     email = forms.EmailField(
         label='Correo electrónico',
@@ -179,6 +159,7 @@ class FormularioRegistro(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Clases Tailwind para los campos de contraseña generados por Django
         for campo in ('password1', 'password2'):
             if campo in self.fields:
                 self.fields[campo].widget.attrs.update({'class': INPUT_CLS})
@@ -196,3 +177,4 @@ class FormularioRegistro(UserCreationForm):
         if commit:
             usuario.save()
         return usuario
+    
