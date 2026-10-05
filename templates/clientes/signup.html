@@ -267,7 +267,16 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                  <div class="register-card">
+                    <!-- Separador -->
+                    <div class="divider">¿Ya tienes cuenta?</div>
+                    <!-- Link a login -->
+                    <div class="login-link">
+                        <a href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right mr-1"></i> Iniciar Sesión
+                        </a>
+                    </div>
+                    <div class="divider">-</div>
+                    <div class="register-card">
                     <!-- Cabecera de la tarjeta -->
                       <div class="register-header py-0">
                         <i class="bi bi-person-plus"></i>
@@ -326,16 +335,6 @@
                                 <button type="submit" class="btn-register">
                                     <i class="bi bi-rocket-takeoff mr-2"></i> Crear Cuenta Gratis
                                 </button>
-                                
-                                <!-- Separador -->
-                                <div class="divider">¿Ya tienes cuenta?</div>
-                                
-                                <!-- Link a login -->
-                                <div class="login-link">
-                                    <a href="{% url 'login' %}">
-                                        <i class="bi bi-box-arrow-in-right mr-1"></i> Iniciar Sesión
-                                    </a>
-                                </div>
                             </form>
                         </div>
                     </div>
