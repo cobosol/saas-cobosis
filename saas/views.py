@@ -4,7 +4,7 @@ from promociones.models import Promocion
 
 # Create your views here.
 def inicio(request):
-    
+    print("En inicio")
     servicios = Servicio.objects.filter(activo=True).prefetch_related(
         'planes'
     ).filter(planes__activo=True).distinct()
@@ -12,6 +12,7 @@ def inicio(request):
     context = {
         'servicios': servicios
     }
+    print(context) 
     return render(request, "index.html", context)
 
 def inicio_promociones(request):

@@ -59,15 +59,81 @@
             </div>
         </div>
 
-        <!-- Pie -->
-        <div class="text-center mt-6">
-            <a href="/" class="text-gray-400 hover:text-gray-600 text-sm">
-                <i class="fas fa-rocket mr-1"></i>Powered by Cobosis
-            </a>
-            {% if promocion.datos_extra.negocio.nombre_negocio %}
-            <p class="text-gray-400 text-xs mt-2">{{ promocion.datos_extra.negocio.nombre_negocio }}</p>
-            {% endif %}
+        <!-- BOTONES DE COMPARTIR EN REDES -->
+        <div class="mt-8 flex justify-center gap-6 text-gray-400">
+            <span class="self-center text-sm hidden sm:block">Compartir esta promoción:</span>
+            <a href="https://wa.me/?text=Mira%20esta%20promoción:%20{{ request.build_absolute_uri }}" target="_blank" class="hover:text-green-400 transition flex items-center gap-2"><i class="fab fa-whatsapp text-2xl"></i> <span class="text-sm hidden md:inline">WhatsApp</span></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="hover:text-blue-500 transition flex items-center gap-2"><i class="fab fa-facebook text-2xl"></i> <span class="text-sm hidden md:inline">Facebook</span></a>
+            <a href="https://twitter.com/intent/tweet?text={{ promocion.titulo }}&url={{ request.build_absolute_uri }}" target="_blank" class="hover:text-white transition flex items-center gap-2"><i class="fab fa-x-twitter text-2xl"></i> <span class="text-sm hidden md:inline">Twitter</span></a>
         </div>
+
+        <!-- SECCIÓN RSVP -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📋 Confirmar asistencia</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if can_rsvp %}
+                            {% if rsvp_success %}
+                                <div class="alert alert-success">
+                                    ✅ ¡Gracias, tu asistencia ha sido confirmada!
+                                </div>
+                            {% elif already_rsvped %}
+                                <div class="alert alert-info">
+                                    Ya has confirmado tu asistencia a este evento.
+                                </div>
+                            {% else %}
+                                {% if rsvp_error %}
+                                    <div class="alert alert-danger">{{ rsvp_error }}</div>
+                                {% endif %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Nombre completo</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Correo electrónico</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Confirmar asistencia</button>
+                                </form>
+                            {% endif %}
+                            <p class="mt-3 text-muted small">
+                                <i class="bi bi-people"></i> {{ rsvp_count }} personas confirmadas
+                            </p>
+                        {% else %}
+                            <p class="text-muted">El RSVP no está habilitado para esta promoción.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+        <!-- CARRUSEL DE PROMOCIONES RELACIONADAS -->
+        {% if relacionadas %}
+        <section class="mt-16">
+            <h2 class="text-2xl font-bold text-gray-300 mb-6 text-center">Otras promociones que te pueden interesar</h2>
+            
+            <div class="carousel-container flex overflow-x-auto space-x-6 pb-4 -mx-4 px-4">
+                {% for rel in relacionadas %}
+                <a href="{% url 'ver_promocion' rel.slug %}" class="carousel-item flex-shrink-0 w-72 bg-gray-800 rounded-xl shadow-md border border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-500 transition block group">
+                    <div class="h-40 bg-gray-700 overflow-hidden">
+                        {% if rel.imagen %}
+                        <img src="{{ rel.imagen.url }}" alt="{{ rel.titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-gray-500">Sin imagen</div>
+                        {% endif %}
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-gray-100 truncate">{{ rel.titulo }}</h3>
+                        <p class="text-xs text-gray-400 mt-1 line-clamp-2 h-8">{{ rel.descripcion }}</p>
+                        <span class="mt-3 inline-block text-blue-400 text-sm font-semibold">Ver promoción →</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
     </div>
 
 </body>

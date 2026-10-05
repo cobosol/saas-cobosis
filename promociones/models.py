@@ -149,7 +149,7 @@ class Promocion(models.Model):
                                blank=True, null=True)
     fecha_evento = models.DateTimeField('Fecha del evento', null=True, blank=True)
     lugar = models.CharField('Lugar', max_length=200, blank=True)
-    enlace_accion = models.URLField('Enlace de acción (botón)', blank=True)
+    enlace_accion = models.URLField('Enlace de acción (botón)', null=True, blank=True)
     datos_extra = models.JSONField('Datos extra', default=dict, blank=True,
                                    help_text='Información adicional de la solicitud original')
     estado = models.CharField('Estado', max_length=20, choices=ESTADOS, default='borrador')
@@ -189,6 +189,19 @@ class Promocion(models.Model):
         return reverse('promociones:ver_promocion', kwargs={'slug': self.slug})
 
     @property
+    def esta_vigente(self):
+        from django.utils import timezone
+        return self.estado == 'publicado' and self.fecha_evento > timezone.now()
+    
+class RSVP(models.Model):
+    promotion = models.ForeignKey(Promocion, on_delete=models.CASCADE, related_name='rsvps')
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.promotion.title}"
+    
     def esta_publicada(self):
         return self.publicada and self.estado == 'publicada'
 
