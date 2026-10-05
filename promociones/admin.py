@@ -2,7 +2,7 @@
 Registro de los modelos de promociones en el admin de Django.
 
 El panel administrativo web (templates promociones/admin_*.html) es la
-herramienta principal del equipo, pero el admin de Django es �til para
+herramienta principal del equipo, pero el admin de Django es útil para
 gestionar plantillas, revisar datos JSON y corregir estados puntualmente.
 """
 from django.contrib import admin
@@ -23,7 +23,7 @@ class PromocionAdmin(admin.ModelAdmin):
     list_filter = ('estado', 'publicada')
     search_fields = ('titulo', 'slug')
     readonly_fields = ('slug', 'vistas', 'creada_en')
-    prepopulated_fields = {}  # el slug se genera autom�ticamente en save()
+    prepopulated_fields = {}  # el slug se genera automáticamente en save()
 
 
 @admin.register(SolicitudPromocion)

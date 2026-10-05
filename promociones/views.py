@@ -57,6 +57,146 @@ URL_REGISTRO = 'registro'
 
 ESTADOS_CON_PROMO = ['pendiente', 'disenando', 'aprobada', 'publicada']
 
+# ==============================================================================
+# Landing público de promociones (renderiza promociones/inicio.html)
+# ==============================================================================
+def promociones(request):
+    print("En promociones")
+    """Landing principal del servicio de promociones.
+
+    Construye TODO el contexto que espera `promociones/inicio.html`:
+
+        promociones_carrusel  -> lista de "slides"; cada slide es un grupo de
+                                 tarjetas (3 por grupo) para el carrusel superior.
+        eventos_agrupados     -> idem, solo promociones de tipo 'evento'.
+        negocios_agrupados    -> idem, solo promociones de tipo 'negocio'.
+        categorias_eventos    -> categorías para los filtros de la sección eventos.
+        categorias_negocios   -> categorías para los filtros de la sección negocios.
+        planes                -> planes activos del servicio 'promociones'.
+
+    Notas sobre el modelo actual (promociones.models.Promocion):
+        - No existe FK `categoria` ni campos `prioridad`, `descuento`, `rating`,
+          `precio_original`... La plantilla los usa, así que los inyectamos como
+          atributos dinámicos leídos desde `datos_extra`. Si prefieres tenerlos
+          como columnas reales, mira la sección 3 al final.
+        - El "tipo" (evento/negocio) se deduce de `datos_extra['tipo']` o, en su
+          defecto, de la solicitud asociada.
+    """
+    TAM_GRUPO = 3  # tarjetas por slide del carrusel (coincide con col-md-4)
+
+    # ---------------------------------------------------------------
+    # 1) Promociones publicadas
+    # ---------------------------------------------------------------
+    qs = (Promocion.objects
+          .filter(publicada=True, estado='publicada')
+          .select_related('solicitud', 'solicitud__usuario')
+          .order_by('-fecha_publicacion', '-creada_en'))
+
+    promos = [_enriquecer_promo(p) for p in qs]
+
+    # ---------------------------------------------------------------
+    # 2) Separar por tipo (evento / negocio)
+    # ---------------------------------------------------------------
+    eventos  = [p for p in promos if p._tipo_interno == 'evento']
+    negocios = [p for p in promos if p._tipo_interno == 'negocio']
+
+    # ---------------------------------------------------------------
+    # 3) Agrupar en slides (chunks) para los carruseles
+    # ---------------------------------------------------------------
+    def _agrupar(lista, tam=TAM_GRUPO):
+        return [lista[i:i + tam] for i in range(0, len(lista), tam)]
+
+    # ---------------------------------------------------------------
+    # 4) Categorías para los filtros
+    #    Como no hay modelo Categoria todavía, las derivamos de datos_extra
+    #    de las promociones publicadas. Si algún día creas el modelo, basta
+    #    con sustituir estas líneas por Categoria.objects.filter(...).
+    # ---------------------------------------------------------------
+    def _categorias_desde(promos_lista):
+        vistas = {}
+        for p in promos_lista:
+            slug = getattr(p.categoria, 'slug', None) if hasattr(p, 'categoria') else None
+            if slug and slug not in vistas:
+                vistas[slug] = p.categoria
+        return list(vistas.values())
+
+    categorias_eventos  = _categorias_desde(eventos)
+    categorias_negocios = _categorias_desde(negocios)
+
+    # ---------------------------------------------------------------
+    # 5) Planes activos del servicio de promociones
+    # ---------------------------------------------------------------
+    planes = (Plan.objects
+              .filter(activo=True, servicio__slug='promociones')
+              .order_by('precio'))
+
+    # ---------------------------------------------------------------
+    # 6) Contexto final
+    # ---------------------------------------------------------------
+    context = {
+        'promociones_carrusel': _agrupar(promos[:12]),   # limita a 12 destacadas
+        'eventos_agrupados':    _agrupar(eventos),
+        'negocios_agrupados':   _agrupar(negocios),
+        'categorias_eventos':   categorias_eventos,
+        'categorias_negocios':  categorias_negocios,
+        'planes':               planes,
+        'titulo_pagina':        'Promociones',
+    }
+    print(context)
+    return render(request, 'promociones/inicio.html', context)
+
+
+# ------------------------------------------------------------------------------
+# Helper privado: inyecta los atributos "de presentación" que la plantilla usa
+# pero que NO existen en el modelo Promocion. Los saca de datos_extra (JSON),
+# donde ya los guardas en admin_crear_tarjeta:
+#     promocion.datos_extra = {
+#         'solicitud_id': ..., 'tipo': ..., 'negocio': ..., 'usuario': ...
+#     }
+# Añade ahí (o en el AdminPromocionForm) las claves: categoria_nombre,
+# categoria_slug, categoria_icono, prioridad, descuento, rating, reviews,
+# distancia, precio_original, precio_oferta.
+# ------------------------------------------------------------------------------
+class _CategoriaLite:
+    """Objeto ligero con la forma que la plantilla espera (cat.nombre, cat.slug, cat.icono)."""
+    __slots__ = ('nombre', 'slug', 'icono')
+    def __init__(self, nombre, slug, icono='tag'):
+        self.nombre, self.slug, self.icono = nombre, slug, icono
+
+
+def _enriquecer_promo(promo):
+    """Añade a `promo` los atributos dinámicos que usa inicio.html."""
+    datos = promo.datos_extra or {}
+    tipo = datos.get('tipo')
+
+    # Fallback: deducir el tipo desde la solicitud
+    if not tipo and getattr(promo, 'solicitud_id', None):
+        try:
+            tipo = promo.solicitud.tipo
+        except SolicitudPromocion.DoesNotExist:
+            tipo = None
+
+    # Guardamos el tipo como atributo "privado" para filtrar en la vista
+    promo._tipo_interno = tipo or 'ninguno'
+
+    # Categoría (la plantilla hace promo.categoria.nombre / .slug / .icono)
+    nombre_cat = (datos.get('categoria_nombre')
+                  or (tipo.capitalize() if tipo else 'Promoción'))
+    slug_cat   = (datos.get('categoria_slug')
+                  or (tipo if tipo else 'otros'))
+    icono_cat  = datos.get('categoria_icono', 'tag')
+    promo.categoria = _CategoriaLite(nombre_cat, slug_cat, icono_cat)
+
+    # Resto de campos "decorativos"
+    promo.prioridad       = datos.get('prioridad', 1)
+    promo.descuento       = datos.get('descuento')
+    promo.rating          = datos.get('rating', 4)
+    promo.reviews         = datos.get('reviews', 0)
+    promo.distancia       = datos.get('distancia', 'Cerca')
+    promo.precio_original = datos.get('precio_original')
+    promo.precio_oferta   = datos.get('precio_oferta')
+
+    return promo
 
 # ==============================================================================
 # Helpers internos
