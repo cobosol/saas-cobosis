@@ -251,7 +251,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- ========== HERO HEADER ========== -->
 <header class="relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #6C63FF 50%, #16213e 100%);">
     <div class="max-w-4xl mx-auto text-center py-10 md:py-16 px-6">
         <div class="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm mb-6 border border-white/20">
@@ -263,7 +262,6 @@
         </h1>
     </div>
     
-    <!-- Onda decorativa -->
     <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
         <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="w-full h-[60px]">
             <path d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z" fill="#f9fafb"></path>
@@ -271,16 +269,12 @@
     </div>
 </header>
 
-<!-- ========== FORMULARIO DE LOGIN ========== -->
 <section class="bg-gray-50" style="background-color: #f9fafb;">
     <div class="login-container">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                    
                     <div class="login-card">
-                        
-                        <!-- Cabecera de la tarjeta -->
                         <div class="login-header">
                             <div class="icon-circle">
                                 <i class="bi bi-person-check"></i>
@@ -289,10 +283,7 @@
                             <p>Ingresa tus credenciales</p>
                         </div>
                         
-                        <!-- Cuerpo del formulario -->
                         <div class="login-body">
-                            
-                            <!-- Mensaje de registro exitoso -->
                             {% if 'register' in request.GET %}
                             <div class="alert-success">
                                 <i class="bi bi-check-circle-fill"></i>
@@ -303,7 +294,6 @@
                             </div>
                             {% endif %}
                             
-                            <!-- Mensaje de error general -->
                             {% if form.non_field_errors %}
                             <div class="alert-error">
                                 <i class="bi bi-exclamation-triangle-fill"></i>
@@ -317,7 +307,6 @@
                             <form method="post" novalidate>
                                 {% csrf_token %}
                                 
-                                <!-- Campo: Nombre de usuario -->
                                 <div class="mb-4">
                                     <label for="id_username">
                                         Nombre de usuario <span style="color: #dc2626;">*</span>
@@ -339,7 +328,6 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Campo: Contraseña -->
                                 <div class="mb-4">
                                     <label for="id_password">
                                         Contraseña <span style="color: #dc2626;">*</span>
@@ -352,8 +340,8 @@
                                                placeholder="Tu contraseña"
                                                style="padding-left: 2.75rem;">
                                         <button type="button" 
-                                                onclick="togglePassword()"
-                                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; z-index: 1;"
+                                                data-toggle-password
+                                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; z-index: 2;"
                                                 aria-label="Mostrar contraseña">
                                             <i class="bi bi-eye" id="toggleIcon"></i>
                                         </button>
@@ -367,7 +355,6 @@
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Recordar sesión + Olvidé contraseña -->
                                 <div class="remember-me">
                                     <label>
                                         <input type="checkbox" name="remember">
@@ -378,16 +365,13 @@
                                     </a>
                                 </div>
                                 
-                                <!-- Campo oculto next -->
                                 <input type="hidden" name="next" value="{{ next }}">
                                 
-                                <!-- Botón de login -->
                                 <button type="submit" class="btn-login">
                                     <i class="bi bi-box-arrow-in-right mr-2"></i> Acceder
                                 </button>
                             </form>
                             
-                            <!-- Links extra -->
                             <div class="extra-links">
                                 <p class="mb-2">
                                     ¿No tienes cuenta? 
@@ -398,8 +382,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Confianza debajo -->
                     <div class="text-center mt-4">
                         <div class="row g-3">
                             <div class="col-4">
@@ -422,7 +404,6 @@
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </div>
@@ -432,23 +413,6 @@
 
 {% block extra_scripts %}
 <script>
-    // Mostrar/ocultar contraseña
-    function togglePassword() {
-        const passwordInput = document.getElementById('id_password');
-        const toggleIcon = document.getElementById('toggleIcon');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleIcon.classList.remove('bi-eye');
-            toggleIcon.classList.add('bi-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            toggleIcon.classList.remove('bi-eye-slash');
-            toggleIcon.classList.add('bi-eye');
-        }
-    }
-    
-    // Enfocar automáticamente el campo de usuario si está vacío
     document.addEventListener('DOMContentLoaded', function() {
         const usernameInput = document.getElementById('id_username');
         if (usernameInput && !usernameInput.value) {
