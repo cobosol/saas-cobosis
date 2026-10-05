@@ -3,7 +3,6 @@
 
 {% block title %}Mi Panel | Cobosis{% endblock %}
 
-{# Sobrescribe la clase del main para eliminar el padding #}
 {% block main_class %}pt-16 md:pt-16{% endblock %}
 
 {% block extra_styles %}
@@ -13,10 +12,9 @@
         display: flex;
         min-height: calc(100vh - 64px);
         background-color: #f9fafb;
-        margin-top: -1px; /* Elimina cualquier gap */
+        margin-top: -1px;
     }
     
-    /* ===== SIDEBAR (Azul claro #4D96FF) ===== */
     .sidebar {
         width: 260px;
         background-color: var(--info);
@@ -32,10 +30,9 @@
         border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* Ajustar sidebar en desktop */
     @media (min-width: 640px) {
         .sidebar {
-            top: 64px; /* h-16 en desktop */
+            top: 64px;
         }
     }
     
@@ -153,7 +150,6 @@
         color: white;
     }
     
-    /* ===== CONTENIDO PRINCIPAL ===== */
     .main-content {
         flex: 1;
         margin-left: 260px;
@@ -162,7 +158,6 @@
         min-height: 100vh;
     }
     
-    /* ===== TOPBAR ===== */
     .topbar {
         background: white;
         border-bottom: 1px solid #e5e7eb;
@@ -177,7 +172,7 @@
     
     @media (min-width: 640px) {
         .topbar {
-            top: 64px; /* h-16 en desktop */
+            top: 64px;
         }
     }
 
@@ -199,13 +194,11 @@
         color: var(--primary-dark, #5A52D5);
     }
     
-    /* ===== CONTENIDO ===== */
     .dashboard-content {
         flex: 1;
         padding: 2rem;
     }
     
-    /* ===== TARJETAS DE SERVICIOS ===== */
     .service-card {
         background: white;
         border-radius: 1rem;
@@ -235,7 +228,6 @@
         color: var(--primary, #6C63FF);
     }
     
-    /* Badges de estado */
     .status-badge {
         font-size: 0.7rem;
         padding: 0.25rem 0.75rem;
@@ -263,7 +255,6 @@
         border: 1px solid var(--danger, #FF6B6B);
     }
     
-    /* Tarjeta "Adquirir nuevo" */
     .add-service-card {
         background: #fafafa;
         border: 2px dashed #d1d5db;
@@ -297,7 +288,6 @@
         transform: scale(1.1);
     }
     
-    /* ===== SECCIÓN DE EXTRACCIÓN RÁPIDA ===== */
     .quick-extract {
         background: white;
         border-radius: 1rem;
@@ -337,7 +327,6 @@
         justify-content: center;
     }
     
-    /* ===== ALERTA SIN SERVICIOS ===== */
     .empty-state {
         text-align: center;
         padding: 3rem 2rem;
@@ -352,7 +341,6 @@
         margin-bottom: 1rem;
     }
     
-    /* ===== BOTONES ===== */
     .btn-teal {
         background: var(--primary, #6C63FF);
         color: white;
@@ -476,7 +464,6 @@
         font-size: 0.9rem;
     }
     
-    /* ===== UTILIDADES ===== */
     .text-danger-custom {
         color: var(--danger, #FF6B6B) !important;
     }
@@ -489,7 +476,6 @@
         color: var(--warning, #FFD93D);
     }
     
-    /* Mobile menu toggle */
     .sidebar-toggle {
         display: none;
         background: none;
@@ -500,7 +486,6 @@
         padding: 0.25rem;
     }
     
-    /* Responsive */
     @media (max-width: 768px) {
         .sidebar {
             transform: translateX(-100%);
@@ -531,10 +516,7 @@
 
 {% block content %}
 <div class="dashboard-wrapper">
-    
-    <!-- ===== SIDEBAR ===== -->
     <aside class="sidebar" id="sidebar">
-        <!-- Navegación -->
         <nav class="sidebar-nav">
             <a href="{% url 'clientes:panel_cliente' %}" class="sidebar-link active">
                 <i class="bi bi-speedometer2"></i> Panel informativo
@@ -563,7 +545,6 @@
             </a>
         </nav>
         
-        <!-- Usuario -->
         <div class="sidebar-footer">
             <div class="sidebar-user">
                 <div class="user-avatar">
@@ -580,17 +561,13 @@
         </div>
     </aside>
     
-    <!-- Overlay para móvil -->
     <div id="sidebar-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark opacity-50" 
-         style="z-index: 35;" onclick="toggleSidebar()"></div>
+         style="z-index: 35;" data-sidebar-overlay></div>
     
-    <!-- ===== CONTENIDO PRINCIPAL ===== -->
     <div class="main-content">
-        
-        <!-- Topbar -->
         <header class="topbar">
             <div class="d-flex align-items-center gap-3">
-                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir menú">
+                <button class="sidebar-toggle" data-sidebar-toggle aria-label="Abrir menú">
                     <i class="bi bi-list"></i>
                 </button>
                 <h1>Bienvenido, {{ request.user.first_name|default:request.user.username }}</h1>
@@ -600,10 +577,7 @@
             </a>
         </header>
         
-        <!-- Dashboard Content -->
         <main class="dashboard-content">
-            
-            <!-- ===== SIN SERVICIOS ===== -->
             {% if not suscripciones %}
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
@@ -613,9 +587,7 @@
                     <i class="bi bi-rocket-takeoff me-2"></i> Ver Planes
                 </a>
             </div>
-            
             {% else %}
-            <!-- ===== TUS SERVICIOS ACTIVOS ===== -->
             <h2 class="text-lg fw-bold text-gray-800 mb-4">
                 <i class="bi bi-star-fill me-2 icon-warning"></i>Tus Servicios Activos
             </h2>
@@ -624,7 +596,6 @@
                 {% for sub in suscripciones %}
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="service-card">
-                        <!-- Cabecera -->
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="service-icon">
@@ -635,7 +606,6 @@
                                 </h3>
                             </div>
                             
-                            <!-- Estado -->
                             {% if sub.estado == 'activa' %}
                             <span class="status-badge active">
                                 <i class="bi bi-check-circle-fill me-1"></i>Activa
@@ -651,7 +621,6 @@
                             {% endif %}
                         </div>
                         
-                        <!-- Detalles -->
                         <div class="text-sm text-gray-500 mb-4 flex-grow-1">
                             <p class="mb-1">
                                 <span class="fw-medium text-gray-700">Plan:</span> {{ sub.plan.nombre }}
@@ -674,7 +643,6 @@
                             {% endif %}
                         </div>
                         
-                        <!-- Botón de acción -->
                         {% if sub.estado == 'activa' %}
                             {% if sub.plan.servicio.slug == 'gestiona' %}
                             <a href="{% url 'gestiona_panel' %}" class="btn-teal w-100 justify-content-center mt-auto">
@@ -694,7 +662,6 @@
                 </div>
                 {% endfor %}
                 
-                <!-- Tarjeta: Adquirir nuevo servicio -->
                 <div class="col-12 col-md-6 col-lg-4">
                     <a href="{% url 'inicio' %}#servicios" class="add-service-card">
                         <i class="bi bi-plus-circle"></i>
@@ -704,7 +671,6 @@
                 </div>
             </div>
             
-            <!-- ===== EXTRACCIÓN RÁPIDA (Gestiona) ===== -->
             {% if 'gestiona' in servicios_activos|slugify %}
             <div class="quick-extract">
                 <h2 class="text-lg fw-bold text-gray-800 mb-4">
@@ -737,18 +703,36 @@
                 </div>
             </div>
             {% endif %}
-            
             {% endif %}
         </main>
     </div>
 </div>
 
 <script>
-    function toggleSidebar() {
+    document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('d-none');
-    }
+        const toggleButtons = document.querySelectorAll('[data-sidebar-toggle]');
+
+        toggleButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                if (sidebar) {
+                    sidebar.classList.toggle('open');
+                }
+                if (overlay) {
+                    overlay.classList.toggle('d-none');
+                }
+            });
+        });
+
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                if (sidebar) {
+                    sidebar.classList.remove('open');
+                }
+                overlay.classList.add('d-none');
+            });
+        }
+    });
 </script>
 {% endblock %}
