@@ -1,55 +1,198 @@
-from django.db import models
+from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
-from django.utils.timezone import now
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.utils import timezone
-from datetime import timedelta
+from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
+from django.utils.html import strip_tags
+from .models import PerfilCliente
+from django.core.mail import EmailMultiAlternatives
+from django.contrib.auth.forms import PasswordResetForm
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from django.utils.html import format_html
+from saas_cobosis.settings import EMAIL_HOST_USER
 
-class PerfilCliente(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    cid = models.CharField(max_length=20, verbose_name = "Número de identidad", default='11111111111')
-    avatar = models.ImageField(upload_to='profiles', null=True, blank=True, verbose_name = "Foto")
-    bio = models.TextField(null=True, blank=True, verbose_name = "Biografía")
-    link = models.URLField(max_length=200, null=True, blank=True, verbose_name = "Enlace")
-    phone = models.CharField(max_length=15, null=True, blank = True,
-                            help_text='', 
-                            verbose_name = "Número de móvil")
-    ws = models.CharField(max_length=15, null=True, blank = True, verbose_name = "Número para WhatsApp")
-    
-    # Special User
-    reeup = models.CharField(max_length=20, unique=True, null=True, blank = True,
-                            help_text='', 
-                            verbose_name = "Código REEUP")
-    nit = models.CharField(max_length=20, unique=True, null=True, blank = True,
-                            help_text='', 
-                            verbose_name = "Código NIT")
-    address = models.CharField(max_length=100, null=True, blank = True, 
-                            verbose_name = "Dirección oficial")
-    agency = models.CharField(max_length=100, null=True, blank = True, 
-                            verbose_name = "Agencia bancaria")
-    contract = models.CharField(max_length=50, null=True, blank = True, 
-                            verbose_name = "Número de contrato")
+INPUT_CLS = ('w-full p-2 border border-gray-300 rounded-lg '
+             'focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none')
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Tu correo electrónico'
+        })
+
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        subject = render_to_string(subject_template_name, context)
+        subject = ''.join(subject.splitlines())
+        body = render_to_string(email_template_name, context)
+        email = EmailMultiAlternatives(
+            subject,
+            body,
+            EMAIL_HOST_USER,
+            to=[to_email]
+        )
+
+        if html_email_template_name:
+            html_email = render_to_string(html_email_template_name, context)
+            email.attach_alternative(html_email, 'text/html')
+        email.send()
+
+
+class UserCreationFormWithEmail(UserCreationForm):
+    email = forms.EmailField(required=True, label='Correo:', help_text="Hasta 254 caracteres y debe ser un correo válido.")
+
     class Meta:
-        ordering = ['user']
-        verbose_name = "Perfil"
-        verbose_name_plural = "Perfiles"
+        model = User
+        fields = ("username", "first_name", "last_name", "email", "password1", "password2")
 
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name}'
+        labels = {
+            'username': 'Usuario:',
+        }
 
-    @property
-    def name(self):
-        return self.user.first_name + ' ' + self.user.last_name
-    
-    @property
-    def get_avatar_url(self):
-        if self.avatar and hasattr(self.avatar, 'url'):
-            return self.avatar.url 
-        else:
-            return "/static/img/Profile/pensativo.jpg"
-        
-@receiver(post_save, sender=User)
-def ensure_profile_exists(sender, instance, **kwargs):
-    if kwargs.get('created', False):
-        PerfilCliente.objects.get_or_create(user=instance)
+    def __init__(self, *args, **kwargs):
+        super(UserCreationFormWithEmail, self).__init__(*args, **kwargs)
+        self.fields['username'].help_text = """Solo letras, dígitos y @/./+/-/_ """
+        self.fields['first_name'].placeholder = 'Nombres'
+        self.fields['last_name'].placeholder = 'Apellidos'
+        self.fields['password1'].help_text = format_html(
+        '<ul class="password-requirements">'
+            '<li>No puede ser similar a tu otra información personal.</li>'
+            '<li>Debe contener al menos 8 caracteres.</li>'
+            '<li>Debe incluir letras, números y caracteres especiales (*, %, $, ...).</li>'
+        '</ul>'
+        )
+        self.fields['password2'].help_text = """Verifique que coinciden."""
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError(u'El correo ya está registrado, pruebe con otro.')
+        return email
+
+
+class ProfileForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProfileForm, self).__init__(*args, **kwargs)
+        self.fields['link'].widget.attrs['size'] = '100'
+        self.fields['address'].widget.attrs['size'] = '40'
+
+    def clean_bio(self):
+        bio = self.cleaned_data.get('bio')
+        if bio is None:
+            return bio
+        cleaned = strip_tags(bio).strip()
+        return cleaned[:2000]
+
+    def clean_link(self):
+        link = self.cleaned_data.get('link')
+        if not link:
+            return link
+        if not link.startswith(('http://', 'https://')):
+            raise ValidationError('La URL debe comenzar con http:// o https://.')
+        return link
+
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get('avatar')
+        if avatar and avatar.size > 5 * 1024 * 1024:
+            raise ValidationError('La imagen debe pesar menos de 5 MB.')
+        return avatar
+
+    class Meta:
+        model = PerfilCliente
+        fields = ['avatar', 'bio', 'link', 'cid', 'phone', 'ws', 'reeup', 'nit', 'address', 'agency', 'contract']
+        widgets = {
+            'avatar': forms.ClearableFileInput(attrs={'class':'btn-primary btn-block form-control-file mt-3', 'placeholder':'Subir foto'}),
+            'bio': forms.Textarea(attrs={'class':'form-control mt-3', 'rows':4, 'placeholder':'Biografía'}),
+            'link': forms.URLInput(attrs={'class': 'form-control mt-3', 'placeholder':'enlace'}),
+            'address': forms.Textarea(attrs={'class':'form-control mt-3', 'rows':3, 'placeholder':'Dirección legal'}),
+        }
+
+        labels = {
+            'link': 'Sitio personal:'
+        }
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProfileUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['address'].widget.attrs['size'] = '60'
+
+    class Meta:
+        model = PerfilCliente
+        fields = ['cid', 'phone', 'ws', 'reeup', 'nit', 'address', 'agency', 'contract']
+        widgets = {
+            'cid': forms.TextInput(attrs={'class':'form-control mt-3', 'placeholder':'Número de identidad', 'required': False}),
+            'address': forms.Textarea(attrs={'class':'form-control mt-3', 'rows':3, 'placeholder':'Dirección legal'}),
+        }
+
+        labels = {
+            'link': 'Sitio personal:'
+        }
+
+
+class EmailForm(forms.ModelForm):
+    email = forms.EmailField(required=True, max_length=254, help_text="Requerido. 254 caracteres máximo y debe ser un email válido.")
+
+    class Meta:
+        model = User
+        fields = ['email']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if 'email' in self.changed_data:
+            if User.objects.filter(email=email).exists():
+                raise forms.ValidationError("El email ya está registrado, prueba con otro.")
+        return email
+
+
+class FormularioRegistro(UserCreationForm):
+    """Registro de usuario nuevo (paso 2 del flujo de promociones)."""
+
+    email = forms.EmailField(
+        label='Correo electrónico',
+        required=True,
+        widget=forms.EmailInput(attrs={'class': INPUT_CLS,
+                                       'placeholder': 'tu@correo.com'}))
+    first_name = forms.CharField(
+        label='Nombre',
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'class': INPUT_CLS}))
+    last_name = forms.CharField(
+        label='Apellidos',
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'class': INPUT_CLS}))
+
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'email', 'first_name', 'last_name')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': INPUT_CLS,
+                                               'placeholder': 'Nombre de usuario'}),
+        }
+        labels = {'username': 'Nombre de usuario'}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for campo in ('password1', 'password2'):
+            if campo in self.fields:
+                self.fields[campo].widget.attrs.update({'class': INPUT_CLS})
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').lower()
+        User = get_user_model()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Ya existe una cuenta con este correo electrónico.')
+        return email
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        usuario.email = self.cleaned_data.get('email', '').lower()
+        if commit:
+            usuario.save()
+        return usuario
