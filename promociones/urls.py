@@ -19,7 +19,7 @@ app_name = 'promociones'
 
 urlpatterns = [
     # ------------------------- Cliente -------------------------
-    #path('', views.mis_promociones, name='mis_promociones'),
+    path('', views.promociones, name='promociones'),
     path('panel/', views.mis_promociones, name='panel_promociones'),  # alias usado por servicios
     path('suscribir/<int:plan_id>/', views.suscribir_promocion, name='suscribir_promocion'),
     path('primera-promocion/<int:plan_id>/', views.primera_promocion, name='primera_promocion'),

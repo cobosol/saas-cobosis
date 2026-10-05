@@ -11,6 +11,11 @@
             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-user-plus text-blue-600 text-2xl"></i>
             </div>
+            
+            <p class="text-center text-sm text-gray-500 mt-6">
+                ¿Ya tienes cuenta?
+                <a href="{% url 'login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="text-blue-600 font-semibold hover:underline">Inicia sesión</a>
+            </p>
             <h1 class="text-2xl font-bold text-gray-800">Crea tu cuenta</h1>
             <p class="text-sm text-gray-500 mt-2">
                 A falta de un paso: completa tus datos y continúa con la suscripción que elegiste.
@@ -69,10 +74,6 @@
             </button>
         </form>
 
-        <p class="text-center text-sm text-gray-500 mt-6">
-            ¿Ya tienes cuenta?
-            <a href="{% url 'login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="text-blue-600 font-semibold hover:underline">Inicia sesión</a>
-        </p>
     </div>
 </div>
 {% endblock %}
