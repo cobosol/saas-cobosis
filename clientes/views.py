@@ -14,7 +14,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from .models import PerfilCliente
-from .forms import CustomPasswordResetForm, ProfileForm, UserCreationFormWithEmail, EmailForm
+from .forms import CustomPasswordResetForm, FormularioRegistro, ProfileForm, UserCreationFormWithEmail, EmailForm
 #Librerías para mensajes, algunos basados en views
 from django.contrib import messages
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -36,9 +36,11 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse
 
+NEXT_SEGURO_PREFIJOS = ('/',)
 
 @login_required
 def panel_cliente(request):
+    print("Estoy en panel cliente")
     # En views.py -> def panel_cliente
     suscripciones = Suscripcion.objects.filter(
         usuario=request.user, 
@@ -123,6 +125,38 @@ def confirmacion_envio(request):
 def cuenta_activada(request):
     return render(request, 'clientes/confirmacion_activacion.html')
 
+def _destino_seguro(next_url):
+    """Evita redirecciones a dominios externos (open redirect)."""
+    if next_url and next_url.startswith(NEXT_SEGURO_PREFIJOS) \
+            and not next_url.startswith('//'):
+        return next_url
+    return None
+
+def registro_aux(request):
+    """Formulario de registro con continuación de flujo (?next=)."""
+    next_url = _destino_seguro(request.GET.get('next') or request.POST.get('next'))
+
+    if request.user.is_authenticated:
+        return redirect(next_url or 'inicio')
+
+    if request.method == 'POST':
+        form = FormularioRegistro(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            # Login automático: el flujo continúa sin fricción
+            login(request, usuario)
+            messages.success(request,
+                             f'¡Bienvenido, {usuario.username}! Tu cuenta ha sido creada.')
+            return redirect(next_url or 'inicio')
+    else:
+        form = FormularioRegistro()
+
+    return render(request, 'clientes/registro.html', {
+        'form': form,
+        'next_url': next_url or '',
+        'titulo_pagina': 'Crear cuenta',
+    })
+
 class SignUpView(CreateView):
     form_class = UserCreationFormWithEmail
     template_name = 'clientes/signup.html'
@@ -173,12 +207,10 @@ class EmailUpdate(UpdateView):
         form.fields['email'].widget = forms.EmailInput(attrs={'class': 'form-control mb-2', 'placeholder':'Email'})
         return form
     
-
 def users_list(request, template_name="clientes/users_list.html"):
     perfiles = PerfilCliente.objects.all().order_by('-user__date_joined')
     return render(request, template_name, locals())
     
-
 class Actualizar_perfil_admin(SuccessMessageMixin, UpdateView):
     model = PerfilCliente
     fields = '__all_'

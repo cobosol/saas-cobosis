@@ -124,7 +124,7 @@ class Suscripcion(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='planes')
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE, related_name='clientes')
     activo = models.BooleanField(default=True)
-    fecha_inicio = models.DateField(auto_now=True)
+    fecha_inicio = models.DateField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADO, default='activa')
     fecha_fin = models.DateField(null=True, blank=True)
 
@@ -155,7 +155,11 @@ class Suscripcion(models.Model):
 
     def save(self, *args, **kwargs):
         # Si la suscripción se está marcando como 'activa'
-        self.fecha_fin = timezone.localdate() + timedelta(days=self.plan.vigencia_dias)
+            # Solo fija la ventana de vigencia cuando se activa
+        if self.estado == 'activa' and not self.fecha_inicio:
+            self.fecha_inicio = timezone.localdate()
+        if self.estado == 'activa' and self.fecha_inicio and not self.fecha_fin:
+            self.fecha_fin = self.fecha_inicio + timedelta(days=self.plan.vigencia_dias)
         if self.estado == 'activa':
             # Buscar otras suscripciones del mismo usuario y mismo servicio
             # que estén activas o solicitadas, excluyendo la actual
@@ -172,3 +176,4 @@ class Suscripcion(models.Model):
                 super(Suscripcion, sub).save(update_fields=['estado']) 
 
         super(Suscripcion, self).save(*args, **kwargs)
+        

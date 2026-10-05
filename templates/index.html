@@ -55,7 +55,7 @@
                 <i class="fas fa-play mr-2"></i>Nuestros servicios
             </a>
             {% else %}
-            <a href="{% url 'registro' %}" class="bg-white text-[#6C63FF] font-bold py-4 px-10 rounded-xl hover:bg-white hover:text-[#FF6B6B] transition-all duration-300 inline-block text-lg">
+            <a href="{% url 'clientes:registro' %}" class="bg-white text-[#6C63FF] font-bold py-4 px-10 rounded-xl hover:bg-white hover:text-[#FF6B6B] transition-all duration-300 inline-block text-lg">
                 <i class="fas fa-play mr-2"></i>Nuestros servicios
             </a>
             {%endif%}
@@ -208,7 +208,7 @@
                 Comenzar Ahora
             </a>
             {% else %}
-            <a href="{% url 'registro' %}" 
+            <a href="{% url 'clientes:registro' %}" 
                class="bg-[#FF6B6B] text-white font-bold py-4 px-10 rounded-xl shadow-2xl hover:bg-[#2d1b69] transition-all duration-300 inline-block text-lg">
                 <i class="fas fa-rocket mr-2 group-hover:animate-bounce"></i>
                 Comenzar Ahora

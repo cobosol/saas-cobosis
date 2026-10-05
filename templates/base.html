@@ -223,12 +223,21 @@
                         </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                        <a class="dropdown-item py-2 small" href="{% url 'panel_cliente' %}">
+                        {% if user.is_superuser %}
+                        <a class="dropdown-item py-2 small" href="{% url 'panel_suscripciones' %}">
+                            <i class="bi bi-credit-card me-2"></i> Panel suscripciones
+                        </a>
+                        <a class="dropdown-item py-2 small" href="{% url 'promociones:admin_solicitudes' %}">
+                            <i class="bi bi-credit-card me-2"></i> Panel promociones
+                        </a>
+                        {% else %}
+                        <a class="dropdown-item py-2 small" href="{% url 'clientes:panel_cliente' %}">
                             <i class="bi bi-credit-card me-2"></i> Panel personal
                         </a>
+                        {% endif %}
                     </li>
                     <li>
-                        <a class="dropdown-item py-2 small" href="{% url 'profile' %}">
+                        <a class="dropdown-item py-2 small" href="{% url 'clientes:profile' %}">
                             <i class="bi bi-person-gear me-2"></i> Mi Perfil
                         </a>
                     </li>                    
@@ -249,7 +258,7 @@
                        class="btn-login text-gray-600 hover:text-[#6C63FF] hover:bg-gray-50 rounded-lg transition-colors whitespace-nowrap fw-medium text-decoration-none">
                         Iniciar Sesión
                     </a>
-                    <a href="{% url 'registro' %}" 
+                    <a href="{% url 'clientes:registro' %}" 
                        class="btn-register bg-[#6C63FF] text-white rounded-lg fw-semibold hover:bg-[#5A52D5] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 whitespace-nowrap text-decoration-none">
                         <i class="bi bi-person-plus me-1"></i> Registrarse
                     </a>

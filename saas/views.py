@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from servicios.models import Servicio, Plan
-from promociones.models import Categoria, Promocion
+from promociones.models import Promocion
 
 # Create your views here.
 def inicio(request):
@@ -21,13 +21,13 @@ def inicio_promociones(request):
         return [lista[i:i+n] for i in range(0, len(lista), n)]
     
     # Eventos (sin cambios)
-    eventos = Promocion.objects.filter(estado='publicado', tipo='evento').order_by('-prioridad', '-fecha_evento')
-    negocios = Promocion.objects.filter(estado='publicado', tipo='negocio').order_by('-prioridad', '-creado')
+    eventos = Promocion.objects.filter(estado='publicado', solicitud__tipo='evento')
+    negocios = Promocion.objects.filter(estado='publicado', solicitud__tipo='negocio')
     planes = Plan.objects.filter(activo=True, servicio__nombre='Promociones').order_by('precio', '-orden')
 
     # --- NUEVO: Carrusel principal (máximo 18 promociones = 3 slides de 6) ---
-    promociones_destacadas = Promocion.objects.filter(estado='publicado').order_by('-prioridad', '-creado')[:18]
-    promociones_carrusel = agrupar(promociones_destacadas, 6)  # grupos de 6
+    promociones_destacadas = Promocion.objects.filter(estado='publicado')[:18]
+    promociones_carrusel = agrupar(promociones_destacadas, 6)  # grupos de 6 .order_by('-creado')'-prioridad', 
 
     context = {
         # Carrusel principal
@@ -35,12 +35,12 @@ def inicio_promociones(request):
 
         # Eventos
         'eventos_agrupados': agrupar(eventos[:9], 3),   # 3 slides de 3
-        'categorias_eventos': Categoria.objects.filter(tipo='evento'),
+        #'categorias_eventos': Categoria.objects.filter(tipo='evento'),
         'total_eventos': eventos.count(),
 
         # Negocios
         'negocios_agrupados': agrupar(negocios[:9], 3),
-        'categorias_negocios': Categoria.objects.filter(tipo='negocio'),
+        #'categorias_negocios': Categoria.objects.filter(tipo='negocio'),
         'total_negocios': negocios.count(),
 
         'planes': planes,

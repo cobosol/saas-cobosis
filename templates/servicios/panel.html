@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Suscripciones{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  {# ---------- ENCABEZADO ---------- #}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-0">
+        <i class="fas fa-crown text-warning"></i> Panel de Suscripciones
+      </h2>
+      <small class="text-muted">Aprueba o deniega las solicitudes de planes</small>
+    </div>
+    <span class="badge bg-primary fs-6">
+      {{ conteos.solicitada }} pendiente{{ conteos.solicitada|pluralize }}
+    </span>
+  </div>
+
+  {# ---------- MENSAJES ---------- #}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {# ---------- TABS DE ESTADO ---------- #}
+  <ul class="nav nav-pills mb-3">
+    {% for valor, etiqueta in estados %}
+      <li class="nav-item me-1">
+        <a class="nav-link {% if estado_actual == valor %}active{% endif %}"
+           href="?estado={{ valor }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+          {{ etiqueta }}
+          <span class="badge rounded-pill {% if estado_actual == valor %}bg-light text-dark{% else %}bg-secondary{% endif %} ms-1">
+            {% if valor == 'solicitada' %}{{ conteos.solicitada }}{% elif valor == 'activa' %}{{ conteos.activa }}{% elif valor == 'vencida' %}{{ conteos.vencida }}{% else %}{{ conteos.cancelada }}{% endif %}
+          </span>
+        </a>
+      </li>
+    {% endfor %}
+    <li class="nav-item">
+      <a class="nav-link {% if estado_actual == 'todas' %}active{% endif %}" href="?estado=todas">Todas</a>
+    </li>
+  </ul>
+
+  {# ---------- BUSCADOR ---------- #}
+  <form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="estado" value="{{ estado_actual }}">
+    <div class="col-md-6">
+      <input type="text" name="q" value="{{ busqueda }}" class="form-control"
+             placeholder="Buscar por usuario, email, plan o servicio...">
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-outline-primary w-100">
+        <i class="fas fa-search"></i> Buscar
+      </button>
+    </div>
+    {% if busqueda %}
+    <div class="col-md-3">
+      <a href="?estado={{ estado_actual }}" class="btn btn-outline-secondary w-100">
+        Limpiar
+      </a>
+    </div>
+    {% endif %}
+  </form>
+
+  {# ---------- LISTADO ---------- #}
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Usuario</th>
+            <th>Servicio / Plan</th>
+            <th>Precio</th>
+            <th>Vigencia</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sub in suscripciones %}
+          <tr>
+            {# --- Usuario --- #}
+            <td>
+              <div class="fw-semibold">{{ sub.usuario.username }}</div>
+              <small class="text-muted">{{ sub.usuario.email }}</small>
+            </td>
+
+            {# --- Servicio / Plan --- #}
+            <td>
+              <div><i class="fas fa-cube text-primary"></i> {{ sub.plan.servicio.nombre }}</div>
+              <small class="text-muted">{{ sub.plan.nombre }}</small>
+            </td>
+
+            {# --- Precio --- #}
+            <td>
+              <span class="fw-semibold">${{ sub.plan.precio }}</span>
+              <small class="text-muted d-block">/ {{ sub.plan.vigencia_dias }} días</small>
+            </td>
+
+            {# --- Vigencia --- #}
+            <td>
+              <small class="d-block">
+                Inicio: {{ sub.fecha_inicio|date:"d M Y"|default:"—" }}
+              </small>
+              <small class="d-block text-muted">
+                Fin: {{ sub.fecha_fin|date:"d M Y"|default:"—" }}
+              </small>
+              {% if sub.estado == 'activa' and sub.vigente %}
+                <span class="badge bg-success-subtle text-success-emphasis mt-1">
+                  {{ sub.dias_restantes }} días restantes
+                </span>
+              {% endif %}
+            </td>
+
+            {# --- Estado --- #}
+            <td>
+              {% if sub.estado == 'solicitada' %}
+                <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Solicitada</span>
+              {% elif sub.estado == 'activa' %}
+                <span class="badge bg-success"><i class="fas fa-check"></i> Activa</span>
+              {% elif sub.estado == 'vencida' %}
+                <span class="badge bg-secondary"><i class="fas fa-hourglass-end"></i> Vencida</span>
+              {% else %}
+                <span class="badge bg-danger"><i class="fas fa-times"></i> Cancelada</span>
+              {% endif %}
+            </td>
+
+            {# --- Acciones --- #}
+            <td class="text-end">
+              {% if sub.estado == 'solicitada' %}
+                <form method="post" action="{% url 'aprobar_suscripcion' sub.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-success"
+                          onclick="return confirm('¿Aprobar la suscripción de {{ sub.usuario.username }}?');">
+                    <i class="fas fa-check"></i> Aprobar
+                  </button>
+                </form>
+                <form method="post" action="{% url 'denegar_suscripcion' sub.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('¿Denegar la suscripción de {{ sub.usuario.username }}?');">
+                    <i class="fas fa-times"></i> Denegar
+                  </button>
+                </form>
+              {% elif sub.estado == 'activa' %}
+                <form method="post" action="{% url 'denegar_suscripcion' sub.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('¿Cancelar la suscripción activa?');">
+                    <i class="fas fa-ban"></i> Cancelar
+                  </button>
+                </form>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+              No hay suscripciones {{ estado_actual }} para mostrar.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
