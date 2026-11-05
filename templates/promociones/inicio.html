@@ -320,9 +320,8 @@
                                            style="background: var(--primary, #6C63FF); font-size: 0.75rem;">
                                             <i class="bi bi-ticket-detailed me-1"></i>Ver detalles
                                         </a>
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="compartirPromocion('{{ promo.id }}')" title="Compartir">
-                                            <i class="bi bi-share"></i>
-                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="compartirPromocion('{{ promo.get_absolute_url }}')">
                                     </div>
                                 </div>
                             </div>
@@ -658,5 +657,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+// Utilidad de compartir (necesaria para los botones de las tarjetas)
+window.compartirPromocion = async function(url) {
+    if (navigator.share) {
+        try { await navigator.share({ title: 'Promoción', url }); return; } catch (e) {}
+    }
+    try { await navigator.clipboard.writeText(url); alert('Enlace copiado'); } catch (e) {}
+};
 </script>
 {% endblock %}

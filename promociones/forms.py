@@ -300,7 +300,7 @@ class AdminPromocionForm(forms.ModelForm):
     class Meta:
         model = Promocion
         fields = ['titulo', 'descripcion', 'imagen', 'fecha_evento', 'lugar',
-                  'enlace_accion', 'publicada']
+          'enlace_accion', 'publicada', 'usa_html', 'html_content']
         widgets = {
             'titulo': forms.TextInput(attrs={'class': INPUT_CLS}),
             'descripcion': forms.Textarea(attrs={'class': INPUT_CLS, 'rows': 3}),
@@ -311,6 +311,7 @@ class AdminPromocionForm(forms.ModelForm):
             'enlace_accion': forms.URLInput(attrs={'class': INPUT_CLS}),
             'publicada': forms.CheckboxInput(
                 attrs={'class': 'w-5 h-5 rounded text-green-600 focus:ring-green-500'}),
+            'html_content': forms.Textarea(attrs={'class': INPUT_CLS, 'rows': 33}),
         }
         labels = {
             'titulo': 'Título de la tarjeta *',
@@ -348,3 +349,57 @@ class AdminPromocionForm(forms.ModelForm):
         if cleaned.get('publicada') and not cleaned.get('imagen'):
             self.add_error('imagen', 'Necesitas subir la imagen final para poder publicar.')
         return cleaned
+
+class PromocionHTMLForm(forms.Form):
+    """Formulario generado a partir de PlantillaPromocion.get_campos()."""
+
+    def __init__(self, plantilla, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.plantilla = plantilla
+        for fd in plantilla.get_campos():
+            name = fd['name']
+            label = fd.get('label', name.replace('_', ' ').title())
+            required = fd.get('required', False)
+            maxlength = fd.get('maxlength')
+            ftype = fd.get('type', 'text')
+
+            if ftype == 'textarea':
+                self.fields[name] = forms.CharField(
+                    label=label, required=required, max_length=maxlength,
+                    widget=forms.Textarea(attrs={'class': INPUT_CLS, 'rows': 3}))
+            elif ftype == 'date':
+                self.fields[name] = forms.DateField(
+                    label=label, required=required,
+                    widget=forms.DateInput(attrs={'type': 'date', 'class': INPUT_CLS}))
+            elif ftype == 'time':
+                self.fields[name] = forms.TimeField(
+                    label=label, required=required,
+                    widget=forms.TimeInput(attrs={'type': 'time', 'class': INPUT_CLS}))
+            elif ftype == 'url':
+                self.fields[name] = forms.URLField(
+                    label=label, required=required,
+                    widget=forms.URLInput(attrs={'class': INPUT_CLS}))
+            elif ftype == 'email':
+                self.fields[name] = forms.EmailField(
+                    label=label, required=required,
+                    widget=forms.EmailInput(attrs={'class': INPUT_CLS}))
+            elif ftype == 'color':
+                self.fields[name] = forms.CharField(
+                    label=label, required=False, initial='#2563eb',
+                    widget=forms.TextInput(attrs={'type': 'color', 'class': INPUT_CLS}))
+            else:
+                self.fields[name] = forms.CharField(
+                    label=label, required=required, max_length=maxlength,
+                    widget=forms.TextInput(attrs={'class': INPUT_CLS}))
+
+    def get_datos_render(self) -> dict:
+        """Datos listos para el Template engine (fechas/horas como strings)."""
+        out = {}
+        for k, v in self.cleaned_data.items():
+            if hasattr(v, 'isoformat'):
+                out[k] = v.isoformat()
+            elif hasattr(v, 'strftime'):
+                out[k] = v.strftime('%H:%M')
+            else:
+                out[k] = v if v is not None else ''
+        return out

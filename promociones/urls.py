@@ -45,4 +45,7 @@ urlpatterns = [
     
         # Suscripción: activar al confirmar el pago (sin esperar a la tarjeta)
     path('gestion/solicitudes/<int:pk>/suscripcion/activar/', views.admin_activar_suscripcion, name='admin_activar_suscripcion'),    
+    path('plantillas/', views.seleccionar_plantilla, name='seleccionar_plantilla'),
+    path('plantillas/<int:plantilla_id>/editar/', views.editar_plantilla, name='editar_plantilla'),
+    path('plantillas/<int:plantilla_id>/preview/', views.preview_plantilla, name='preview_plantilla'),
 ]

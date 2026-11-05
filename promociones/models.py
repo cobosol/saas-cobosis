@@ -110,6 +110,17 @@ class PlantillaPromocion(models.Model):
                                        blank=True, null=True)
     activa = models.BooleanField('Activa', default=True)
 
+    html_content = models.TextField(
+        'HTML base de la plantilla',
+        blank=True,
+        help_text='HTML con variables Django. Ej: <h1>{{ titulo }}</h1>'
+    )
+    css_content = models.TextField(
+        'CSS complementario',
+        blank=True,
+        help_text='CSS que se inyectará junto al HTML renderizado.'
+    )
+
     class Meta:
         verbose_name = 'Plantilla de promoción'
         verbose_name_plural = 'Plantillas de promoción'
@@ -157,6 +168,12 @@ class Promocion(models.Model):
     fecha_publicacion = models.DateTimeField('Fecha de publicación', null=True, blank=True)
     vistas = models.PositiveIntegerField('Visitas', default=0)
     creada_en = models.DateTimeField('Creada', auto_now_add=True, null=True)
+    html_content = models.TextField(
+        'HTML de la tarjeta',
+        blank=True,
+        help_text='Si se rellena, se muestra en el detalle en lugar de la imagen.'
+    )
+    usa_html = models.BooleanField('Usar HTML en el detalle', default=False)
 
     class Meta:
         verbose_name = 'Promoción'
@@ -272,6 +289,12 @@ class SolicitudPromocion(models.Model):
                                             verbose_name='Promoción publicada')
     fecha_solicitud = models.DateTimeField('Fecha de solicitud', auto_now_add=True)
     fecha_actualizacion = models.DateTimeField('Última actualización', auto_now=True)
+    usa_plantilla_html = models.BooleanField('Usó plantilla HTML', default=False)
+    html_final = models.TextField(
+        'HTML final renderizado',
+        blank=True,
+        help_text='HTML con los valores del cliente ya aplicados. Es lo que revisa el admin.'
+    )
 
     class Meta:
         verbose_name = 'Solicitud de promoción'
