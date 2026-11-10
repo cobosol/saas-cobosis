@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">Editando: {{ plantilla.nombre }}</h1>
+      <p class="text-sm text-gray-600">Rellena los campos y verás tu promoción al instante.</p>
+    </div>
+    <a href="{% url 'promociones:seleccionar_plantilla' %}{% if plan %}?plan={{ plan.id }}{% endif %}"
+       class="text-sm text-blue-600 hover:underline">← Cambiar plantilla</a>
+  </div>
+
+  <form id="editor-form" method="post"
+        action="{% url 'promociones:editar_plantilla' plantilla.id %}{% if plan %}?plan={{ plan.id }}{% endif %}">
+    {% csrf_token %}
+    {% if plan %}<input type="hidden" name="plan" value="{{ plan.id }}">{% endif %}
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Formulario -->
+      <div class="space-y-4">
+        {% for field in form %}
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit"
+                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+          Concluir edición y enviar al equipo
+        </button>
+      </div>
+
+      <!-- Preview -->
+      <div class="sticky top-6">
+        <p class="text-sm font-medium text-gray-700 mb-2">Vista previa en vivo</p>
+        <div class="border rounded-xl overflow-hidden bg-white">
+          <iframe id="preview-frame" srcdoc="{{ html_inicial }}" class="w-full" style="height: 640px; border: 0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  (function () {
+    const form = document.getElementById('editor-form');
+    const frame = document.getElementById('preview-frame');
+    let timer = null;
+
+    async function refresh() {
+      const fd = new FormData(form);
+      try {
+        const resp = await fetch('{% url "promociones:preview_plantilla" plantilla.id %}', {
+          method: 'POST', body: fd, headers: {'X-Requested-With': 'fetch'}
+        });
+        if (resp.ok) frame.srcdoc = await resp.text();
+      } catch (e) { /* noop */ }
+    }
+
+    form.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(refresh, 300);
+    });
+    form.addEventListener('change', refresh);
+  })();
+</script>
+{% endblock %}

@@ -36,19 +36,20 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
 from django.db.models import F, Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from urllib.parse import quote
+from .services import render_promocion_html
 
 from clientes.models import User  # noqa: F401  (import explícito por claridad)
 from servicios.models import Plan, Suscripcion
 
 from .forms import (AdminCambiarEstadoForm, AdminPromocionForm, DatosNegocioForm,
-                    PromocionSolicitudForm)
-from .models import DatosNegocio, Promocion, SolicitudPromocion
+                    PromocionSolicitudForm, PromocionHTMLForm)
+from .models import DatosNegocio, Promocion, SolicitudPromocion, PlantillaPromocion
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +83,7 @@ def promociones(request):
         - El "tipo" (evento/negocio) se deduce de `datos_extra['tipo']` o, en su
           defecto, de la solicitud asociada.
     """
-    TAM_GRUPO = 3  # tarjetas por slide del carrusel (coincide con col-md-4)
+    TAM_GRUPO = 6  # tarjetas por slide del carrusel (coincide con col-md-4)
 
     # ---------------------------------------------------------------
     # 1) Promociones publicadas
@@ -142,7 +143,6 @@ def promociones(request):
         'planes':               planes,
         'titulo_pagina':        'Promociones',
     }
-    print(context)
     return render(request, 'promociones/inicio.html', context)
 
 
@@ -747,7 +747,10 @@ def admin_crear_tarjeta(request, pk):
                     'usuario': solicitud.usuario.username,
                 }
                 promocion.save()
-
+                if solicitud.usa_plantilla_html and solicitud.html_final:
+                    promocion.html_content = solicitud.html_final
+                    promocion.usa_html = True
+                    promocion.save(update_fields=['html_content', 'usa_html'])
                 solicitud.promocion_creada = promocion
                 if solicitud.estado == 'pendiente':
                     solicitud.estado = 'disenando'   # estado intermedio, NUNCA publicada
@@ -950,3 +953,134 @@ def admin_publicar_promocion_old(request, pk):
         })
 
     return redirect('promociones:admin_solicitud_detalle', pk=pk)
+
+
+# ------------------------------------------------------------------------------
+# Galería de plantillas
+# ------------------------------------------------------------------------------
+def seleccionar_plantilla(request):
+    """Muestra las plantillas HTML activas para que el cliente elija una."""
+    plan_id = request.GET.get('plan')
+    plan = _obtener_plan_promociones(plan_id) if plan_id else None
+
+    plantillas = (PlantillaPromocion.objects
+                  .filter(activa=True)
+                  .exclude(html_content='')
+                  .order_by('categoria', 'nombre'))
+
+    return render(request, 'promociones/seleccionar_plantilla.html', {
+        'plantillas': plantillas,
+        'plan': plan,
+        'titulo_pagina': 'Elige una plantilla',
+    })
+
+
+# ------------------------------------------------------------------------------
+# Editor + preview en vivo + concluir edición
+# ------------------------------------------------------------------------------
+@login_required(login_url=URL_REGISTRO)
+def editar_plantilla(request, plantilla_id):
+    """Editor de la plantilla con preview. Al enviar, crea la SolicitudPromocion."""
+    plantilla = get_object_or_404(PlantillaPromocion, id=plantilla_id, activa=True)
+    if not plantilla.html_content:
+        messages.error(request, 'Esta plantilla todavía no está lista.')
+        return redirect('promociones:seleccionar_plantilla')
+
+    # 1) Determinar el plan (por URL o por suscripción activa/solicitada)
+    plan = _resolver_plan_para_editor(request)
+    if not plan:
+        messages.info(request, 'Elige un plan antes de usar una plantilla.')
+        return redirect(reverse('detalle_servicio', kwargs={'slug': 'promociones'}))
+
+    if request.method == 'POST':
+        form = PromocionHTMLForm(plantilla, request.POST)
+        if form.is_valid():
+            datos_html = form.get_datos_render()
+            html_final = render_promocion_html(plantilla, datos_html)
+
+            with transaction.atomic():
+                sub = Suscripcion.objects.filter(
+                    usuario=request.user, plan=plan,
+                    estado__in=['activa', 'solicitada']).first()
+                if not sub:
+                    sub = Suscripcion.objects.create(
+                        usuario=request.user, plan=plan, estado='solicitada')
+
+                solicitud = SolicitudPromocion.objects.create(
+                    usuario=request.user,
+                    plan=plan,
+                    suscripcion=sub,
+                    plantilla=plantilla,
+                    tipo=(plantilla.categoria
+                          if plantilla.categoria in ('evento', 'negocio')
+                          else 'ninguno'),
+                    titulo=datos_html.get('titulo', plantilla.nombre)[:200],
+                    metodo_creacion='plantilla',
+                    usa_plantilla_html=True,
+                    html_final=html_final,
+                    estado='pendiente',
+                    datos={
+                        'html_form': datos_html,
+                        'negocio': (
+                            DatosNegocio.objects.filter(usuario=request.user)
+                            .first().como_snapshot()
+                            if DatosNegocio.objects.filter(usuario=request.user).exists()
+                            else {}
+                        ),
+                        'plantilla': {'id': plantilla.id, 'nombre': plantilla.nombre},
+                    },
+                )
+
+            logger.info('Solicitud HTML #%s creada (plantilla %s)', solicitud.pk, plantilla.pk)
+            messages.success(
+                request,
+                '¡Listo! Tu promoción con plantilla fue enviada. El equipo la revisará '
+                'y te contactará para pago/activación.')
+            return redirect('promociones:solicitud_enviada', solicitud_id=solicitud.id)
+    else:
+        form = PromocionHTMLForm(plantilla)
+
+    html_inicial = render_promocion_html(plantilla, form.initial or {})
+
+    return render(request, 'promociones/editor_plantilla.html', {
+        'plantilla': plantilla,
+        'form': form,
+        'plan': plan,
+        'html_inicial': html_inicial,
+        'titulo_pagina': f'Editar: {plantilla.nombre}',
+    })
+
+
+# ------------------------------------------------------------------------------
+# Endpoint de preview para el editor (AJAX)
+# ------------------------------------------------------------------------------
+def preview_plantilla(request, plantilla_id):
+    """Devuelve el HTML renderizado con los datos enviados (para el live preview)."""
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+    plantilla = get_object_or_404(PlantillaPromocion, id=plantilla_id, activa=True)
+    form = PromocionHTMLForm(plantilla, request.POST)
+    datos = form.get_datos_render() if form.is_valid() else {
+        k: v for k, v in request.POST.items()
+        if k not in ('csrfmiddlewaretoken',)
+    }
+    return HttpResponse(render_promocion_html(plantilla, datos))
+
+
+# ------------------------------------------------------------------------------
+# Helper
+# ------------------------------------------------------------------------------
+def _resolver_plan_para_editor(request):
+    plan_id = request.GET.get('plan') or request.POST.get('plan')
+    if plan_id:
+        return _obtener_plan_promociones(plan_id)
+    sub = _suscripcion_promociones(request.user)
+    if sub:
+        return sub.plan
+    sub = (Suscripcion.objects
+           .filter(usuario=request.user,
+                   plan__servicio__slug='promociones',
+                   estado='solicitada')
+           .select_related('plan')
+           .first())
+    return sub.plan if sub else None

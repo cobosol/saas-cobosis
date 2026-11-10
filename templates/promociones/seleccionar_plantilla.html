@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-10">
+  <h1 class="text-3xl font-bold mb-2">Elige una plantilla</h1>
+  <p class="text-gray-600 mb-8">Personaliza tu promoción rellenando los campos. Podrás previsualizarla antes de enviarla.</p>
+
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for p in plantillas %}
+      <div class="border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition">
+        <div class="bg-gray-50 h-48 flex items-center justify-center">
+          {% if p.imagen_ejemplo %}
+            <img src="{{ p.imagen_ejemplo.url }}" class="h-full w-full object-cover" alt="{{ p.nombre }}">
+          {% else %}
+            <span class="text-gray-400 text-sm">Sin preview</span>
+          {% endif %}
+        </div>
+        <div class="p-4">
+          <span class="text-xs uppercase text-blue-600 font-semibold">{{ p.get_categoria_display }}</span>
+          <h3 class="text-lg font-semibold mt-1">{{ p.nombre }}</h3>
+          <p class="text-sm text-gray-600 mt-1">{{ p.descripcion|truncatewords:14 }}</p>
+          <a href="{% url 'promociones:editar_plantilla' p.id %}{% if plan %}?plan={{ plan.id }}{% endif %}"
+             class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            Usar esta plantilla
+          </a>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-gray-500">Todavía no hay plantillas disponibles.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

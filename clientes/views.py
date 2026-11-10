@@ -72,12 +72,13 @@ def registro(request):
         try:
             form = UserCreationFormWithEmail(request.POST)
             if form.is_valid():
+                print("Form valida")
                 usuario = form.save(commit=False)
                 usuario.is_active = False  # Usuario inactivo hasta activación
                 usuario.first_name = form.cleaned_data['first_name']
                 usuario.last_name = form.cleaned_data['last_name']
                 usuario.save()
-            
+                print("usuario guardado")
                 # Crear correo de activación
                 asunto = 'Activa tu cuenta'
                 html_content = render_to_string('clientes/activacion_cuenta.html', {
@@ -86,6 +87,7 @@ def registro(request):
                     'uid': urlsafe_base64_encode(force_bytes(usuario.pk)),
                     'token': token_activacion.make_token(usuario),
                 })
+                print(html_content)
                 email = EmailMultiAlternatives(
                     asunto,
                     "Por favor activa tu cuenta",
@@ -93,13 +95,14 @@ def registro(request):
                     to=[usuario.email]
                 )
                 email.attach_alternative(html_content, "text/html")
+                print("Antes de enviar correo")
                 email.send()
                 messages.success(request,"Correo de activación enviado con éxito")
                 return redirect('confirmacion_envio')
             else:
                 messages.error(request,"Error de validación de la form")
         except:
-            messages.error('Error desconocido. Contacte con la administración')
+            messages.error(request, 'Error desconocido. Contacte con la administración')
     else:
         form = UserCreationFormWithEmail()
     return render(request, 'clientes/signup.html', {'form': form})

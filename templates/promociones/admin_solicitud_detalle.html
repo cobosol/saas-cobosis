@@ -28,6 +28,11 @@
                 {% else %}
                     <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-semibold">Rechazada</span>
                 {% endif %}
+                {% if solicitud.usa_plantilla_html %}
+                <span class="ml-2 bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                    <i class="fas fa-code mr-1"></i>Plantilla HTML
+                </span>
+                {% endif %}
             </p>
         </div>
         {% if solicitud.promocion_creada %}
@@ -40,10 +45,10 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- COLUMNA IZQUIERDA: información recibida -->
+        <!-- ============================ COLUMNA IZQUIERDA ============================ -->
         <div class="space-y-6">
 
-            <!-- Cliente y plan -->
+            <!-- Cliente y plan (sin cambios) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="font-bold text-gray-700 mb-4 border-b pb-2"><i class="fas fa-user mr-2 text-gray-400"></i>Cliente y plan</h2>
                 <dl class="text-sm space-y-2">
@@ -60,7 +65,7 @@
                 </dl>
             </div>
 
-            <!-- Datos del negocio -->
+            <!-- Datos del negocio (sin cambios) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="font-bold text-gray-700 mb-4 border-b pb-2"><i class="fas fa-store mr-2 text-gray-400"></i>Datos del negocio</h2>
                 <dl class="text-sm space-y-2">
@@ -83,7 +88,7 @@
                 {% endif %}
             </div>
 
-            <!-- Datos de la promoción -->
+            <!-- Detalle de la promoción + NUEVA: preview HTML -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="font-bold text-gray-700 mb-4 border-b pb-2"><i class="fas fa-bullhorn mr-2 text-gray-400"></i>Detalle de la promoción</h2>
 
@@ -111,9 +116,25 @@
                 {% if solicitud.plantilla %}
                 <p class="text-sm text-gray-500 mt-2"><i class="fas fa-layer-group mr-1"></i>Plantilla solicitada: <strong>{{ solicitud.plantilla.nombre }}</strong></p>
                 {% endif %}
+
+                {# NUEVO: preview del HTML final enviado por el cliente #}
+                {% if solicitud.usa_plantilla_html and solicitud.html_final %}
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <p class="text-xs uppercase text-gray-400 font-semibold mb-2">
+                        <i class="fas fa-code mr-1"></i>Vista previa del HTML enviado por el cliente
+                    </p>
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 overflow-x-auto">
+                        {{ solicitud.html_final|safe }}
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">
+                        Esta es la tarjeta tal y como la verá el público cuando se publique. Si algo no encaja,
+                        edítala en el paso 2 "Tarjeta" → campo "HTML de la tarjeta".
+                    </p>
+                </div>
+                {% endif %}
             </div>
 
-            <!-- Brief IA / imagen del cliente -->
+            <!-- Brief IA / imagen del cliente (sin cambios) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="font-bold text-gray-700 mb-4 border-b pb-2">
                     <i class="fas fa-wand-magic-sparkles mr-2 text-gray-400"></i>
@@ -131,14 +152,13 @@
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: acciones del equipo -->
+        <!-- ============================ COLUMNA DERECHA ============================ -->
         <div class="space-y-6">
 
-            <!-- 1. Flujo de trabajo: stepper + acciones rápidas + estado manual -->
+            <!-- 1. Flujo de trabajo (sin cambios) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="font-bold text-gray-700 mb-4 border-b pb-2"><i class="fas fa-diagram-project mr-2 text-gray-400"></i>1. Estado del flujo de trabajo</h2>
 
-                <!-- Stepper de estados -->
                 <ol class="flex items-start mb-6">
                     {% for paso in pasos_flujo %}
                     <li class="flex items-start {% if not forloop.last %}flex-1{% endif %}">
@@ -158,7 +178,6 @@
                     {% endfor %}
                 </ol>
 
-                <!-- Acciones rápidas (transiciones habituales) -->
                 <div class="flex flex-wrap gap-2 mb-5">
                     {% if solicitud.estado == 'pendiente' %}
                     <form method="POST" action="{% url 'promociones:admin_cambiar_estado' solicitud.pk %}" class="inline">
@@ -201,7 +220,6 @@
                     {% endif %}
                 </div>
 
-                <!-- Control manual del estado + notas internas -->
                 <form method="POST" action="{% url 'promociones:admin_cambiar_estado' solicitud.pk %}">
                     {% csrf_token %}
                     {% include 'promociones/partials/campo.html' with field=estado_form.estado %}
@@ -212,18 +230,32 @@
                 </form>
             </div>
 
-            <!-- 2. Tarjeta: crear borrador -> editar -> publicar -->
+            <!-- 2. Tarjeta (con soporte HTML) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="font-bold text-gray-700 mb-4 border-b pb-2"><i class="fas fa-image mr-2 text-gray-400"></i>2. Tarjeta</h2>
 
                 {% if solicitud.promocion_creada %}
                 <div class="space-y-4">
-                    {% if solicitud.promocion_creada.imagen %}
-                    <img src="{{ solicitud.promocion_creada.imagen.url }}" class="max-h-64 rounded-lg border border-gray-200 mx-auto" alt="Tarjeta">
+                    {# --- NUEVO: previa HTML si usa_html --- #}
+                    {% if solicitud.promocion_creada.usa_html and solicitud.promocion_creada.html_content %}
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 overflow-x-auto">
+                            {{ solicitud.promocion_creada.html_content|safe }}
+                        </div>
+                        <p class="text-xs text-purple-600 text-center">
+                            <i class="fas fa-code mr-1"></i>Tarjeta HTML · la imagen de portada sigue viva en el landing
+                        </p>
+                        {% if solicitud.promocion_creada.imagen %}
+                            <img src="{{ solicitud.promocion_creada.imagen.url }}"
+                                 class="max-h-40 rounded-lg border border-gray-200 mx-auto opacity-80"
+                                 alt="Imagen de portada (landing)">
+                            <p class="text-xs text-gray-400 text-center">↑ Imagen de portada (landing)</p>
+                        {% endif %}
+                    {% elif solicitud.promocion_creada.imagen %}
+                        <img src="{{ solicitud.promocion_creada.imagen.url }}" class="max-h-64 rounded-lg border border-gray-200 mx-auto" alt="Tarjeta">
                     {% else %}
-                    <div class="h-32 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-                        Sin imagen todavía (obligatoria para publicar)
-                    </div>
+                        <div class="h-32 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+                            Sin imagen todavía (obligatoria para publicar)
+                        </div>
                     {% endif %}
 
                     <dl class="text-sm space-y-2">
@@ -240,7 +272,6 @@
                     </dl>
 
                     {% if solicitud.promocion_creada.publicada %}
-                    <!-- Acciones de una tarjeta publicada -->
                     <div class="flex flex-col sm:flex-row gap-2">
                         <a href="{% url 'promociones:ver_promocion' solicitud.promocion_creada.slug %}" target="_blank"
                            class="flex-1 text-center bg-blue-50 text-blue-600 font-bold py-2.5 px-4 rounded-lg hover:bg-blue-100 transition text-sm">
@@ -255,7 +286,6 @@
                         </form>
                     </div>
                     {% else %}
-                    <!-- Acciones de un borrador: publicar (paso explícito) -->
                     <div>
                         {% if solicitud.promocion_creada.imagen %}
                         <form method="POST" action="{% url 'promociones:admin_publicar_tarjeta' solicitud.pk %}"
@@ -279,7 +309,6 @@
                     </div>
                     {% endif %}
 
-                    <!-- Editar la tarjeta (sin cambiar estados) -->
                     <details {% if not solicitud.promocion_creada.publicada %}open{% endif %} class="border border-gray-200 rounded-lg">
                         <summary class="cursor-pointer text-sm font-semibold text-gray-600 px-4 py-3 hover:bg-gray-50 rounded-lg">
                             <i class="fas fa-pen mr-1"></i>Editar tarjeta
@@ -294,6 +323,26 @@
                                 {% include 'promociones/partials/campo.html' with field=promo_form.lugar %}
                             </div>
                             {% include 'promociones/partials/campo.html' with field=promo_form.enlace_accion %}
+
+                            {# NUEVO: bloque HTML en la edición #}
+                            {% if solicitud.usa_plantilla_html %}
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 my-3">
+                                <label class="flex items-center gap-2 text-sm font-semibold text-purple-800 mb-2">
+                                    {{ promo_form.usa_html }} {{ promo_form.usa_html.label }}
+                                </label>
+                                <p class="text-xs text-purple-700 mb-2">
+                                    Esta solicitud vino desde plantilla HTML. Deja la casilla marcada para
+                                    mostrar la tarjeta HTML en el detalle público. La imagen de arriba se
+                                    sigue usando como portada en el landing.
+                                </p>
+                                {% include 'promociones/partials/campo.html' with field=promo_form.html_content %}
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Puedes retocar el HTML/CSS antes de publicar. Los valores del cliente ya
+                                    vienen aplicados y autoescapeados.
+                                </p>
+                            </div>
+                            {% endif %}
+
                             {% if promo_form.imagen.errors %}
                             <p class="text-red-500 text-xs mb-3">{{ promo_form.imagen.errors.0 }}</p>
                             {% endif %}
@@ -306,7 +355,7 @@
                 </div>
 
                 {% elif promo_form %}
-                <!-- Sin tarjeta: crearla como BORRADOR (nunca publica automáticamente) -->
+                <!-- Sin tarjeta: crearla como BORRADOR -->
                 <p class="text-xs text-gray-500 mb-4">
                     Sube el diseño (puedes dejarlo sin imagen y añadirla después) y guarda la tarjeta
                     como <strong>borrador</strong>. La publicación es un paso aparte para respetar los
@@ -322,6 +371,21 @@
                         {% include 'promociones/partials/campo.html' with field=promo_form.lugar %}
                     </div>
                     {% include 'promociones/partials/campo.html' with field=promo_form.enlace_accion %}
+
+                    {# NUEVO: bloque HTML en la creación #}
+                    {% if solicitud.usa_plantilla_html %}
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 my-3">
+                        <label class="flex items-center gap-2 text-sm font-semibold text-purple-800">
+                            {{ promo_form.usa_html }} {{ promo_form.usa_html.label }}
+                        </label>
+                        <p class="text-xs text-purple-700 mt-1 mb-2">
+                            Se rellenará automáticamente con el HTML que envió el cliente. Puedes
+                            retocarlo antes de guardar el borrador.
+                        </p>
+                        {% include 'promociones/partials/campo.html' with field=promo_form.html_content %}
+                    </div>
+                    {% endif %}
+
                     <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
                         {{ promo_form.activar_suscripcion }} {{ promo_form.activar_suscripcion.label }}
                     </label>
@@ -335,7 +399,7 @@
                 {% endif %}
             </div>
 
-            <!-- 3. Suscripción y contacto -->
+            <!-- 3. Suscripción y contacto (sin cambios) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 class="font-bold text-gray-700 mb-4 border-b pb-2"><i class="fas fa-credit-card mr-2 text-gray-400"></i>3. Suscripción y contacto</h2>
 
