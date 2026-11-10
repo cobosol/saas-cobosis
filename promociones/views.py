@@ -83,7 +83,7 @@ def promociones(request):
         - El "tipo" (evento/negocio) se deduce de `datos_extra['tipo']` o, en su
           defecto, de la solicitud asociada.
     """
-    TAM_GRUPO = 3  # tarjetas por slide del carrusel (coincide con col-md-4)
+    TAM_GRUPO = 6  # tarjetas por slide del carrusel (coincide con col-md-4)
 
     # ---------------------------------------------------------------
     # 1) Promociones publicadas

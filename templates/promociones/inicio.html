@@ -214,6 +214,14 @@
         background: var(--primary, #6C63FF);
     }
 
+    .promo-carousel .carousel-control-prev { left: -18px; }
+    .promo-carousel .carousel-control-next { right: -18px; }
+
+    @media (max-width: 768px) {
+        .promo-carousel .carousel-control-prev { left: -4px; }
+        .promo-carousel .carousel-control-next { right: -4px; }
+    }
+
     /* Tarjetas con efecto hover */
     #promoCarousel .card:hover {
         transform: translateY(-6px);
@@ -251,6 +259,30 @@
             font-size: 0.65rem;
         }
     }
+
+    @media (min-width: 992px) {
+        #promoCarousel .card-title,
+        .promo-carousel .card-title {
+            font-size: 0.82rem;
+            line-height: 1.15;
+        }
+        #promoCarousel .card-text,
+        .promo-carousel .card-text {
+            font-size: 0.72rem;
+            line-height: 1.25;
+        }
+        #promoCarousel .card .btn,
+        .promo-carousel .card .btn {
+            font-size: 0.7rem !important;
+            padding: 0.3rem 0.4rem;
+        }
+        /* Badge de categoría un pelín más pequeño */
+        .category-badge {
+            font-size: 0.62rem;
+            padding: 2px 6px;
+        }
+    }
+
 </style>
 {% endblock %}
 
@@ -281,7 +313,7 @@
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                     <div class="row g-3">
                         {% for promo in grupo %}
-                        <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden bg-white" 
                                  style="transition: transform 0.3s ease;">
                                 <div class="position-relative" style="background: #f8f9fa;">
@@ -394,7 +426,7 @@
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                     <div class="row g-2">
                         {% for promo in grupo %}
-                        <div class="col-sm-6 col-md-4" data-category="{{ promo.categoria.slug }}">
+                        <div class="col-6 col-md-4 col-lg-2" data-category="{{ promo.categoria.slug }}">
                             <div class="card shadow-sm">
                                 <div class="position-relative overflow-hidden">
                                     {% if promo.imagen %}
@@ -492,7 +524,7 @@
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                     <div class="row g-2">
                         {% for promo in grupo %}
-                        <div class="col-md-4" data-category="{{ promo.categoria.slug }}">
+                        <div class="col-6 col-md-4 col-lg-2" data-category="{{ promo.categoria.slug }}">
                             <div class="card shadow-sm">
                                 <div class="position-relative overflow-hidden">
                                     {% if promo.imagen %}
